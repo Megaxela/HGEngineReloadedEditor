@@ -1,7 +1,7 @@
 #pragma once
 
 // HG::Core
-#include <Scene.hpp>
+#include <HG/Core/Scene.hpp>
 
 namespace HG::Editor
 {

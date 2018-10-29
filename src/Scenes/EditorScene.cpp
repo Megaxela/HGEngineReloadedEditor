@@ -3,11 +3,18 @@
 #include <EditBehaviours/GraphicsInterface.hpp>
 
 // HG::Core
-#include <GameObjectBuilder.hpp>
-#include <Application.hpp>
+#include <HG/Core/GameObjectBuilder.hpp>
+#include <HG/Core/Application.hpp>
+#include <HG/Core/ResourceManager.hpp>
 
 // HG::Rendering::Base
-#include <Camera.hpp>
+#include <HG/Rendering/Base/Camera.hpp>
+
+// HG::Utils
+#include <HG/Utils/Loaders/AssimpLoader.hpp>
+
+// GLM
+#include <glm/gtx/quaternion.hpp>
 
 HG::Editor::EditorScene::EditorScene(HG::Core::Scene *sceneToEdit) :
     m_scene(sceneToEdit)
@@ -24,6 +31,7 @@ void HG::Editor::EditorScene::start()
         // to hide it from user code.
         .setHidden(true)
         .setGlobalPosition({0, 0, 0})
+        .setRotation(glm::quat(glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f)))
         // Adding camera behaviour
         .addBehaviour(new HG::Rendering::Base::Camera)
         // Adding behaviours for GUI rendering
@@ -44,6 +52,13 @@ void HG::Editor::EditorScene::start()
     {
         addGameObject(editingCameraGameObject);
     }
+
+    // Loading model
+    auto cubeModel = application()->resourceManager()
+        ->load<HG::Utils::AssimpLoader>("../engine/examples/RenderToTexture/Assets/Models/cube.obj")
+        .guaranteeGet();
+
+
 
     auto parentGO = HG::Core::GameObjectBuilder()
         .setName("Parent1")

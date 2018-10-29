@@ -4,7 +4,7 @@
 #include <memory>
 
 // HG::Core
-#include <Behaviour.hpp>
+#include <HG/Core/Behaviour.hpp>
 
 // ALogger
 #include <Loggers/AbstractLogger.hpp>
@@ -12,11 +12,20 @@
 // Ringbuffer
 #include <ringbuffer.hpp>
 
+// GLM
+#include <glm/glm.hpp>
+
 namespace Logger
 {
     class LogsListener;
 
     using LogsListenerPtr = std::shared_ptr<LogsListener>;
+}
+
+namespace HG::Rendering::Base
+{
+    class RenderTarget;
+    struct RenderOverride;
 }
 
 namespace HG::Editor::Behaviours
@@ -92,7 +101,14 @@ namespace HG::Editor::Behaviours
         struct SceneWidgetSettings
         {
             bool show = true;
+            glm::ivec2 size;
         };
+
+        /**
+         * @brief Method for updating render override
+         * object and override render target.
+         */
+        void updateRenderOverride();
 
         /**
          * @brief Method for updating internal
@@ -149,6 +165,12 @@ namespace HG::Editor::Behaviours
         void setupLogging();
 
         /**
+         * @brief Method for setting up render override
+         * system.
+         */
+        void setupRenderOverride();
+
+        /**
          * @brief Method for transfering logs from listener
          * to internal logs ringbuffer.
          */
@@ -162,6 +184,7 @@ namespace HG::Editor::Behaviours
         SceneWidgetSettings m_sceneWidgetSettings;
 
         std::vector<HG::Core::GameObject*> m_gameObjectsCache;
+        HG::Rendering::Base::RenderOverride* m_renderOverride;
     };
 }
 

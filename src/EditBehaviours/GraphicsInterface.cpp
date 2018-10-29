@@ -2,10 +2,18 @@
 #include <EditBehaviours/GraphicsInterface.hpp>
 
 // HG::Core
-#include <Scene.hpp>
-#include <GameObject.hpp>
-#include <Transform.hpp>
-#include <Logging.hpp>
+#include <HG/Core/Application.hpp>
+#include <HG/Core/Scene.hpp>
+#include <HG/Core/GameObject.hpp>
+#include <HG/Core/Transform.hpp>
+#include <HG/Core/Logging.hpp>
+
+// HG::Rendering::Base
+#include <HG/Rendering/Base/Renderer.hpp>
+#include <HG/Rendering/Base/RenderingPipeline.hpp>
+#include <HG/Rendering/Base/RenderTarget.hpp>
+#include <HG/Rendering/Base/Texture.hpp>
+#include <HG/Rendering/Base/RenderOverride.hpp>
 
 // ImGui
 #include <imgui.h>
@@ -21,19 +29,30 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_loggingWidgetSettings(),
     m_assetsWidgetSettings(),
     m_sceneWidgetSettings(),
-    m_gameObjectsCache()
+    m_gameObjectsCache(),
+    m_renderOverride(new HG::Rendering::Base::RenderOverride)
 {
     setupLogging();
+
+    setupRenderOverride();
 }
 
 HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
 {
     // todo: Delegate to method
     HG::Core::Logging::userLogger()->removeLogsListener(m_loggingWidgetSettings.logsListener);
+
+    delete m_renderOverride->mainRenderTarget->colorTexture(0);
+    delete m_renderOverride->mainRenderTarget;
+    delete m_renderOverride;
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 {
+    // Setting render override object
+    scene()->application()->renderer()->pipeline()->setRenderOverride(m_renderOverride);
+    scene()->application()->renderer()->pipeline()->clear(HG::Utils::Color::fromRGB(25, 25, 25));
+
     updateLogs();
     updateGameObjectsCache();
 
@@ -59,8 +78,6 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     // Enabling dockspace
     ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
 
-
-
     // Drawing widgets
     drawGameObjectsWidget();
     drawInspectorWidget();
@@ -74,6 +91,12 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
 
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::updateRenderOverride()
+{
+    m_renderOverride->mainRenderTarget->setSize(m_sceneWidgetSettings.size);
+    m_renderOverride->mainRenderTarget->colorTexture(0)->setSize(m_sceneWidgetSettings.size);
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
@@ -141,6 +164,17 @@ void HG::Editor::Behaviours::GraphicsInterface::drawSceneWidget()
 {
     if (ImGui::Begin("Scene", &m_sceneWidgetSettings.show))
     {
+        m_sceneWidgetSettings.size = {
+            ImGui::GetContentRegionAvail().x,
+            ImGui::GetContentRegionAvail().y
+        };
+
+        updateRenderOverride();
+
+        ImGui::Image(
+            m_renderOverride->mainRenderTarget->colorTexture(0),
+            ImVec2(m_sceneWidgetSettings.size.x, m_sceneWidgetSettings.size.y)
+        );
 
     }
     ImGui::End();
@@ -212,6 +246,17 @@ void HG::Editor::Behaviours::GraphicsInterface::setupLogging()
     m_loggingWidgetSettings.logsListener = std::make_shared<UserLogsListener>();
 
     HG::Core::Logging::userLogger()->addLogsListener(m_loggingWidgetSettings.logsListener);
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
+{
+    auto texture = new HG::Rendering::Base::Texture(
+        {200, 200},
+        HG::Rendering::Base::Texture::Format::RGB
+    );
+
+    m_renderOverride->mainRenderTarget = new HG::Rendering::Base::RenderTarget({200, 200});
+    m_renderOverride->mainRenderTarget->setColorTexture(texture, 0);
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateLogs()
