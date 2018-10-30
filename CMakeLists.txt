@@ -11,14 +11,12 @@ add_subdirectory(engine)
 # Adding libraries
 add_subdirectory(libraries)
 
+# Adding sources
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE HEADER_FILES include/*.cpp)
+
 # Setting up application
-add_executable(HGEngineReloadedImGui
-    src/main.cpp
-    src/Scenes/EditorScene.cpp
-    include/Scenes/EditorScene.hpp
-    src/EditBehaviours/GraphicsInterface.cpp
-    include/EditBehaviours/GraphicsInterface.hpp
-)
+add_executable(HGEngineReloadedImGui ${SOURCE_FILES})
 
 target_include_directories(HGEngineReloadedImGui PUBLIC
     include
@@ -30,4 +28,6 @@ target_link_libraries(HGEngineReloadedImGui
     HGRenderingOGL
     HGStandard
     HGUtils
+
+    FilesystemWatcher
 )

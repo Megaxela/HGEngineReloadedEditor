@@ -1,0 +1,1 @@
+#include <AssetSystem/AssetsManager.hpp>
