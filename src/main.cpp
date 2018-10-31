@@ -1,8 +1,8 @@
 // Editor
 #include <Scenes/EditorScene.hpp>
+#include <Editor/Application.hpp>
 
 // HG::Core
-#include <HG/Core/Application.hpp>
 #include <HG/Core/ResourceManager.hpp>
 
 // HG::Standard
@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 {
     CurrentLogger::setCurrentLogger(std::make_shared<Loggers::BasicLogger>());
 
-    HG::Core::Application application("HGEngine Editor", argc, argv);
+    HG::Editor::Application application("HGEngine Editor", argc, argv);
 
     // Setting resource accessor implementation
     application.resourceManager()

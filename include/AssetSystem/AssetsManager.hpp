@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace AssetSystem
+namespace HG::AssetSystem
 {
     /**
      * @brief Class, that describes assets manager.
@@ -9,6 +9,7 @@ namespace AssetSystem
     class AssetsManager
     {
     public:
+
 
 
     };

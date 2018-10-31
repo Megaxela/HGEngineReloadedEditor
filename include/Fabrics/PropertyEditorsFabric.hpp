@@ -8,7 +8,10 @@
 namespace HG::Editor
 {
     class AbstractPropertyProcessor;
+}
 
+namespace HG::Editor::Fabrics
+{
     /**
      * @brief Class, that describes fabric for
      */

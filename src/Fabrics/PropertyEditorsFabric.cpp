@@ -1,12 +1,12 @@
-#include <Factories/PropertyEditorsFabric.hpp>
+#include <Fabrics/PropertyEditorsFabric.hpp>
 
-HG::Editor::PropertyEditorsFabric::PropertyEditorsFabric() :
+HG::Editor::Fabrics::PropertyEditorsFabric::PropertyEditorsFabric() :
     m_data()
 {
 
 }
 
-std::shared_ptr<HG::Editor::AbstractPropertyProcessor> HG::Editor::PropertyEditorsFabric::create(std::size_t typeHash)
+std::shared_ptr<HG::Editor::AbstractPropertyProcessor> HG::Editor::Fabrics::PropertyEditorsFabric::create(std::size_t typeHash)
 {
     auto iterator = m_data.find(typeHash);
 
@@ -27,7 +27,7 @@ std::shared_ptr<HG::Editor::AbstractPropertyProcessor> HG::Editor::PropertyEdito
     return pair.first;
 }
 
-void HG::Editor::PropertyEditorsFabric::clear()
+void HG::Editor::Fabrics::PropertyEditorsFabric::clear()
 {
     m_data.clear();
 }
