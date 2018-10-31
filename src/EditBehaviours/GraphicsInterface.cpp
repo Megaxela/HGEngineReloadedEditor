@@ -134,7 +134,17 @@ void HG::Editor::Behaviours::GraphicsInterface::drawInspectorWidget()
 {
     if (ImGui::Begin("Inspector", &m_inspectorWidgetSettings.show))
     {
-
+        switch (m_commonSettings.lastSelectedType)
+        {
+        case CommonSettings::LastSelectedType::GameObject:
+            drawGameObjectInspectorBody();
+            break;
+        case CommonSettings::LastSelectedType::Asset:
+            drawAssetInspectorBody();
+            break;
+        case CommonSettings::LastSelectedType::None:
+            break;
+        }
     }
     ImGui::End();
 }
@@ -246,6 +256,50 @@ void HG::Editor::Behaviours::GraphicsInterface::setupLogging()
     m_loggingWidgetSettings.logsListener = std::make_shared<UserLogsListener>();
 
     HG::Core::Logging::userLogger()->addLogsListener(m_loggingWidgetSettings.logsListener);
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectInspectorBody()
+{
+    if (m_gameObjectsWidgetSettings.selected == nullptr)
+    {
+        return;
+    }
+
+    // Displaying gameobject header
+    bool enabledCache = m_gameObjectsWidgetSettings.selected->isEnabled();
+    if (ImGui::Checkbox("##InspectorEnabled", &enabledCache))
+    {
+        m_gameObjectsWidgetSettings.selected->setEnabled(enabledCache);
+    }
+
+    ImGui::SameLine();
+
+    ImGui::Text("%s", m_gameObjectsWidgetSettings.selected->name().c_str());
+
+    // todo: Don't invalidate cache if current gameobject was not changed
+    //       or if behaviours amount was not changed.
+    m_inspectorWidgetSettings.behavioursCache.clear();
+
+    // Getting and iterating all behaviours
+    m_gameObjectsWidgetSettings.selected->getBehaviours(m_inspectorWidgetSettings.behavioursCache);
+
+    for (const auto& behaviour : m_inspectorWidgetSettings.behavioursCache)
+    {
+        m_inspectorWidgetSettings.propertiesCache.clear();
+
+        // Getting and iterating all properties
+        behaviour->getProperties(m_inspectorWidgetSettings.propertiesCache);
+
+        for (const auto& property : m_inspectorWidgetSettings.propertiesCache)
+        {
+
+        }
+    }
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::drawAssetInspectorBody()
+{
+
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()

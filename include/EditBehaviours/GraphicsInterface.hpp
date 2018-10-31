@@ -22,6 +22,11 @@ namespace Logger
     using LogsListenerPtr = std::shared_ptr<LogsListener>;
 }
 
+namespace HG::Core
+{
+    class Behaviour;
+}
+
 namespace HG::Rendering::Base
 {
     class RenderTarget;
@@ -82,6 +87,8 @@ namespace HG::Editor::Behaviours
         struct InspectorWidgetSettings
         {
             bool show = true;
+            std::vector<HG::Core::Behaviour*> behavioursCache;
+            std::vector<HG::Core::Behaviour::Property> propertiesCache;
         };
 
         struct LoggingWidgetSettings
@@ -163,6 +170,20 @@ namespace HG::Editor::Behaviours
          * logging widget.
          */
         void setupLogging();
+
+        // InspectorWidget methods
+
+        /**
+         * @brief Method for drawing and operating with
+         * selected gameobject attributes.
+         */
+        void drawGameObjectInspectorBody();
+
+        /**
+         * @brief Method for drawing and operating with
+         * selected asset.
+         */
+        void drawAssetInspectorBody();
 
         /**
          * @brief Method for setting up render override
