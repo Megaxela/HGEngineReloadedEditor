@@ -58,6 +58,12 @@ namespace HG::Editor::Fabrics
          */
         void clear();
 
+        /**
+         * @brief Method, that performs registration
+         * of default type processors.
+         */
+        void registrateDefault();
+
     private:
 
         std::unordered_map<

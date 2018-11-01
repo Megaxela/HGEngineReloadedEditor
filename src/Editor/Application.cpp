@@ -10,7 +10,7 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     m_propertyEditorsFabric(new HG::Editor::Fabrics::PropertyEditorsFabric()),
     m_assetsFabric(new HG::Editor::Fabrics::AssetsFabric())
 {
-
+    m_propertyEditorsFabric->registrateDefault();
 }
 
 HG::Editor::Application::~Application()

@@ -58,6 +58,21 @@ void main()
     }
 };
 
+class NumberTestBehaviour : public HG::Core::Behaviour
+{
+    HG_PROPERTY(float,    Prop_float);
+    HG_PROPERTY(double,   Prop_double);
+    HG_PROPERTY(uint8_t,  Prop_uint8_t);
+    HG_PROPERTY(int8_t,   Prop_int8_t);
+    HG_PROPERTY(uint16_t, Prop_uint16_t);
+    HG_PROPERTY(int16_t,  Prop_int16_t);
+    HG_PROPERTY(uint32_t, Prop_uint32_t);
+    HG_PROPERTY(int32_t,  Prop_int32_t);
+    HG_PROPERTY(uint64_t, Prop_uint64_t);
+    HG_PROPERTY(int64_t,  Prop_int64_t);
+    HG_PROPERTY(HG::Utils::Color, Prop_Color);
+};
+
 HG::Editor::EditorScene::EditorScene(HG::Core::Scene *sceneToEdit) :
     m_scene(sceneToEdit)
 {
@@ -71,7 +86,7 @@ void HG::Editor::EditorScene::start()
         .setName(".EditorCamera")
         // Setting object to hidden mode
         // to hide it from user code.
-        .setHidden(true)
+        .setHidden(false)
         .setGlobalPosition({0.0f, 0.0f, 2.5f})
         // Adding camera behaviour
         .addBehaviour(new HG::Rendering::Base::Camera)
@@ -120,7 +135,9 @@ void HG::Editor::EditorScene::start()
 
     auto parentGO2 = HG::Core::GameObjectBuilder()
         .setName("Parent2")
-        .deploy();
+        .addBehaviour(
+            new NumberTestBehaviour()
+        ).deploy();
 
     auto child1 = HG::Core::GameObjectBuilder()
         .setName("Child1")

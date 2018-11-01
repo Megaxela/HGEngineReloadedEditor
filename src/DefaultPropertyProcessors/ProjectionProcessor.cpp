@@ -7,10 +7,9 @@
 // ImGui
 #include <imgui.h>
 
-void HG::Editor::PropertyProcessors::ProjectionProcessor::perform(std::size_t id,
-                                                                  const HG::Core::Behaviour::Property &property)
+void HG::Editor::PropertyProcessors::ProjectionProcessor::perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property)
 {
-    auto key = "##" + property.name() + std::to_string(id);
+    auto key = name + "##" + std::to_string(id);
 
     auto value = static_cast<int>(property.getGetter<HG::Rendering::Base::Camera::Projection>()());
 

@@ -2,6 +2,7 @@
 #include <EditBehaviours/GraphicsInterface.hpp>
 #include <Editor/Application.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
+#include <AbstractPropertyProcessor.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -284,6 +285,7 @@ void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectInspectorBody()
 
     // Getting and iterating all behaviours
     m_gameObjectsWidgetSettings.selected->getBehaviours(m_inspectorWidgetSettings.behavioursCache);
+    m_gameObjectsWidgetSettings.selected->getRenderingBehaviours(m_inspectorWidgetSettings.behavioursCache);
 
     // Getting Editor::Application
     auto editorApplication = dynamic_cast<HG::Editor::Application*>(scene()->application());
@@ -293,6 +295,8 @@ void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectInspectorBody()
         ImGui::Text("%s", "This application has wrong type.");
         return;
     }
+
+    std::size_t id = 0;
 
     for (const auto& behaviour : m_inspectorWidgetSettings.behavioursCache)
     {
@@ -304,15 +308,17 @@ void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectInspectorBody()
         for (const auto& property : m_inspectorWidgetSettings.propertiesCache)
         {
             // Displaying title
-
             auto processor = editorApplication
                 ->propertyEditorsFabric()
                 ->create(property.typeInfo().hash_code());
 
             if (processor == nullptr)
             {
-
+                ImGui::Text("No processor for \"%s\" type (%s)", property.type().c_str(), property.name().c_str());
+                continue;
             }
+
+            processor->perform(id++, property.name(), property);
         }
     }
 }

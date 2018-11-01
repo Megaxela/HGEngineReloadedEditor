@@ -17,9 +17,6 @@ namespace HG::Editor::PropertyProcessors
          * @param id Unique field id.
          * @param property Constant reference to property object.
          */
-        void perform(std::size_t id, const HG::Core::Behaviour::Property &property) override;
+        void perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property) override;
     };
 }
-
-
-#endif //HGENGINERELOADEDIMGUI_PROJECTIONPROCESSOR_HPP
