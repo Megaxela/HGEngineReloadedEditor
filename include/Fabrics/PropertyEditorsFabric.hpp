@@ -27,7 +27,8 @@ namespace HG::Editor::Fabrics
         PropertyEditorsFabric();
 
         /**
-         * @brief Property processor constructor
+         * @brief Property processor constructor. This
+         * method will cache created processors.
          * @param typeHash Type hash id.
          * @return Shared pointer with property processor. Or nullptr if
          * can't create processor.
@@ -69,7 +70,7 @@ namespace HG::Editor::Fabrics
         std::unordered_map<
             std::size_t,
             std::pair<
-                std::shared_ptr<HG::Editor::AbstractPropertyProcessor>,
+                PropertyProcessorPtr,
                 std::function<PropertyProcessorPtr()>
             >
         > m_data;

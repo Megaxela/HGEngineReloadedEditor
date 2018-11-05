@@ -66,6 +66,25 @@ namespace HG::Editor::AssetSystem::Assets
         std::size_t type() const;
 
         /**
+         * @brief Method for getting asset parent.
+         * @return Pointer to parent asset. Or `nullptr`
+         * if there is no parent.
+         */
+        AbstractAsset* parent() const;
+
+        /**
+         * @brief Method for getting asset children.
+         * You may modify children - only for reordering.
+         */
+        std::vector<AbstractAsset*>& children();
+
+        /**
+         * @brief Method for setting parent for asset.
+         * @param asset Pointer to new parent.
+         */
+        void setParent(AbstractAsset* parent);
+
+        /**
          * @brief Method, that calls `onLoad`
          * method to perform asset data loading.
          * This method can be called async.
@@ -94,6 +113,9 @@ namespace HG::Editor::AssetSystem::Assets
         virtual void onInspector();
 
     private:
+
+        AbstractAsset* m_parent;
+        std::vector<AbstractAsset*> m_children;
 
         State m_state;
         std::filesystem::path m_path;
