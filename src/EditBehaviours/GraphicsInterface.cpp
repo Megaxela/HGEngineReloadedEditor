@@ -4,6 +4,8 @@
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AbstractPropertyProcessor.hpp>
 
+#include <Widgets/GameObjects.hpp>
+
 // HG::Core
 #include <HG/Core/Application.hpp>
 #include <HG/Core/Scene.hpp>
@@ -27,7 +29,7 @@
 
 HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_commonSettings(),
-    m_gameObjectsWidgetSettings(),
+    m_gameObjectsWidget(new HG::Editor::Widgets::GameObjects()),
     m_inspectorWidgetSettings(),
     m_loggingWidgetSettings(),
     m_assetsWidgetSettings(),
@@ -82,6 +84,9 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
 
     // Drawing widgets
+    drawToolBar();
+
+    m_gameObjectsWidget->draw();
     drawGameObjectsWidget();
     drawInspectorWidget();
     drawLoggingWidget();
@@ -93,7 +98,7 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
-
+    m_gameObjectsWidget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateRenderOverride()
@@ -112,6 +117,35 @@ void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
     }
 
     scene()->getGameObjects(m_gameObjectsCache);
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
+{
+    ImGui::BeginMenuBar();
+    if (ImGui::BeginMenu("File"))
+    {
+        ImGui::MenuItem("New Project"));
+        if (ImGui::MenuItem("Open Project"))
+        {
+            actionOpenProject();
+        }
+
+        ImGui::MenuItem("Close Project"));
+
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Exit"));
+
+        ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Help"))
+    {
+        if (ImGui::MenuItem("About HGEngine"));
+
+        ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectsWidget()
@@ -139,13 +173,13 @@ void HG::Editor::Behaviours::GraphicsInterface::drawInspectorWidget()
     {
         switch (m_commonSettings.lastSelectedType)
         {
-        case CommonSettings::LastSelectedType::GameObject:
+        case HG::Editor::Widgets::Settings::Common::LastSelectedType::GameObject:
             drawGameObjectInspectorBody();
             break;
-        case CommonSettings::LastSelectedType::Asset:
+        case HG::Editor::Widgets::Settings::Common::LastSelectedType::Asset:
             drawAssetInspectorBody();
             break;
-        case CommonSettings::LastSelectedType::None:
+        case HG::Editor::Widgets::Settings::Common::LastSelectedType::None:
             break;
         }
     }
@@ -193,6 +227,11 @@ void HG::Editor::Behaviours::GraphicsInterface::drawSceneWidget()
     ImGui::End();
 }
 
+void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
+{
+
+}
+
 void HG::Editor::Behaviours::GraphicsInterface::displayGameObject(HG::Core::GameObject *gameObject)
 {
     auto hasChildren = !gameObject->transform()->children().empty();
@@ -207,7 +246,7 @@ void HG::Editor::Behaviours::GraphicsInterface::displayGameObject(HG::Core::Game
     // If LMB pressed on this item
     if (ImGui::IsItemClicked(0))
     {
-        m_commonSettings.lastSelectedType = CommonSettings::LastSelectedType::GameObject;
+        m_commonSettings.lastSelectedType = HG::Editor::Widgets::Settings::Common::LastSelectedType::GameObject;
         m_gameObjectsWidgetSettings.selected = gameObject;
     }
 

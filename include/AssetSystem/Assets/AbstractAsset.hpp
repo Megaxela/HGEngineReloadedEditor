@@ -112,6 +112,14 @@ namespace HG::Editor::AssetSystem::Assets
          */
         virtual void onInspector();
 
+        /**
+         * @brief Method, that called every frame
+         * on drawing in assets window. By default
+         * it just draws name. (from `name` method)
+         * @return Is item opened.
+         */
+        virtual bool onTreeItemDraw(int flags);
+
     private:
 
         AbstractAsset* m_parent;

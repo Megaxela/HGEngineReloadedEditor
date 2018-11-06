@@ -4,6 +4,9 @@
 // Editor
 #include <AssetSystem/Assets/AbstractAsset.hpp>
 
+// ImGui
+#include <imgui.h>
+
 HG::Editor::AssetSystem::Assets::AbstractAsset::AbstractAsset(std::filesystem::path path, std::size_t type) :
     m_parent(nullptr),
     m_children(),
@@ -89,4 +92,9 @@ bool HG::Editor::AssetSystem::Assets::AbstractAsset::onLoad()
 void HG::Editor::AssetSystem::Assets::AbstractAsset::onInspector()
 {
 
+}
+
+bool HG::Editor::AssetSystem::Assets::AbstractAsset::onTreeItemDraw(int flags)
+{
+    return ImGui::TreeNodeEx(this, flags, "%s", name().c_str());
 }

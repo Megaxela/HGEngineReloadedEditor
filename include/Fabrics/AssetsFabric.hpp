@@ -5,6 +5,8 @@
 #include <memory>
 #include <filesystem>
 #include <functional>
+#include <map>
+#include <set>
 
 namespace HG::Editor::AssetSystem::Assets
 {
@@ -45,7 +47,7 @@ namespace HG::Editor::Fabrics
          * @param extensions Extension for identifying asset.
          */
         template<typename AssetType>
-        void registrate(const std::unordered_set<std::string>& extensions)
+        void registrate(const std::set<std::string>& extensions)
         {
             m_data[extensions] = [](std::filesystem::path path) -> AssetPtr
             {
@@ -67,9 +69,9 @@ namespace HG::Editor::Fabrics
 
     private:
 
-        std::unordered_map<
-            std::unordered_set<std::string>,
-            std::function<AssetPtr()>
+        std::map<
+            std::set<std::string>,
+            std::function<AssetPtr(std::filesystem::path)>
         > m_data;
     };
 }

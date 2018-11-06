@@ -3,6 +3,9 @@
 // C++ STL
 #include <memory>
 
+// Editor
+#include <Widgets/CommonSettings.hpp>
+
 // HG::Core
 #include <HG/Core/Behaviour.hpp>
 
@@ -14,6 +17,11 @@
 
 // GLM
 #include <glm/glm.hpp>
+
+namespace HG::Editor::Widgets
+{
+    class GameObjects;
+}
 
 namespace Logger
 {
@@ -65,18 +73,6 @@ namespace HG::Editor::Behaviours
 
     private:
 
-        struct CommonSettings
-        {
-            enum class LastSelectedType
-            {
-                None,
-                GameObject,
-                Asset
-            };
-
-            LastSelectedType lastSelectedType = LastSelectedType::None;
-        };
-
         struct GameObjectsWidgetSettings
         {
             bool show = true;
@@ -124,6 +120,11 @@ namespace HG::Editor::Behaviours
         void updateGameObjectsCache();
 
         /**
+         * @brief Method for drawing toolbar.
+         */
+        void drawToolBar();
+
+        /**
          * @brief Method for drawing and operating with
          * widget, that displays and manages gameobjects.
          */
@@ -153,6 +154,9 @@ namespace HG::Editor::Behaviours
          * widget, that displays scene's editing widget.
          */
         void drawSceneWidget();
+
+        // Actions
+        void actionOpenProject();
 
         // GameObjectWidget methods
 
@@ -197,7 +201,10 @@ namespace HG::Editor::Behaviours
          */
         void updateLogs();
 
-        CommonSettings m_commonSettings;
+        Widgets::Settings::Common m_commonSettings;
+
+        HG::Editor::Widgets::GameObjects* m_gameObjectsWidget;
+
         GameObjectsWidgetSettings m_gameObjectsWidgetSettings;
         InspectorWidgetSettings m_inspectorWidgetSettings;
         LoggingWidgetSettings m_loggingWidgetSettings;

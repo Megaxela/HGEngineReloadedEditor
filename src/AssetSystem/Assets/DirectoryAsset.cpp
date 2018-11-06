@@ -8,3 +8,4 @@ HG::Editor::AssetSystem::Assets::DirectoryAsset::DirectoryAsset(std::filesystem:
 {
 
 }
+

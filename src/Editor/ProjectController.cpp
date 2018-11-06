@@ -4,7 +4,7 @@
 
 HG::Editor::ProjectController::ProjectController(HG::Editor::Application *parent) :
     m_parentApplication(parent),
-    m_assetsManager(new HG::AssetSystem::AssetsManager())
+    m_assetsManager(new HG::AssetSystem::AssetsManager(parent))
 {
 
 }
