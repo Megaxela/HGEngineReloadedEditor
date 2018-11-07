@@ -5,6 +5,12 @@
 #include <AbstractPropertyProcessor.hpp>
 
 #include <Widgets/GameObjects.hpp>
+#include <Widgets/Inspector.hpp>
+#include <Widgets/Scene.hpp>
+#include <Widgets/Assets.hpp>
+#include <Widgets/Logging.hpp>
+
+#include <Widgets/OpenPath.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -29,12 +35,12 @@
 
 HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_commonSettings(),
-    m_gameObjectsWidget(new HG::Editor::Widgets::GameObjects()),
-    m_inspectorWidgetSettings(),
-    m_loggingWidgetSettings(),
-    m_assetsWidgetSettings(),
-    m_sceneWidgetSettings(),
-    m_gameObjectsCache(),
+    m_gameObjectsWidget(new HG::Editor::Widgets::GameObjects(&m_commonSettings)),
+    m_inspectorWidget(new HG::Editor::Widgets::Inspector(&m_commonSettings)),
+    m_sceneWidget(new HG::Editor::Widgets::Scene()),
+    m_loggingWidget(new HG::Editor::Widgets::Logging()),
+    m_assetsWidget(new HG::Editor::Widgets::Assets(&m_commonSettings)),
+    m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
     m_renderOverride(new HG::Rendering::Base::RenderOverride)
 {
     setupLogging();
@@ -45,11 +51,15 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
 HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
 {
     // todo: Delegate to method
-    HG::Core::Logging::userLogger()->removeLogsListener(m_loggingWidgetSettings.logsListener);
+    HG::Core::Logging::userLogger()->removeLogsListener(m_loggingWidget->logsListener());
 
     delete m_renderOverride->mainRenderTarget->colorTexture(0);
     delete m_renderOverride->mainRenderTarget;
     delete m_renderOverride;
+
+    delete m_gameObjectsWidget;
+    delete m_inspectorWidget;
+    delete m_sceneWidget;
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
@@ -58,65 +68,46 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     scene()->application()->renderer()->pipeline()->setRenderOverride(m_renderOverride);
     scene()->application()->renderer()->pipeline()->clear(HG::Utils::Color::fromRGB(25, 25, 25));
 
-    updateLogs();
+    m_loggingWidget->update();
+
     updateGameObjectsCache();
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
-    ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    window_flags |= ImGuiWindowFlags_NoTitleBar |
-                    ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_NoBringToFrontOnFocus |
-                    ImGuiWindowFlags_NoNavFocus |
-                    ImGuiWindowFlags_NoMove;
-
-    ImGui::Begin("EditorDockSpace#", nullptr, window_flags);
-
-    ImGui::PopStyleVar(2);
-
-    // Enabling dockspace
-    ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
+    prepareDockSpace();
 
     // Drawing widgets
     drawToolBar();
 
     m_gameObjectsWidget->draw();
-    drawGameObjectsWidget();
-    drawInspectorWidget();
-    drawLoggingWidget();
-    drawAssetsWidget();
-    drawSceneWidget();
+    m_inspectorWidget->draw();
+    m_sceneWidget->draw();
+    m_loggingWidget->draw();
+    m_assetsWidget->draw();
 
+    // Required because of ImGui::Begin call in prepareDockSpace
     ImGui::End();
+
+    m_openPathWidget->draw();
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
-    m_gameObjectsWidget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::updateRenderOverride()
-{
-    m_renderOverride->mainRenderTarget->setSize(m_sceneWidgetSettings.size);
-    m_renderOverride->mainRenderTarget->colorTexture(0)->setSize(m_sceneWidgetSettings.size);
+    m_gameObjectsWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    m_inspectorWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    m_sceneWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    m_loggingWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    m_assetsWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
 {
-    m_gameObjectsCache.clear();
+    m_commonSettings.gameobjectsCache.clear();
 
     if (scene() == nullptr)
     {
         return;
     }
 
-    scene()->getGameObjects(m_gameObjectsCache);
+    scene()->getGameObjects(m_commonSettings.gameobjectsCache);
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
@@ -124,13 +115,13 @@ void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
     ImGui::BeginMenuBar();
     if (ImGui::BeginMenu("File"))
     {
-        ImGui::MenuItem("New Project"));
+        ImGui::MenuItem("New Project");
         if (ImGui::MenuItem("Open Project"))
         {
             actionOpenProject();
         }
 
-        ImGui::MenuItem("Close Project"));
+        ImGui::MenuItem("Close Project");
 
 
         ImGui::Separator();
@@ -148,119 +139,9 @@ void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
     ImGui::EndMenuBar();
 }
 
-void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectsWidget()
-{
-    if (ImGui::Begin("GameObjects", &m_gameObjectsWidgetSettings.show))
-    {
-        // Displaying root gameobjects
-        // (Root gameobjects does not have parent)
-        for (auto&& gameObject : m_gameObjectsCache)
-        {
-            if (gameObject->transform()->parent() != nullptr)
-            {
-                continue;
-            }
-
-            displayGameObject(gameObject);
-        }
-    }
-    ImGui::End();
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::drawInspectorWidget()
-{
-    if (ImGui::Begin("Inspector", &m_inspectorWidgetSettings.show))
-    {
-        switch (m_commonSettings.lastSelectedType)
-        {
-        case HG::Editor::Widgets::Settings::Common::LastSelectedType::GameObject:
-            drawGameObjectInspectorBody();
-            break;
-        case HG::Editor::Widgets::Settings::Common::LastSelectedType::Asset:
-            drawAssetInspectorBody();
-            break;
-        case HG::Editor::Widgets::Settings::Common::LastSelectedType::None:
-            break;
-        }
-    }
-    ImGui::End();
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::drawLoggingWidget()
-{
-    if (ImGui::Begin("Logs", &m_loggingWidgetSettings.show))
-    {
-        for (auto&& message : m_loggingWidgetSettings.messagesBuffer)
-        {
-            ImGui::Selectable("%s", message.message.c_str());
-        }
-    }
-    ImGui::End();
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::drawAssetsWidget()
-{
-    if (ImGui::Begin("Assets", &m_assetsWidgetSettings.show))
-    {
-
-    }
-    ImGui::End();
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::drawSceneWidget()
-{
-    if (ImGui::Begin("Scene", &m_sceneWidgetSettings.show))
-    {
-        m_sceneWidgetSettings.size = {
-            ImGui::GetContentRegionAvail().x,
-            ImGui::GetContentRegionAvail().y
-        };
-
-        updateRenderOverride();
-
-        ImGui::Image(
-            m_renderOverride->mainRenderTarget->colorTexture(0),
-            ImVec2(m_sceneWidgetSettings.size.x, m_sceneWidgetSettings.size.y)
-        );
-
-    }
-    ImGui::End();
-}
-
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
 {
 
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::displayGameObject(HG::Core::GameObject *gameObject)
-{
-    auto hasChildren = !gameObject->transform()->children().empty();
-
-    auto nodeFlags =
-        (hasChildren ? 0U : ImGuiTreeNodeFlags_Leaf) |
-        ImGuiTreeNodeFlags_OpenOnArrow |
-        (gameObject == m_gameObjectsWidgetSettings.selected ? ImGuiTreeNodeFlags_Selected : 0U);
-
-    bool opened = ImGui::TreeNodeEx(gameObject, nodeFlags, "%s", gameObject->name().c_str());
-
-    // If LMB pressed on this item
-    if (ImGui::IsItemClicked(0))
-    {
-        m_commonSettings.lastSelectedType = HG::Editor::Widgets::Settings::Common::LastSelectedType::GameObject;
-        m_gameObjectsWidgetSettings.selected = gameObject;
-    }
-
-    // If this gameobject opened - show
-    // it's children.
-    if (opened)
-    {
-        for (auto&& childTransform : gameObject->transform()->children())
-        {
-            displayGameObject(childTransform->gameObject());
-        }
-
-        ImGui::TreePop();
-    }
 }
 
 /**
@@ -295,76 +176,11 @@ private:
 
 void HG::Editor::Behaviours::GraphicsInterface::setupLogging()
 {
-    m_loggingWidgetSettings.logsListener = std::make_shared<UserLogsListener>();
+    auto logsListener = std::make_shared<UserLogsListener>();
 
-    HG::Core::Logging::userLogger()->addLogsListener(m_loggingWidgetSettings.logsListener);
-}
+    HG::Core::Logging::userLogger()->addLogsListener(logsListener);
 
-void HG::Editor::Behaviours::GraphicsInterface::drawGameObjectInspectorBody()
-{
-    if (m_gameObjectsWidgetSettings.selected == nullptr)
-    {
-        return;
-    }
-
-    // Displaying gameobject header
-    bool enabledCache = m_gameObjectsWidgetSettings.selected->isEnabled();
-    if (ImGui::Checkbox("##InspectorEnabled", &enabledCache))
-    {
-        m_gameObjectsWidgetSettings.selected->setEnabled(enabledCache);
-    }
-
-    ImGui::SameLine();
-
-    ImGui::Text("%s", m_gameObjectsWidgetSettings.selected->name().c_str());
-
-    // todo: Don't invalidate cache if current gameobject was not changed
-    //       or if behaviours amount was not changed.
-    m_inspectorWidgetSettings.behavioursCache.clear();
-
-    // Getting and iterating all behaviours
-    m_gameObjectsWidgetSettings.selected->getBehaviours(m_inspectorWidgetSettings.behavioursCache);
-    m_gameObjectsWidgetSettings.selected->getRenderingBehaviours(m_inspectorWidgetSettings.behavioursCache);
-
-    // Getting Editor::Application
-    auto editorApplication = dynamic_cast<HG::Editor::Application*>(scene()->application());
-
-    if (editorApplication == nullptr)
-    {
-        ImGui::Text("%s", "This application has wrong type.");
-        return;
-    }
-
-    std::size_t id = 0;
-
-    for (const auto& behaviour : m_inspectorWidgetSettings.behavioursCache)
-    {
-        m_inspectorWidgetSettings.propertiesCache.clear();
-
-        // Getting and iterating all properties
-        behaviour->getProperties(m_inspectorWidgetSettings.propertiesCache);
-
-        for (const auto& property : m_inspectorWidgetSettings.propertiesCache)
-        {
-            // Displaying title
-            auto processor = editorApplication
-                ->propertyEditorsFabric()
-                ->create(property.typeInfo().hash_code());
-
-            if (processor == nullptr)
-            {
-                ImGui::Text("No processor for \"%s\" type (%s)", property.type().c_str(), property.name().c_str());
-                continue;
-            }
-
-            processor->perform(id++, property.name(), property);
-        }
-    }
-}
-
-void HG::Editor::Behaviours::GraphicsInterface::drawAssetInspectorBody()
-{
-
+    m_loggingWidget->setLogsListener(logsListener);
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
@@ -376,12 +192,31 @@ void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
 
     m_renderOverride->mainRenderTarget = new HG::Rendering::Base::RenderTarget({200, 200});
     m_renderOverride->mainRenderTarget->setColorTexture(texture, 0);
+
+    m_sceneWidget->setRenderTarget(m_renderOverride->mainRenderTarget);
 }
 
-void HG::Editor::Behaviours::GraphicsInterface::updateLogs()
+void HG::Editor::Behaviours::GraphicsInterface::prepareDockSpace()
 {
-    while (m_loggingWidgetSettings.logsListener->hasMessages())
-    {
-        m_loggingWidgetSettings.messagesBuffer.push_back(m_loggingWidgetSettings.logsListener->popMessage());
-    }
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar |
+                    ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoBringToFrontOnFocus |
+                    ImGuiWindowFlags_NoNavFocus |
+                    ImGuiWindowFlags_NoMove;
+
+    ImGui::Begin("EditorDockSpace#", nullptr, window_flags);
+
+    ImGui::PopStyleVar(2);
+
+    // Enabling dockspace
+    ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
 }

@@ -56,7 +56,14 @@ namespace HG::Editor::Widgets
          */
         void draw();
 
+        /**
+         * @brief Method, that has to be called before draw.
+         */
+        void update();
+
     protected:
+
+        bool m_opened;
 
         /**
          * @brief Method, that's called on `draw` call.
@@ -70,8 +77,6 @@ namespace HG::Editor::Widgets
         virtual void onUpdate();
 
     private:
-
-        bool m_opened;
 
         HG::Editor::Application* m_application;
     };

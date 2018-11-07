@@ -3,6 +3,16 @@
 // Editor
 #include <Widgets/AbstractWidget.hpp>
 
+namespace HG::Core
+{
+    class GameObject;
+}
+
+namespace HG::Editor::Widgets::Settings
+{
+    struct Common;
+}
+
 namespace HG::Editor::Widgets
 {
     /**
@@ -15,11 +25,21 @@ namespace HG::Editor::Widgets
         /**
          * @brief Constructor.
          */
-        GameObjects();
+        explicit GameObjects(HG::Editor::Widgets::Settings::Common* settings);
 
     protected:
 
         void onDraw() override;
 
+        /**
+         * @brief Recursive method, that performs
+         * gameobject's tree drawing.
+         * @param go Pointer to gameobject to draw.
+         */
+        void displayGameObject(HG::Core::GameObject* go);
+
+    private:
+
+        HG::Editor::Widgets::Settings::Common* m_commonSettings;
     };
 }

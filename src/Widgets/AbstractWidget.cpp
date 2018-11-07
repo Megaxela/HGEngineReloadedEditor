@@ -2,7 +2,8 @@
 #include <Widgets/AbstractWidget.hpp>
 
 HG::Editor::Widgets::AbstractWidget::AbstractWidget() :
-    m_opened(true)
+    m_opened(true),
+    m_application(nullptr)
 {
 
 }
@@ -20,6 +21,11 @@ bool HG::Editor::Widgets::AbstractWidget::isOpened() const
 void HG::Editor::Widgets::AbstractWidget::draw()
 {
     onDraw();
+}
+
+void HG::Editor::Widgets::AbstractWidget::update()
+{
+    onUpdate();
 }
 
 void HG::Editor::Widgets::AbstractWidget::setApplication(HG::Editor::Application *application)
