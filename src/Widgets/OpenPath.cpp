@@ -4,6 +4,9 @@
 // C++ STL
 #include <algorithm>
 
+// ALogger
+#include <CurrentLogger.hpp>
+
 // ImGui
 #include <imgui.h>
 
@@ -11,7 +14,7 @@ namespace {
     constexpr std::size_t max_path = 2048;
 }
 
-bool HG::Editor::Widgets::OpenPath::FileCache::proceedStatus()
+bool HG::Editor::Widgets::OpenPath::FileData::proceedStatus()
 {
     std::error_code ec;
     status = std::filesystem::status(path, ec);
@@ -19,145 +22,172 @@ bool HG::Editor::Widgets::OpenPath::FileCache::proceedStatus()
     return !bool(ec);
 }
 
-bool HG::Editor::Widgets::OpenPath::FileCache::proceedChildren()
+HG::Editor::Widgets::OpenPath::OpenPath() :
+    m_settings()
 {
-    if (status.type() != std::filesystem::file_type::directory)
-    {
-        isProceed = true;
-
-        return true;
-    }
-
-    if (path == "/dev/fd" ||
-        path == "/proc/self")
-    {
-        isProceed = true;
-        return true;
-    }
-
-    for (auto& p : std::filesystem::directory_iterator(
-            path,
-            std::filesystem::directory_options::skip_permission_denied
-    ))
-    {
-        FileCache cache;
-
-        cache.path = p;
-        cache.proceedStatus();
-
-        children.emplace_back(std::move(cache));
-    }
-
-    std::sort(
-        children.begin(),
-        children.end(),
-        [](FileCache& l, FileCache& r) -> bool
-        {
-            return l.path < r.path;
-        }
-    );
-
-    isProceed = true;
-
-    return true;
+    m_currentPath = "/home/ushanovalex";
+    updateFilesInCurrentPath();
 }
 
-HG::Editor::Widgets::OpenPath::OpenPath() :
-    m_root(),
-    m_pathBuffer()
+void HG::Editor::Widgets::OpenPath::setOkCallback(HG::Editor::Widgets::OpenPath::OkCallback callback)
 {
-    m_pathBuffer.reserve(2048);
+    m_callback = std::move(callback);
+}
 
-    initialize();
+HG::Editor::Widgets::OpenPath::Settings &HG::Editor::Widgets::OpenPath::settings()
+{
+    return m_settings;
 }
 
 void HG::Editor::Widgets::OpenPath::onDraw()
 {
     if (ImGui::Begin("OpenPath", &m_opened))
     {
-        drawToolbar();
+        drawButtonsPath();
 
-        drawPathEditor();
+        drawItemsChild();
 
-        drawTreeWidget();
+        drawFileInput();
+
+        drawButtons();
     }
     ImGui::End();
 }
 
-void HG::Editor::Widgets::OpenPath::initialize()
+void HG::Editor::Widgets::OpenPath::updateFilesInCurrentPath()
 {
-    // todo: Add initialization for windows
-    m_root.path = "/";
-    m_root.proceedStatus();
-    m_root.proceedChildren();
-    m_pathBuffer = "/";
+    m_files.clear();
 
-    assert(m_pathBuffer.capacity() == max_path);
+    for (auto& p : std::filesystem::directory_iterator(
+            m_currentPath,
+            std::filesystem::directory_options::skip_permission_denied
+    ))
+    {
+        FileData cache;
+
+        cache.path = p;
+        cache.proceedStatus();
+
+        m_files.emplace_back(std::move(cache));
+    }
+
+    std::sort(
+            m_files.begin(),
+            m_files.end(),
+            [](const FileData& l, const FileData& r) -> bool
+            {
+                return l.path < r.path;
+            }
+    );
 }
 
-void HG::Editor::Widgets::OpenPath::drawToolbar()
+void HG::Editor::Widgets::OpenPath::clear()
 {
 
 }
 
-void HG::Editor::Widgets::OpenPath::drawPathEditor()
+void HG::Editor::Widgets::OpenPath::drawButtonsPath()
 {
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-    ImGui::InputText("##OpenPath/Path", m_pathBuffer.data(), max_path);
+    std::filesystem::path pathCache;
+
+    bool changed = false;
+
+    for (auto&& segment : m_currentPath)
+    {
+        if (segment != *m_currentPath.begin())
+        {
+            ImGui::SameLine();
+        }
+
+        pathCache /= segment;
+        auto segmentName = segment.string() + "##OpenPath_Path";
+
+        if (ImGui::Button(segmentName.c_str()))
+        {
+            m_currentPath = pathCache;
+            changed = true;
+            break;
+        }
+    }
+
+    if (changed)
+    {
+        updateFilesInCurrentPath();
+    }
+}
+
+void HG::Editor::Widgets::OpenPath::drawItemsChild()
+{
+    auto size = ImGui::GetContentRegionAvail();
+
+    size.y -= ImGui::GetItemsLineHeightWithSpacing() * 2;
+
+    ImGui::BeginChild("##ItemsChild_OpenPath_Items", size);
+
+    bool changed = false;
+
+    if (std::distance(m_currentPath.begin(), m_currentPath.end()) > 1 &&
+        ImGui::Selectable("..##GotoBack_OpenPath_Items", m_currentPath.parent_path() == m_selected, ImGuiSelectableFlags_AllowDoubleClick))
+    {
+        if (ImGui::IsMouseDoubleClicked(0))
+        {
+            m_currentPath = m_currentPath.parent_path();
+            changed = true;
+        }
+    }
+
+    for (const auto& file : m_files)
+    {
+        auto isSelected = file.path == m_selected;
+
+        if (ImGui::Selectable(file.path.filename().c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick))
+        {
+            m_selected = file.path;
+
+            if (ImGui::IsMouseDoubleClicked(0) &&
+                file.status.type() == std::filesystem::file_type::directory)
+            {
+                m_currentPath = file.path;
+                changed = true;
+            }
+        }
+    }
+
+    if (changed)
+    {
+        updateFilesInCurrentPath();
+    }
+
+    ImGui::EndChild();
+}
+
+void HG::Editor::Widgets::OpenPath::drawFileInput()
+{
+    static char buffer[2048];
+
+    const float comboWidth = 100;
+
+    ImGui::Text("Filename:");
+
+    ImGui::SameLine();
+
+    ImGui::PushItemWidth(-(comboWidth + ImGui::GetStyle().ItemSpacing.x));
+    ImGui::InputText("##FilenameInput_OpenPath_Input", buffer, 2048);
+    ImGui::PopItemWidth();
+
+    ImGui::SameLine();
+
+    static const char* values[] = {".cpp", ".hpp", ".gcc"};
+    static int current = 0;
+
+    ImGui::PushItemWidth(comboWidth);
+    ImGui::Combo("##ExtensionSelection_OpenPath_Input", &current, values, 3);
     ImGui::PopItemWidth();
 }
 
-void HG::Editor::Widgets::OpenPath::drawTreeWidget()
+void HG::Editor::Widgets::OpenPath::drawButtons()
 {
-    ImGui::BeginChildFrame(1, ImGui::GetContentRegionAvail());
-
-    auto flags =
-         (m_root.children.empty() ? ImGuiTreeNodeFlags_Leaf : 0U) |
-         ImGuiTreeNodeFlags_OpenOnArrow;
-
-    // Drawing root
-    if (ImGui::TreeNodeEx("Root##OpenPath/RootElement", flags))
-    {
-        for (auto&& child : m_root.children)
-        {
-            displayPath(&child);
-        }
-
-        ImGui::TreePop();
-    }
-
-    ImGui::EndChildFrame();
-}
-
-void HG::Editor::Widgets::OpenPath::displayPath(FileCache* fileCache)
-{
-    if (!fileCache->isProceed)
-    {
-        fileCache->proceedChildren();
-    }
-
-    auto hasChildren = !fileCache->children.empty();
-
-    auto nodeFlags =
-            (hasChildren ? 0U : ImGuiTreeNodeFlags_Leaf) |
-            ImGuiTreeNodeFlags_OpenOnArrow |
-            (fileCache->path == m_selectedPath ? ImGuiTreeNodeFlags_Selected : 0U);
-
-    bool opened = ImGui::TreeNodeEx(fileCache, nodeFlags, "%s", fileCache->path.filename().c_str());
-
-    if (ImGui::IsItemClicked(0))
-    {
-        m_selectedPath = fileCache->path;
-        m_pathBuffer = m_selectedPath.string();
-    }
-
-    if (opened)
-    {
-        for (auto&& childTransform : fileCache->children)
-        {
-            displayPath(&childTransform);
-        }
-
-        ImGui::TreePop();
-    }
+    ImGui::Button("Cancel##OpenPath_Buttons");
+    ImGui::SameLine();
+    ImGui::Button("Ok##OpenPath_Buttons");
 }
