@@ -61,6 +61,12 @@ namespace HG::Editor::Widgets
          */
         void update();
 
+        /**
+         * @brief Method, that performs widget initialization.
+         * Has to be executed after application initialization.
+         */
+        void initialize();
+
     protected:
 
         bool m_opened;
@@ -75,6 +81,12 @@ namespace HG::Editor::Widgets
          * By default do nothing.
          */
         virtual void onUpdate();
+
+        /**
+         * @brief Method, that's called on `initialize` call.
+         * By default do nothing.
+         */
+        virtual void onInitialization();
 
     private:
 

@@ -42,3 +42,13 @@ void HG::Editor::Widgets::AbstractWidget::onUpdate()
 {
 
 }
+
+void HG::Editor::Widgets::AbstractWidget::initialize()
+{
+    onInitialization();
+}
+
+void HG::Editor::Widgets::AbstractWidget::onInitialization()
+{
+
+}

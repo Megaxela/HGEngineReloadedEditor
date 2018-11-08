@@ -96,6 +96,9 @@ void HG::Editor::Behaviours::GraphicsInterface::onStart()
     m_sceneWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
     m_loggingWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
     m_assetsWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+
+    m_openPathWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    m_openPathWidget->initialize();
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
@@ -141,7 +144,10 @@ void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
 
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
 {
+    m_openPathWidget->settings().fileTypes = {".cpp", ".hpp"};
+    m_openPathWidget->settings().mode = HG::Editor::Widgets::OpenPath::Settings::Mode::File;
 
+    m_openPathWidget->setOpened(true);
 }
 
 /**

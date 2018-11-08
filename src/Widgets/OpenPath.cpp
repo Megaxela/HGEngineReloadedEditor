@@ -1,8 +1,20 @@
 // Editor
 #include <Widgets/OpenPath.hpp>
+#include <Editor/Application.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 // C++ STL
 #include <algorithm>
+
+// HG::Core
+#include <HG/Core/ResourceManager.hpp>
+
+// HG::Rendering::Base
+#include <HG/Rendering/Base/Texture.hpp>
+
+// HG::Utils
+#include <HG/Utils/Surface.hpp>
+#include <HG/Utils/Loaders/STBImageLoader.hpp>
 
 // ALogger
 #include <CurrentLogger.hpp>
@@ -23,10 +35,32 @@ bool HG::Editor::Widgets::OpenPath::FileData::proceedStatus()
 }
 
 HG::Editor::Widgets::OpenPath::OpenPath() :
-    m_settings()
+    m_settings(),
+    m_currentOpenState(false)
 {
-    m_currentPath = "/home/ushanovalex";
-    updateFilesInCurrentPath();
+    setOpened(false);
+    clear();
+}
+
+HG::Editor::Widgets::OpenPath::~OpenPath()
+{
+    delete m_file;
+    delete m_directory;
+}
+
+void HG::Editor::Widgets::OpenPath::onInitialization()
+{
+    m_file = new HG::Rendering::Base::Texture(
+        application()
+            ->resourceManager()
+            ->load<HG::Utils::STBImageLoader>("images/text.png")
+    );
+
+    m_directory = new HG::Rendering::Base::Texture(
+        application()
+            ->resourceManager()
+            ->load<HG::Utils::STBImageLoader>("images/folder.png")
+    );
 }
 
 void HG::Editor::Widgets::OpenPath::setOkCallback(HG::Editor::Widgets::OpenPath::OkCallback callback)
@@ -41,8 +75,24 @@ HG::Editor::Widgets::OpenPath::Settings &HG::Editor::Widgets::OpenPath::settings
 
 void HG::Editor::Widgets::OpenPath::onDraw()
 {
-    if (ImGui::Begin("OpenPath", &m_opened))
+    // todo: When ImGui will be ready - fix this strange behaviour
+    if (m_currentOpenState != isOpened())
     {
+        m_currentOpenState = isOpened();
+
+        if (isOpened())
+        {
+            ImGui::OpenPopup("Explorer");
+        }
+    }
+
+    if (ImGui::BeginPopupModal("Explorer"))
+    {
+        if (!isOpened())
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
         drawButtonsPath();
 
         drawItemsChild();
@@ -50,8 +100,9 @@ void HG::Editor::Widgets::OpenPath::onDraw()
         drawFileInput();
 
         drawButtons();
+
+        ImGui::EndPopup();
     }
-    ImGui::End();
 }
 
 void HG::Editor::Widgets::OpenPath::updateFilesInCurrentPath()
@@ -83,7 +134,8 @@ void HG::Editor::Widgets::OpenPath::updateFilesInCurrentPath()
 
 void HG::Editor::Widgets::OpenPath::clear()
 {
-
+    m_currentPath = "/home";
+    updateFilesInCurrentPath();
 }
 
 void HG::Editor::Widgets::OpenPath::drawButtonsPath()
@@ -138,11 +190,37 @@ void HG::Editor::Widgets::OpenPath::drawItemsChild()
 
     for (const auto& file : m_files)
     {
+        if ((!m_settings.showHidden &&
+             isHidden(file)) ||
+
+            (file.status.type() == std::filesystem::file_type::regular &&
+             m_settings.filterByExtension &&
+             !m_settings.fileTypes.empty() &&
+             file.path.has_extension() &&
+             m_settings.fileTypes[m_settings.currentFileType] != file.path.extension()))
+        {
+            continue;
+        }
+
+        HG::Rendering::Base::Texture* icon = nullptr;
+
+        if (file.status.type() == std::filesystem::file_type::directory)
+        {
+            icon = m_directory;
+        }
+        else if (file.status.type() == std::filesystem::file_type::regular)
+        {
+            icon = m_file;
+        }
+
         auto isSelected = file.path == m_selected;
 
-        if (ImGui::Selectable(file.path.filename().c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick))
+        if (ImGui::IconSelectable(file.path.filename().c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick, {0, 0}, icon))
         {
-            m_selected = file.path;
+            if (validateData(file))
+            {
+                m_selected = file.path;
+            }
 
             if (ImGui::IsMouseDoubleClicked(0) &&
                 file.status.type() == std::filesystem::file_type::directory)
@@ -165,7 +243,7 @@ void HG::Editor::Widgets::OpenPath::drawFileInput()
 {
     static char buffer[2048];
 
-    const float comboWidth = 100;
+    float comboWidth = 100;
 
     ImGui::Text("Filename:");
 
@@ -177,17 +255,88 @@ void HG::Editor::Widgets::OpenPath::drawFileInput()
 
     ImGui::SameLine();
 
-    static const char* values[] = {".cpp", ".hpp", ".gcc"};
-    static int current = 0;
+    if (m_settings.mode != Settings::Mode::Directory &&
+        !m_settings.fileTypes.empty())
+    {
+        ImGui::PushItemWidth(comboWidth);
+        ImGui::Combo(
+            "##ExtensionSelection_OpenPath_Input",
+            &m_settings.currentFileType,
+            [](void* data, int index, const char** value) -> bool
+            {
+                auto settings = static_cast<Settings*>(data);
 
-    ImGui::PushItemWidth(comboWidth);
-    ImGui::Combo("##ExtensionSelection_OpenPath_Input", &current, values, 3);
-    ImGui::PopItemWidth();
+                if (index >= settings->fileTypes.size())
+                {
+                    return false;
+                }
+
+                (*value) = settings->fileTypes[index].c_str();
+
+                return true;
+            },
+            &m_settings,
+            m_settings.fileTypes.size()
+        );
+        ImGui::PopItemWidth();
+    }
 }
 
 void HG::Editor::Widgets::OpenPath::drawButtons()
 {
-    ImGui::Button("Cancel##OpenPath_Buttons");
+    if (ImGui::Button("Cancel##OpenPath_Buttons"))
+    {
+        clear();
+        ImGui::CloseCurrentPopup();
+    }
+
     ImGui::SameLine();
+
     ImGui::Button("Ok##OpenPath_Buttons");
+}
+
+bool HG::Editor::Widgets::OpenPath::validateData(const HG::Editor::Widgets::OpenPath::FileData &data)
+{
+    switch (m_settings.mode)
+    {
+    case Settings::Mode::Directory:
+        return data.status.type() == std::filesystem::file_type::directory  &&
+               (m_settings.additionalChecker == nullptr ||
+                m_settings.additionalChecker(data));
+    case Settings::Mode::File:
+    {
+        if (data.status.type() != std::filesystem::file_type::regular)
+        {
+            return false;
+        }
+
+        return (m_settings.fileTypes.empty() ||
+                hasProperExtension(data)) &&
+               (m_settings.additionalChecker == nullptr ||
+                m_settings.additionalChecker(data));
+    }
+    case Settings::Mode::Any:
+        return m_settings.additionalChecker == nullptr ||
+               m_settings.additionalChecker(data);
+
+    }
+
+}
+
+bool HG::Editor::Widgets::OpenPath::isHidden(const HG::Editor::Widgets::OpenPath::FileData &data)
+{
+    auto filename = data.path.filename();
+
+    return filename.empty() ||
+           filename.string()[0] == '.';
+}
+
+bool HG::Editor::Widgets::OpenPath::hasProperExtension(const HG::Editor::Widgets::OpenPath::FileData &data)
+{
+    return data.path.has_extension() &&
+           std::find(
+               m_settings.fileTypes.begin(),
+               m_settings.fileTypes.end(),
+               data.path.extension().string()
+           ) != m_settings.fileTypes.end();
 }
