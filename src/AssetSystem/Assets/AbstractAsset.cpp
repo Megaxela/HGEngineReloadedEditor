@@ -19,10 +19,15 @@ HG::Editor::AssetSystem::Assets::AbstractAsset::AbstractAsset(std::filesystem::p
 
 HG::Editor::AssetSystem::Assets::AbstractAsset::~AbstractAsset()
 {
-    for (auto& child : m_children)
+    if (m_parent)
     {
-        delete child;
-        child = nullptr;
+        m_parent->m_children.erase(
+            std::find(
+                m_parent->m_children.begin(),
+                m_parent->m_children.end(),
+                this
+            )
+        );
     }
 
     m_children.clear();
@@ -53,30 +58,27 @@ HG::Editor::AssetSystem::Assets::AbstractAsset *HG::Editor::AssetSystem::Assets:
     return m_parent;
 }
 
-std::vector<HG::Editor::AssetSystem::Assets::AbstractAsset *> &HG::Editor::AssetSystem::Assets::AbstractAsset::children()
+std::vector<HG::Editor::AssetSystem::Assets::AssetPtr> &HG::Editor::AssetSystem::Assets::AbstractAsset::children()
 {
     return m_children;
 }
 
-void HG::Editor::AssetSystem::Assets::AbstractAsset::setParent(HG::Editor::AssetSystem::Assets::AbstractAsset *parent)
+void HG::Editor::AssetSystem::Assets::AbstractAsset::addChild(HG::Editor::AssetSystem::Assets::AssetPtr child)
 {
-    if (m_parent != nullptr)
+    if (child->m_parent)
     {
-        m_parent->m_children.erase(
+        child->m_parent->m_children.erase(
             std::find(
-                m_parent->m_children.begin(),
-                m_parent->m_children.end(),
+                child->m_parent->m_children.begin(),
+                child->m_parent->m_children.end(),
                 this
             )
         );
     }
 
-    m_parent = parent;
+    child->m_parent = this;
 
-    if (m_parent != nullptr)
-    {
-        m_parent->m_children.push_back(this);
-    }
+    m_children.emplace_back(std::move(child));
 }
 
 bool HG::Editor::AssetSystem::Assets::AbstractAsset::load() const

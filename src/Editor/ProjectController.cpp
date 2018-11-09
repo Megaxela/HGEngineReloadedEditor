@@ -21,7 +21,7 @@ HG::Editor::Application *HG::Editor::ProjectController::application() const
 
 void HG::Editor::ProjectController::load(std::filesystem::path path)
 {
-
+    m_assetsManager->setAssetsPath(std::move(path));
 }
 
 HG::AssetSystem::AssetsManager *HG::Editor::ProjectController::assetManager()

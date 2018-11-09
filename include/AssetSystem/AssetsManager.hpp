@@ -12,6 +12,7 @@ namespace HG::Editor
 
 namespace HG::Editor::AssetSystem::Assets
 {
+    class RootAsset;
     class AbstractAsset;
     using AssetPtr = std::shared_ptr<AbstractAsset>;
 }
@@ -56,11 +57,28 @@ namespace HG::AssetSystem
          */
         std::filesystem::path assetsPath() const;
 
+        /**
+         * @brief Method for clearing assets from
+         * manager. (Also detaches all watchers)
+         */
+        void clearAssets();
+
+        /**
+         * @brief Method for updating assets.
+         */
+        void updateAssets();
+
     private:
+
+        void reloadAssets();
+
+        void reloadDirectory(const std::filesystem::path& path, HG::Editor::AssetSystem::Assets::AssetPtr target);
+
+        bool m_assetsPathChanged;
 
         std::filesystem::path m_assetsPath;
 
-        std::vector<HG::Editor::AssetSystem::Assets::AssetPtr> m_rootAssets;
+        std::shared_ptr<HG::Editor::AssetSystem::Assets::RootAsset> m_rootAsset;
 
         HG::Editor::Application* m_parentApplication;
     };

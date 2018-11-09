@@ -3,6 +3,7 @@
 #include <Editor/Application.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AbstractPropertyProcessor.hpp>
+#include <Editor/ProjectController.hpp>
 
 #include <Widgets/GameObjects.hpp>
 #include <Widgets/Inspector.hpp>
@@ -144,8 +145,15 @@ void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
 
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
 {
-    m_openPathWidget->settings().fileTypes = {".cpp", ".hpp"};
-    m_openPathWidget->settings().mode = HG::Editor::Widgets::OpenPath::Settings::Mode::File;
+    auto project = dynamic_cast<HG::Editor::Application*>(scene()->application())->projectController();
+
+    m_openPathWidget->settings().mode = HG::Editor::Widgets::OpenPath::Settings::Mode::Directory;
+    m_openPathWidget->setOkCallback(
+        [project](const std::filesystem::path& data)
+        {
+            project->load(data);
+        }
+    );
 
     m_openPathWidget->setOpened(true);
 }

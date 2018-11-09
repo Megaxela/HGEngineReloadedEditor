@@ -31,6 +31,10 @@ namespace HG::Editor::Widgets
 
         using OkCallback = std::function<void(std::filesystem::path)>;
 
+        /**
+         * @brief Structure, that describes
+         * dialog settings.
+         */
         struct Settings
         {
             enum class Mode
@@ -77,32 +81,73 @@ namespace HG::Editor::Widgets
         void clear();
 
     protected:
+        /**
+         * @brief Method for drawing widget.
+         */
         void onDraw() override;
 
+        /**
+         * @brief Method that performs icons
+         * loading.
+         */
         void onInitialization() override;
 
     private:
 
+        /**
+         * @brief Method for drawing path buttons.
+         */
         void drawButtonsPath();
 
+        /**
+         * @brief Method for drawing items in directory.
+         */
         void drawItemsChild();
 
+        /**
+         * @brief Method for drawing file input.
+         */
         void drawFileInput();
 
+        /**
+         * @brief Method for drawing Ok/Cancel buttons.
+         */
         void drawButtons();
 
+        /**
+         * @brief Method for updating files in selected path
+         * to update `drawItemsChild` data.
+         */
         void updateFilesInCurrentPath();
 
+        /**
+         * @brief Method for validating file data for display.
+         */
         bool validateData(const FileData& data);
 
+        /**
+         * @brief Method for checking is some file hidden.
+         * (Currently working only with dot files)
+         * @param data
+         * @return
+         */
         bool isHidden(const FileData& data);
 
+        /**
+         * @brief Method for checking does
+         * available extensions contains
+         * file extension.
+         * @param data
+         * @return
+         */
         bool hasProperExtension(const FileData& data);
 
         std::vector<FileData> m_files;
 
         std::filesystem::path m_currentPath;
         std::filesystem::path m_selected;
+
+        std::string m_inputBuffer;
 
         OkCallback m_callback;
 

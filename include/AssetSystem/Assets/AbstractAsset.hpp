@@ -5,6 +5,10 @@
 
 namespace HG::Editor::AssetSystem::Assets
 {
+    class AbstractAsset;
+
+    using AssetPtr = std::shared_ptr<AbstractAsset>;
+
     /**
      * @brief Class, that describes abstract engine
      * asset.
@@ -76,13 +80,12 @@ namespace HG::Editor::AssetSystem::Assets
          * @brief Method for getting asset children.
          * You may modify children - only for reordering.
          */
-        std::vector<AbstractAsset*>& children();
+        std::vector<AssetPtr>& children();
 
         /**
-         * @brief Method for setting parent for asset.
-         * @param asset Pointer to new parent.
+         * @brief Method for adding child to parent.
          */
-        void setParent(AbstractAsset* parent);
+        void addChild(AssetPtr child);
 
         /**
          * @brief Method, that calls `onLoad`
@@ -123,7 +126,7 @@ namespace HG::Editor::AssetSystem::Assets
     private:
 
         AbstractAsset* m_parent;
-        std::vector<AbstractAsset*> m_children;
+        std::vector<AssetPtr> m_children;
 
         State m_state;
         std::filesystem::path m_path;
