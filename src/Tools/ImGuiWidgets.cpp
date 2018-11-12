@@ -13,6 +13,17 @@ ImVec2 operator+(const ImVec2& l, const ImVec2& r)
     return result;
 }
 
+ImVec2 operator-(const ImVec2& l, const ImVec2& r)
+{
+    auto result = l;
+
+    result.x -= r.x;
+    result.y -= r.y;
+
+    return result;
+}
+
+
 bool ImGui::IconSelectable(const char *label,
                            bool selected,
                            int flags,

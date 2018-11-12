@@ -13,8 +13,6 @@ namespace HG::Editor::PropertyProcessors
     public:
         void perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property) override;
 
-    public:
-
 
     };
 }

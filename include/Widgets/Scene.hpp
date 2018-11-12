@@ -9,6 +9,12 @@
 namespace HG::Rendering::Base
 {
     class RenderTarget;
+    class RenderOverride;
+}
+
+namespace HG::Core
+{
+    class GameObject;
 }
 
 namespace HG::Editor::Widgets
@@ -26,6 +32,11 @@ namespace HG::Editor::Widgets
         Scene();
 
         /**
+         * @brief Destructor.
+         */
+        ~Scene() override;
+
+        /**
          * @brief Method for setting render target to display.
          * @param target
          */
@@ -38,8 +49,12 @@ namespace HG::Editor::Widgets
 
         void updateRenderOverride();
 
+        HG::Core::GameObject* checkSelectedGameObject();
+
         glm::ivec2 m_size;
 
         HG::Rendering::Base::RenderTarget* m_mainRenderTarget;
+
+        HG::Rendering::Base::RenderOverride* m_selectionOverride;
     };
 }

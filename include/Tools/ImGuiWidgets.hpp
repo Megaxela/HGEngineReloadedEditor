@@ -12,3 +12,4 @@ namespace ImGui
 }
 
 ImVec2 operator+(const ImVec2& l, const ImVec2& r);
+ImVec2 operator-(const ImVec2& l, const ImVec2& r);
