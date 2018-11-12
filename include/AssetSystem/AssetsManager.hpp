@@ -68,6 +68,12 @@ namespace HG::AssetSystem
          */
         void updateAssets();
 
+        /**
+         * @brief Method for getting manager root asset.
+         * @return Pointer to abstract asset.
+         */
+        HG::Editor::AssetSystem::Assets::AssetPtr rootAsset() const;
+
     private:
 
         void reloadAssets();

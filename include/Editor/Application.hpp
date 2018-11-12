@@ -49,6 +49,8 @@ namespace HG::Editor
          */
         HG::Editor::Fabrics::AssetsFabric* assetsFabric() const;
 
+        bool performCycle() override;
+
     private:
 
         HG::Editor::ProjectController* m_projectController;

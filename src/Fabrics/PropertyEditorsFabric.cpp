@@ -7,9 +7,14 @@
 #include <DefaultPropertyProcessors/DoubleProcessor.hpp>
 #include <DefaultPropertyProcessors/NumberProcessor.hpp>
 #include <DefaultPropertyProcessors/ProjectionProcessor.hpp>
+#include <DefaultPropertyProcessors/GameObjectProcessor.hpp>
+#include <DefaultPropertyProcessors/ColorProcessor.hpp>
 
 // HG::Rendering::Base
 #include <HG/Rendering/Base/Camera.hpp>
+
+// HG::Utils
+#include <HG/Utils/Color.hpp>
 
 HG::Editor::Fabrics::PropertyEditorsFabric::PropertyEditorsFabric() :
     m_data()
@@ -76,6 +81,12 @@ void HG::Editor::Fabrics::PropertyEditorsFabric::registrateDefault()
             typeid(int64_t).hash_code()
     );
     registrate<HG::Editor::PropertyProcessors::ProjectionProcessor>(
-        typeid(HG::Editor::PropertyProcessors::ProjectionProcessor).hash_code()
+        typeid(HG::Rendering::Base::Camera::Projection).hash_code()
+    );
+    registrate<HG::Editor::PropertyProcessors::ColorProcessor>(
+        typeid(HG::Utils::Color).hash_code()
+    );
+    registrate<HG::Editor::PropertyProcessors::GameObjectProcessor>(
+        typeid(HG::Core::GameObject*).hash_code()
     );
 }

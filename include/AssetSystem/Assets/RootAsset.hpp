@@ -17,7 +17,7 @@ namespace HG::Editor::AssetSystem::Assets
     public:
 
         // Root asset type id (not real asset)
-        static constexpr std::size_t AssetId = HG::Utils::StringTools::hash("Asset::RootAsset")
+        static constexpr std::size_t AssetId = HG::Utils::StringTools::hash("Asset::RootAsset");
 
         explicit RootAsset(std::filesystem::path path);
     };

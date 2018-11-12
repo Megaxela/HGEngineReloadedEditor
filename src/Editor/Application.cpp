@@ -3,6 +3,7 @@
 #include <Editor/ProjectController.hpp>
 #include <Fabrics/AssetsFabric.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
+#include <AssetSystem/AssetsManager.hpp>
 
 HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     HG::Core::Application(std::move(name), argc, argv),
@@ -33,4 +34,11 @@ HG::Editor::Fabrics::PropertyEditorsFabric *HG::Editor::Application::propertyEdi
 HG::Editor::Fabrics::AssetsFabric *HG::Editor::Application::assetsFabric() const
 {
     return m_assetsFabric;
+}
+
+bool HG::Editor::Application::performCycle()
+{
+    m_projectController->assetManager()->proceedEvents();
+
+    return HG::Core::Application::performCycle();
 }

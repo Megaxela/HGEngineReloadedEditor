@@ -71,6 +71,7 @@ class NumberTestBehaviour : public HG::Core::Behaviour
     HG_PROPERTY(uint64_t, Prop_uint64_t);
     HG_PROPERTY(int64_t,  Prop_int64_t);
     HG_PROPERTY(HG::Utils::Color, Prop_Color);
+    HG_PROPERTY(HG::Core::GameObject*, Prop_GameObject);
 };
 
 HG::Editor::EditorScene::EditorScene(HG::Core::Scene *sceneToEdit) :

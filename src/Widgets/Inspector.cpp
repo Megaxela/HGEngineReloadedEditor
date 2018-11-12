@@ -11,6 +11,10 @@
 // ImGui
 #include <imgui.h>
 
+// ALogger
+#include <SystemTools.h>
+#include <Tools/ImGuiIdentificators.hpp>
+
 HG::Editor::Widgets::Inspector::Inspector(HG::Editor::Widgets::Settings::Common *settings) :
     m_commonSettings(settings)
 {
@@ -78,25 +82,30 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
     for (const auto& behaviour : m_commonSettings->behavioursCache)
     {
-        m_commonSettings->propertiesCache.clear();
+        auto headerLabel = SystemTools::getTypeName(*behaviour) + "##" + HG::Identificators::Items::GameObjectHeader;
 
-        // Getting and iterating all properties
-        behaviour->getProperties(m_commonSettings->propertiesCache);
-
-        for (const auto& property : m_commonSettings->propertiesCache)
+        if (ImGui::CollapsingHeader(headerLabel.c_str()))
         {
-            // Displaying title
-            auto processor = editorApplication
+            m_commonSettings->propertiesCache.clear();
+
+            // Getting and iterating all properties
+            behaviour->getProperties(m_commonSettings->propertiesCache);
+
+            for (const auto& property : m_commonSettings->propertiesCache)
+            {
+                // Displaying title
+                auto processor = editorApplication
                     ->propertyEditorsFabric()
                     ->create(property.typeInfo().hash_code());
 
-            if (processor == nullptr)
-            {
-                ImGui::Text("No processor for \"%s\" type (%s)", property.type().c_str(), property.name().c_str());
-                continue;
-            }
+                if (processor == nullptr)
+                {
+                    ImGui::Text("No processor for \"%s\" type (%s)", property.type().c_str(), property.name().c_str());
+                    continue;
+                }
 
-            processor->perform(id++, property.name(), property);
+                processor->perform(id++, property.name(), property);
+            }
         }
     }
 }

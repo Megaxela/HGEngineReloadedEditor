@@ -41,5 +41,7 @@ namespace HG::Editor::Widgets
     private:
 
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
+
+        HG::Core::GameObject* m_previousSelected;
     };
 }

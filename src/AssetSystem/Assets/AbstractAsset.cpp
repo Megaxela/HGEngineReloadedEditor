@@ -22,10 +22,13 @@ HG::Editor::AssetSystem::Assets::AbstractAsset::~AbstractAsset()
     if (m_parent)
     {
         m_parent->m_children.erase(
-            std::find(
+            std::find_if(
                 m_parent->m_children.begin(),
                 m_parent->m_children.end(),
-                this
+                [this](const AssetPtr& asset)
+                {
+                    return asset.get() == this;
+                }
             )
         );
     }
@@ -35,7 +38,7 @@ HG::Editor::AssetSystem::Assets::AbstractAsset::~AbstractAsset()
 
 std::string HG::Editor::AssetSystem::Assets::AbstractAsset::name() const
 {
-    return m_path.string();
+    return m_path.filename();
 }
 
 std::filesystem::path HG::Editor::AssetSystem::Assets::AbstractAsset::path() const
@@ -68,10 +71,13 @@ void HG::Editor::AssetSystem::Assets::AbstractAsset::addChild(HG::Editor::AssetS
     if (child->m_parent)
     {
         child->m_parent->m_children.erase(
-            std::find(
+            std::find_if(
                 child->m_parent->m_children.begin(),
                 child->m_parent->m_children.end(),
-                this
+                [this](const AssetPtr& asset)
+                {
+                    return asset.get() == this;
+                }
             )
         );
     }

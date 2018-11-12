@@ -116,7 +116,7 @@ void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
 
 void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
 {
-    ImGui::BeginMenuBar();
+    ImGui::BeginMainMenuBar();
     if (ImGui::BeginMenu("File"))
     {
         ImGui::MenuItem("New Project");
@@ -140,7 +140,7 @@ void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
 
         ImGui::EndMenu();
     }
-    ImGui::EndMenuBar();
+    ImGui::EndMainMenuBar();
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
@@ -212,7 +212,15 @@ void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
 
 void HG::Editor::Behaviours::GraphicsInterface::prepareDockSpace()
 {
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags window_flags =
+            ImGuiWindowFlags_MenuBar |
+            ImGuiWindowFlags_NoDocking |
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
+            ImGuiWindowFlags_NoNavFocus |
+            ImGuiWindowFlags_NoMove;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -220,16 +228,11 @@ void HG::Editor::Behaviours::GraphicsInterface::prepareDockSpace()
     ImGui::SetNextWindowViewport(viewport->ID);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    window_flags |= ImGuiWindowFlags_NoTitleBar |
-                    ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_NoBringToFrontOnFocus |
-                    ImGuiWindowFlags_NoNavFocus |
-                    ImGuiWindowFlags_NoMove;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f});
 
     ImGui::Begin("EditorDockSpace#", nullptr, window_flags);
 
-    ImGui::PopStyleVar(2);
+    ImGui::PopStyleVar(3);
 
     // Enabling dockspace
     ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));

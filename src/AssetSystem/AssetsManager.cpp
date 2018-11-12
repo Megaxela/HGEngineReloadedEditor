@@ -65,7 +65,7 @@ void HG::AssetSystem::AssetsManager::updateAssets()
 
 void HG::AssetSystem::AssetsManager::reloadAssets()
 {
-    m_rootAsset = new HG::Editor::AssetSystem::Assets::RootAsset(m_assetsPath);
+    m_rootAsset = std::make_shared<HG::Editor::AssetSystem::Assets::RootAsset>(m_assetsPath);
 
     reloadDirectory(m_assetsPath, m_rootAsset);
 }
@@ -85,4 +85,9 @@ void HG::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path
 
         target->addChild(newAsset);
     }
+}
+
+HG::Editor::AssetSystem::Assets::AssetPtr HG::AssetSystem::AssetsManager::rootAsset() const
+{
+    return m_rootAsset;
 }

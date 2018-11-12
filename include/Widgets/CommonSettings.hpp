@@ -2,6 +2,7 @@
 
 // C++ STL
 #include <vector>
+#include <memory>
 
 // HG::Core
 #include <HG/Core/Behaviour.hpp>
@@ -10,6 +11,13 @@ namespace HG::Core
 {
     class GameObject;
     class Behaviour;
+}
+
+namespace HG::Editor::AssetSystem::Assets
+{
+    class AbstractAsset;
+
+    using AssetPtr = std::shared_ptr<AbstractAsset>;
 }
 
 namespace HG::Editor::Widgets::Settings
@@ -26,6 +34,7 @@ namespace HG::Editor::Widgets::Settings
         LastSelectedType lastSelectedType = LastSelectedType::None;
 
         HG::Core::GameObject* selectedGameObject;
+        HG::Editor::AssetSystem::Assets::AssetPtr selectedAsset;
 
         std::vector<HG::Core::Behaviour*> behavioursCache;
         std::vector<HG::Core::GameObject*> gameobjectsCache;
