@@ -13,6 +13,11 @@ namespace HG::Core
     class Behaviour;
 }
 
+namespace HG::Rendering::Base
+{
+    class RenderBehaviour;
+}
+
 namespace HG::Editor::AssetSystem::Assets
 {
     class AbstractAsset;
@@ -38,6 +43,7 @@ namespace HG::Editor::Widgets::Settings
 
         std::vector<HG::Core::Behaviour*> behavioursCache;
         std::vector<HG::Core::GameObject*> gameobjectsCache;
+        std::vector<HG::Rendering::Base::RenderBehaviour*> renderBehavioursCache;
         std::vector<HG::Core::Behaviour::Property> propertiesCache;
     };
 }

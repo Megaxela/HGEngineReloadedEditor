@@ -3,6 +3,9 @@
 // Editor
 #include <Widgets/AbstractWidget.hpp>
 
+// HG::Utils
+#include <HG/Utils/Color.hpp>
+
 // glm
 #include <glm/vec2.hpp>
 
@@ -17,6 +20,11 @@ namespace HG::Core
     class GameObject;
 }
 
+namespace HG::Editor::Widgets::Settings
+{
+    struct Common;
+}
+
 namespace HG::Editor::Widgets
 {
     /**
@@ -29,7 +37,7 @@ namespace HG::Editor::Widgets
         /**
          * @brief Constructor.
          */
-        Scene();
+        explicit Scene(HG::Editor::Widgets::Settings::Common* common);
 
         /**
          * @brief Destructor.
@@ -56,5 +64,9 @@ namespace HG::Editor::Widgets
         HG::Rendering::Base::RenderTarget* m_mainRenderTarget;
 
         HG::Rendering::Base::RenderOverride* m_selectionOverride;
+
+        HG::Editor::Widgets::Settings::Common* m_commonSettings;
+
+        std::unordered_map<HG::Utils::Color, HG::Core::GameObject*> m_colorCache;
     };
 }

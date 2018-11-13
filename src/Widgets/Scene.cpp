@@ -5,6 +5,7 @@
 
 // HG::Core
 #include <HG/Core/Scene.hpp>
+#include <HG/Core/GameObject.hpp>
 
 // HG::Rendering::Base
 #include <HG/Rendering/Base/RenderTarget.hpp>
@@ -19,11 +20,13 @@
 
 // ALogger
 #include <CurrentLogger.hpp>
+#include <Widgets/CommonSettings.hpp>
 
-HG::Editor::Widgets::Scene::Scene() :
+HG::Editor::Widgets::Scene::Scene(HG::Editor::Widgets::Settings::Common* common) :
     m_size({0, 0}),
     m_mainRenderTarget(nullptr),
-    m_selectionOverride(new HG::Rendering::Base::RenderOverride())
+    m_selectionOverride(new HG::Rendering::Base::RenderOverride()),
+    m_commonSettings(common)
 {
 
 }
@@ -88,10 +91,22 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject()
     // Enabling selection override
     application()->renderer()->pipeline()->setRenderOverride(m_selectionOverride);
 
-    // Rendering scene
-    application()->scene()->render(application()->renderer());
+//    auto diff = std::numeric_limits<uint32_t>(m_commonSettings->gameobjectsCache.size()
 
-    // todo: Add result processing
+    // Rendering scene
+    for (auto&& gameObject : m_commonSettings->gameobjectsCache)
+    {
+
+        // todo: Change color of material here
+
+        m_commonSettings->renderBehavioursCache.clear();
+        gameObject->getRenderingBehaviours(m_commonSettings->renderBehavioursCache);
+
+        for (auto&& renderBehaviour : m_commonSettings->renderBehavioursCache)
+        {
+            application()->renderer()->pipeline()->render(renderBehaviour);
+        }
+    }
 
     // Reverting previous override option
     application()->renderer()->pipeline()->setRenderOverride(currentOverride);
