@@ -2,6 +2,7 @@
 #include <Widgets/Scene.hpp>
 #include <Tools/ImGuiWidgets.hpp>
 #include <Editor/Application.hpp>
+#include <Materials/ColorMaterial.hpp>
 
 // HG::Core
 #include <HG/Core/Scene.hpp>
@@ -14,6 +15,7 @@
 #include <HG/Rendering/Base/Renderer.hpp>
 #include <HG/Rendering/Base/RenderingPipeline.hpp>
 #include <HG/Rendering/Base/RenderOverride.hpp>
+#include <HG/Rendering/Base/MaterialCollection.hpp>
 
 // ImGui
 #include <imgui.h>
@@ -26,6 +28,7 @@ HG::Editor::Widgets::Scene::Scene(HG::Editor::Widgets::Settings::Common* common)
     m_size({0, 0}),
     m_mainRenderTarget(nullptr),
     m_selectionOverride(new HG::Rendering::Base::RenderOverride()),
+    m_materialOverride(nullptr),
     m_commonSettings(common)
 {
 
@@ -64,8 +67,8 @@ void HG::Editor::Widgets::Scene::onDraw()
             {
                 auto pos = ImGui::GetMousePos() - ImGui::GetItemRectMin();
 
-                // todo: Trigger item locating with re rendering.
-                auto selectedGameObject = checkSelectedGameObject();
+                m_commonSettings->selectedGameObject = checkSelectedGameObject(pos);
+                m_commonSettings->lastSelectedType = Settings::Common::LastSelectedType::GameObject;
             }
         }
     }
@@ -81,8 +84,18 @@ void HG::Editor::Widgets::Scene::updateRenderOverride()
     }
 }
 
-HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject()
+HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(ImVec2 pos)
 {
+    // Lazy initialization
+    if (m_materialOverride == nullptr)
+    {
+        m_materialOverride = application()
+                ->renderer()
+                ->materialCollection()
+                ->getMaterial<HG::Editor::Materials::ColorMaterial>();
+        m_selectionOverride->material = m_materialOverride;
+    }
+
     auto currentOverride = application()->renderer()->pipeline()->renderOverride();
 
     // Reusing already allocated render target (cause of render ordering)
@@ -90,17 +103,37 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject()
 
     // Enabling selection override
     application()->renderer()->pipeline()->setRenderOverride(m_selectionOverride);
+    application()->renderer()->pipeline()->clear(HG::Utils::Color::Black);
 
-//    auto diff = std::numeric_limits<uint32_t>(m_commonSettings->gameobjectsCache.size()
+    std::size_t diff = (256 * 256 * 256) / (m_commonSettings->gameobjectsCache.size() + 1);
 
+    Info() << "Diff: " << diff << " (" << (256 * 256 * 256) << " / " << (m_commonSettings->gameobjectsCache.size() + 1);
+
+    std::size_t colorCode = diff;
+
+    m_colorCache.clear();
     // Rendering scene
     for (auto&& gameObject : m_commonSettings->gameobjectsCache)
     {
-
-        // todo: Change color of material here
-
         m_commonSettings->renderBehavioursCache.clear();
         gameObject->getRenderingBehaviours(m_commonSettings->renderBehavioursCache);
+
+        if (m_commonSettings->renderBehavioursCache.empty())
+        {
+            continue;
+        }
+
+        m_colorCache[colorCode] = gameObject;
+
+        auto color = HG::Utils::Color::fromRGB(
+                static_cast<uint8_t>((colorCode & 0xFF    )      ),
+                static_cast<uint8_t>((colorCode & 0xFF00  ) >>  8),
+                static_cast<uint8_t>((colorCode & 0xFF0000) >> 16)
+        );
+
+        m_materialOverride->setColor(color);
+
+        Info() << "For GO " << gameObject->name() << " color " << color << " with code " << colorCode;
 
         for (auto&& renderBehaviour : m_commonSettings->renderBehavioursCache)
         {
@@ -111,5 +144,21 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject()
     // Reverting previous override option
     application()->renderer()->pipeline()->setRenderOverride(currentOverride);
 
-    return nullptr;
+    // Getting data from rendertarget
+    auto color = application()->renderer()->getTexturePixel(m_mainRenderTarget->colorTexture(0), {pos.x, pos.y});
+
+    // Color to color code
+    colorCode = color.red() | color.green() << 8 | color.blue() << 16;
+
+    Info() << "Received color " << color << ", Received color code " << colorCode;
+
+    // Searching in cache
+    auto gameObjectIterator = m_colorCache.find(colorCode);
+
+    if (gameObjectIterator == m_colorCache.end())
+    {
+        return nullptr;
+    }
+
+    return gameObjectIterator->second;
 }

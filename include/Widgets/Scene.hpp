@@ -1,5 +1,8 @@
 #pragma once
 
+// C++ STL
+#include <unordered_map>
+
 // Editor
 #include <Widgets/AbstractWidget.hpp>
 
@@ -8,6 +11,12 @@
 
 // glm
 #include <glm/vec2.hpp>
+#include <imgui.h>
+
+namespace HG::Editor::Materials
+{
+    class ColorMaterial;
+}
 
 namespace HG::Rendering::Base
 {
@@ -57,16 +66,17 @@ namespace HG::Editor::Widgets
 
         void updateRenderOverride();
 
-        HG::Core::GameObject* checkSelectedGameObject();
+        HG::Core::GameObject* checkSelectedGameObject(ImVec2 vec2);
 
         glm::ivec2 m_size;
 
         HG::Rendering::Base::RenderTarget* m_mainRenderTarget;
 
         HG::Rendering::Base::RenderOverride* m_selectionOverride;
+        HG::Editor::Materials::ColorMaterial* m_materialOverride;
 
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
-        std::unordered_map<HG::Utils::Color, HG::Core::GameObject*> m_colorCache;
+        std::unordered_map<std::size_t, HG::Core::GameObject*> m_colorCache;
     };
 }

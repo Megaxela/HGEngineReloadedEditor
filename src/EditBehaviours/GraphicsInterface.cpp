@@ -38,7 +38,7 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_commonSettings(),
     m_gameObjectsWidget(new HG::Editor::Widgets::GameObjects(&m_commonSettings)),
     m_inspectorWidget(new HG::Editor::Widgets::Inspector(&m_commonSettings)),
-    m_sceneWidget(new HG::Editor::Widgets::Scene()),
+    m_sceneWidget(new HG::Editor::Widgets::Scene(&m_commonSettings)),
     m_loggingWidget(new HG::Editor::Widgets::Logging()),
     m_assetsWidget(new HG::Editor::Widgets::Assets(&m_commonSettings)),
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
