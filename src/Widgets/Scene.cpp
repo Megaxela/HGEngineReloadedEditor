@@ -107,8 +107,6 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(ImVec2
 
     std::size_t diff = (256 * 256 * 256) / (m_commonSettings->gameobjectsCache.size() + 1);
 
-    Info() << "Diff: " << diff << " (" << (256 * 256 * 256) << " / " << (m_commonSettings->gameobjectsCache.size() + 1);
-
     std::size_t colorCode = diff;
 
     m_colorCache.clear();
