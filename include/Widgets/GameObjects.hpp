@@ -40,6 +40,10 @@ namespace HG::Editor::Widgets
 
     private:
 
+        void drawGameObjects();
+
+        void drawMenu();
+
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         HG::Core::GameObject* m_previousSelected;

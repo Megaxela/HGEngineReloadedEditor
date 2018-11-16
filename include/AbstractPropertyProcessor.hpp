@@ -18,6 +18,6 @@ namespace HG::Editor
          * @param id Unique property id.
          * @param property Constant reference to property.
          */
-        virtual void perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property) = 0;
+        virtual void perform(const std::string &name, const HG::Core::Behaviour::Property &property) = 0;
     };
 }

@@ -23,6 +23,7 @@
 // ALogger
 #include <CurrentLogger.hpp>
 #include <Widgets/CommonSettings.hpp>
+#include <Tools/ImGuiIdentificators.hpp>
 
 HG::Editor::Widgets::Scene::Scene(HG::Editor::Widgets::Settings::Common* common) :
     m_size({0, 0}),
@@ -46,7 +47,9 @@ void HG::Editor::Widgets::Scene::setRenderTarget(HG::Rendering::Base::RenderTarg
 
 void HG::Editor::Widgets::Scene::onDraw()
 {
-    if (ImGui::Begin("Scene", &m_opened))
+    ImGui::IDGuard idGuard(HG::ID::Scene::Window);
+
+    if (ImGui::Begin(HG::Names::Scene::Window, &m_opened))
     {
         m_size = {
             ImGui::GetContentRegionAvail().x,

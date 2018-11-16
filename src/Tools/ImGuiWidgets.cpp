@@ -1,6 +1,10 @@
 // Editor
 #include <Tools/ImGuiWidgets.hpp>
 
+// ALogger
+#include <CurrentLogger.hpp>
+
+// ImGui
 #include <imgui_internal.h>
 
 ImVec2 operator+(const ImVec2& l, const ImVec2& r)
@@ -125,4 +129,41 @@ bool ImGui::IconSelectable(const char *label,
     if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(window->DC.ItemFlags & ImGuiItemFlags_SelectableDontClosePopup))
         ImGui::CloseCurrentPopup();
     return pressed;
+}
+
+ImGui::IDGuard::IDGuard(int id)
+{
+    ImGui::PushID(id);
+}
+
+ImGui::IDGuard::IDGuard(void *id)
+{
+    ImGui::PushID(id);
+}
+
+ImGui::IDGuard::IDGuard(const char *id)
+{
+    ImGui::PushID(id);
+}
+
+ImGui::IDGuard::IDGuard(const char *begin_id, const char *end_id)
+{
+    ImGui::PushID(begin_id, end_id);
+}
+
+ImGui::IDGuard::~IDGuard()
+{
+    ImGui::PopID();
+}
+
+ImGui::DisabledGuard::DisabledGuard()
+{
+    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+}
+
+ImGui::DisabledGuard::~DisabledGuard()
+{
+    ImGui::PopItemFlag();
+    ImGui::PopStyleVar();
 }

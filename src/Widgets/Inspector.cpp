@@ -4,6 +4,7 @@
 #include <Editor/Application.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AbstractPropertyProcessor.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 // HG::Core
 #include <HG/Core/GameObject.hpp>
@@ -23,7 +24,9 @@ HG::Editor::Widgets::Inspector::Inspector(HG::Editor::Widgets::Settings::Common 
 
 void HG::Editor::Widgets::Inspector::onDraw()
 {
-    if (ImGui::Begin("Inspector", &m_opened))
+    ImGui::IDGuard idGuard(HG::ID::Inspector::Window);
+
+    if (ImGui::Begin(HG::Names::Inspector::Window, &m_opened))
     {
         switch (m_commonSettings->lastSelectedType)
         {
@@ -52,7 +55,7 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
     // Displaying gameobject header
     bool enabledCache = gameObject->isEnabled();
-    if (ImGui::Checkbox("##InspectorEnabled", &enabledCache))
+    if (ImGui::IDGuard(HG::ID::Inspector::EnabledCheckbox), ImGui::Checkbox(nullptr, &enabledCache))
     {
         gameObject->setEnabled(enabledCache);
     }
@@ -82,9 +85,8 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
     for (const auto& behaviour : m_commonSettings->behavioursCache)
     {
-        auto headerLabel = SystemTools::getTypeName(*behaviour) + "##" + HG::Identificators::Items::GameObjectHeader;
-
-        if (ImGui::CollapsingHeader(headerLabel.c_str()))
+        if (ImGui::IDGuard(HG::ID::GameObject::Header),
+            ImGui::CollapsingHeader(SystemTools::getTypeName(*behaviour).c_str()))
         {
             m_commonSettings->propertiesCache.clear();
 
@@ -104,7 +106,9 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
                     continue;
                 }
 
-                processor->perform(id++, property.name(), property);
+                ImGui::IDGuard idGuard(static_cast<int>(id++));
+
+                processor->perform(property.name(), property);
             }
         }
     }

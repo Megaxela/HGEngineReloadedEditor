@@ -4,14 +4,11 @@
 // ImGui
 #include <imgui.h>
 
-void HG::Editor::PropertyProcessors::FloatProcessor::perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property)
+void HG::Editor::PropertyProcessors::FloatProcessor::perform(const std::string &name, const HG::Core::Behaviour::Property &property)
 {
-    // Creating unique key
-    auto key = property.name() + "##" + std::to_string(id);
-
     auto value = property.getGetter<float>()();
 
-    if (ImGui::DragFloat(key.c_str(), &value))
+    if (ImGui::DragFloat(name.c_str(), &value))
     {
         property.getSetter<float>()(value);
     }

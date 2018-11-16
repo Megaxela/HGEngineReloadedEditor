@@ -2,6 +2,7 @@
 #include <Widgets/GameObjects.hpp>
 #include <Widgets/CommonSettings.hpp>
 #include <Tools/ImGuiIdentificators.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 // HG::Core
 #include <HG/Core/GameObject.hpp>
@@ -20,19 +21,123 @@ HG::Editor::Widgets::GameObjects::GameObjects(HG::Editor::Widgets::Settings::Com
 
 void HG::Editor::Widgets::GameObjects::onDraw()
 {
-    if (ImGui::Begin("GameObjects", &m_opened))
-    {
-        for (auto&& gameObject : m_commonSettings->gameobjectsCache)
-        {
-            if (gameObject->transform()->parent() != nullptr)
-            {
-                continue;
-            }
+    ImGui::IDGuard idGuard(HG::ID::GameObject::Window);
 
-            displayGameObject(gameObject);
-        }
+    if (ImGui::Begin(HG::Names::GameObject::Window, &m_opened))
+    {
+        drawGameObjects();
     }
+
+    drawMenu();
+
     ImGui::End();
+}
+
+void HG::Editor::Widgets::GameObjects::drawGameObjects()
+{
+    for (auto&& gameObject : m_commonSettings->gameobjectsCache)
+    {
+        if (gameObject->transform()->parent() != nullptr)
+        {
+            continue;
+        }
+
+        displayGameObject(gameObject);
+    }
+}
+
+void HG::Editor::Widgets::GameObjects::drawMenu()
+{
+    if (ImGui::BeginPopupContextWindow())
+    {
+        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Copy),
+            ImGui::Selectable(HG::Names::GameObject::Menu::Copy))
+        {
+
+        }
+
+        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Paste),
+            ImGui::Selectable(HG::Names::GameObject::Menu::Paste))
+        {
+
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::IDGuard(HG::ID::GameObject::Menu::CreateEmpty),
+            ImGui::Selectable(HG::Names::GameObject::Menu::CreateEmpty))
+        {
+
+        }
+
+        {
+            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::Menu3DObject);
+            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::Menu3DObject))
+            {
+                if (ImGui::IDGuard(HG::ID::GameObject::Menu::Cube),
+                        ImGui::Selectable(HG::Names::GameObject::Menu::Cube))
+                {
+
+                }
+
+                ImGui::EndMenu();
+            }
+        }
+
+        {
+            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::Menu2DObject);
+            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::Menu2DObject))
+            {
+                if (ImGui::IDGuard(HG::ID::GameObject::Menu::Sprite),
+                        ImGui::Selectable(HG::Names::GameObject::Menu::Sprite))
+                {
+
+                }
+
+                ImGui::EndMenu();
+            }
+        }
+
+        {
+            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuLight);
+            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuLight))
+            {
+                if (ImGui::IDGuard(HG::ID::GameObject::Menu::PointLight),
+                        ImGui::Selectable(HG::Names::GameObject::Menu::PointLight))
+                {
+
+                }
+
+                ImGui::EndMenu();
+            }
+        }
+
+        {
+            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuAudio);
+            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuAudio))
+            {
+
+                ImGui::EndMenu();
+            }
+        }
+
+        {
+            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuUI);
+            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuUI))
+            {
+
+                ImGui::EndMenu();
+            }
+        }
+
+        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Camera),
+            ImGui::Selectable(HG::Names::GameObject::Menu::Camera))
+        {
+
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 void HG::Editor::Widgets::GameObjects::displayGameObject(HG::Core::GameObject *gameObject)
@@ -44,13 +149,15 @@ void HG::Editor::Widgets::GameObjects::displayGameObject(HG::Core::GameObject *g
             ImGuiTreeNodeFlags_OpenOnArrow |
             (gameObject == m_commonSettings->selectedGameObject ? ImGuiTreeNodeFlags_Selected : 0U);
 
-    bool opened = ImGui::TreeNodeEx(gameObject, nodeFlags, "%s", gameObject->name().c_str());
+    bool opened =
+            (ImGui::IDGuard(HG::ID::GameObject::TreeItem),
+             ImGui::TreeNodeEx(gameObject, nodeFlags, "%s", gameObject->name().c_str()));
 
     if (ImGui::BeginDragDropSource())
     {
         m_commonSettings->selectedGameObject = m_previousSelected;
 
-        ImGui::SetDragDropPayload(HG::Identificators::DragDrop::GameObject, &gameObject, sizeof(void*));
+        ImGui::SetDragDropPayload(HG::ID::DragDrop::GameObject, &gameObject, sizeof(void*));
 
         ImGui::Text("GameObject: %s", gameObject->name().c_str());
 

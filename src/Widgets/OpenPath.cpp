@@ -2,6 +2,7 @@
 #include <Widgets/OpenPath.hpp>
 #include <Editor/Application.hpp>
 #include <Tools/ImGuiWidgets.hpp>
+#include <Tools/ImGuiIdentificators.hpp>
 
 // C++ STL
 #include <algorithm>
@@ -76,6 +77,8 @@ HG::Editor::Widgets::OpenPath::Settings &HG::Editor::Widgets::OpenPath::settings
 
 void HG::Editor::Widgets::OpenPath::onDraw()
 {
+    ImGui::IDGuard idGuard(HG::ID::OpenPath::Window);
+
     // todo: When ImGui will be ready - fix this strange behaviour
     if (m_currentOpenState != isOpened())
     {
@@ -83,12 +86,12 @@ void HG::Editor::Widgets::OpenPath::onDraw()
 
         if (isOpened())
         {
-            ImGui::OpenPopup("Explorer");
+            ImGui::OpenPopup(HG::Names::OpenPath::Window);
         }
     }
 
     ImGui::SetNextWindowSize({600, 500}, ImGuiCond_FirstUseEver);
-    if (ImGui::BeginPopupModal("Explorer"))
+    if (ImGui::BeginPopupModal(HG::Names::OpenPath::Window))
     {
         if (!isOpened())
         {
@@ -154,9 +157,9 @@ void HG::Editor::Widgets::OpenPath::drawButtonsPath()
         }
 
         pathCache /= segment;
-        auto segmentName = segment.string() + "##OpenPath_Path";
 
-        if (ImGui::Button(segmentName.c_str()))
+        if (ImGui::IDGuard(HG::ID::OpenPath::Button::Path),
+            ImGui::Button(segment.c_str()))
         {
             m_currentPath = pathCache;
             changed = true;
@@ -176,12 +179,17 @@ void HG::Editor::Widgets::OpenPath::drawItemsChild()
 
     size.y -= ImGui::GetItemsLineHeightWithSpacing() * 2;
 
-    ImGui::BeginChild("##ItemsChild_OpenPath_Items", size);
+    ImGui::IDGuard childGuard(HG::ID::OpenPath::Child);
+
+    ImGui::BeginChild(HG::ID::OpenPath::Child, size);
 
     bool changed = false;
 
-    if (std::distance(m_currentPath.begin(), m_currentPath.end()) > 1 &&
-        ImGui::Selectable("..##GotoBack_OpenPath_Items", m_currentPath.parent_path() == m_selected, ImGuiSelectableFlags_AllowDoubleClick))
+    if (ImGui::IDGuard(HG::ID::OpenPath::Item::Back),
+        (std::distance(m_currentPath.begin(), m_currentPath.end()) > 1 &&
+         ImGui::Selectable(HG::Names::OpenPath::Item::Back,
+                           m_currentPath.parent_path() == m_selected,
+                           ImGuiSelectableFlags_AllowDoubleClick)))
     {
         if (ImGui::IsMouseDoubleClicked(0))
         {
@@ -252,8 +260,9 @@ void HG::Editor::Widgets::OpenPath::drawFileInput()
     ImGui::SameLine();
 
     ImGui::PushItemWidth(-(comboWidth + ImGui::GetStyle().ItemSpacing.x));
-    if (ImGui::InputText(
-            "##FilenameInput_OpenPath_Input",
+    if (ImGui::IDGuard(HG::ID::OpenPath::Input::Path),
+        ImGui::InputText(
+            HG::Names::OpenPath::Input::Path,
             m_inputBuffer.data(),
             m_inputBuffer.capacity(),
             ImGuiInputTextFlags_EnterReturnsTrue
@@ -307,8 +316,9 @@ void HG::Editor::Widgets::OpenPath::drawFileInput()
         !m_settings.fileTypes.empty())
     {
         ImGui::PushItemWidth(comboWidth);
+        ImGui::IDGuard idGuard(HG::ID::OpenPath::Combo::Extension);
         ImGui::Combo(
-            "##ExtensionSelection_OpenPath_Input",
+            HG::Names::OpenPath::Combo::Extension,
             &m_settings.currentFileType,
             [](void* data, int index, const char** value) -> bool
             {
@@ -332,7 +342,8 @@ void HG::Editor::Widgets::OpenPath::drawFileInput()
 
 void HG::Editor::Widgets::OpenPath::drawButtons()
 {
-    if (ImGui::Button("Cancel##OpenPath_Buttons"))
+    if (ImGui::IDGuard(HG::ID::OpenPath::Button::Cancel),
+        ImGui::Button(HG::Names::OpenPath::Button::Cancel))
     {
         clear();
         setOpened(false);
@@ -340,7 +351,8 @@ void HG::Editor::Widgets::OpenPath::drawButtons()
 
     ImGui::SameLine();
 
-    if (ImGui::Button("Ok##OpenPath_Buttons"))
+    if (ImGui::IDGuard(HG::ID::OpenPath::Button::Ok),
+        ImGui::Button(HG::Names::OpenPath::Button::Ok))
     {
         if (m_callback)
         {

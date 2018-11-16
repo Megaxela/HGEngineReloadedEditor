@@ -25,10 +25,8 @@ namespace HG::Editor::PropertyProcessors
          * @param id
          * @param property
          */
-        void perform(std::size_t id, const std::string& name, const HG::Core::Behaviour::Property& property) override
+        void perform(const std::string &name, const HG::Core::Behaviour::Property &property) override
         {
-            auto key = name + "##" + std::to_string(id);
-
             auto value = property.getGetter<T>()();
 
             bool used = false;
@@ -40,7 +38,7 @@ namespace HG::Editor::PropertyProcessors
 
                 int proxy = value;
 
-                used = ImGui::DragInt(key.c_str(), &proxy, 1.0f, min, max);
+                used = ImGui::DragInt(name.c_str(), &proxy, 1.0f, min, max);
 
                 value = static_cast<T>(proxy);
             }
@@ -65,7 +63,7 @@ namespace HG::Editor::PropertyProcessors
                     dataType = ImGuiDataType_U64;
                 }
 
-                used = ImGui::DragScalar(key.c_str(), dataType, &value, 1.0f);
+                used = ImGui::DragScalar(name.c_str(), dataType, &value, 1.0f);
             }
 
             if (used)

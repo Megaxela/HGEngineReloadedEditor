@@ -7,14 +7,12 @@
 // ImGui
 #include <imgui.h>
 
-void HG::Editor::PropertyProcessors::ColorProcessor::perform(std::size_t id, const std::string &name, const HG::Core::Behaviour::Property &property)
+void HG::Editor::PropertyProcessors::ColorProcessor::perform(const std::string &name, const HG::Core::Behaviour::Property &property)
 {
     // Creating unique key
-    auto key = name + "##" + std::to_string(id);
-
     auto value = property.getGetter<HG::Utils::Color>()();
 
-    if (ImGui::ColorEdit4(key.c_str(), (float*) &value, ImGuiColorEditFlags_RGB))
+    if (ImGui::ColorEdit4(name.c_str(), (float*) &value, ImGuiColorEditFlags_RGB))
     {
         property.getSetter<HG::Utils::Color>()(value);
     }

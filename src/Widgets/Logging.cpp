@@ -1,5 +1,7 @@
 // Editor
 #include <Widgets/Logging.hpp>
+#include <Tools/ImGuiWidgets.hpp>
+#include <Tools/ImGuiIdentificators.hpp>
 
 // ALogger
 #include <LogsListener.hpp>
@@ -26,7 +28,9 @@ Logger::LogsListenerPtr HG::Editor::Widgets::Logging::logsListener() const
 
 void HG::Editor::Widgets::Logging::onDraw()
 {
-    if (ImGui::Begin("Logs", &m_opened))
+    ImGui::IDGuard idGuard(HG::ID::Logging::Window);
+
+    if (ImGui::Begin(HG::Names::Logging::Window, &m_opened))
     {
         for (auto&& message : m_messagesBuffer)
         {

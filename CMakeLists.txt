@@ -35,6 +35,7 @@ add_executable(HGEngineReloadedImGui ${SOURCE_FILES})
 
 target_include_directories(HGEngineReloadedImGui PUBLIC
     include
+    ${CLANG_INCLUDE_DIRS}
 )
 
 target_link_libraries(HGEngineReloadedImGui
