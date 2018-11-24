@@ -16,7 +16,7 @@ HG::Editor::Widgets::GameObjects::GameObjects(HG::Editor::Widgets::Settings::Com
     m_commonSettings(settings),
     m_previousSelected(nullptr)
 {
-
+    setupContextMenu();
 }
 
 void HG::Editor::Widgets::GameObjects::onDraw()
@@ -28,7 +28,7 @@ void HG::Editor::Widgets::GameObjects::onDraw()
         drawGameObjects();
     }
 
-    drawMenu();
+    ImGui::ContextMenuRenderer().render(m_contextMenu);
 
     ImGui::End();
 }
@@ -43,100 +43,6 @@ void HG::Editor::Widgets::GameObjects::drawGameObjects()
         }
 
         displayGameObject(gameObject);
-    }
-}
-
-void HG::Editor::Widgets::GameObjects::drawMenu()
-{
-    if (ImGui::BeginPopupContextWindow())
-    {
-        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Copy),
-            ImGui::Selectable(HG::Names::GameObject::Menu::Copy))
-        {
-
-        }
-
-        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Paste),
-            ImGui::Selectable(HG::Names::GameObject::Menu::Paste))
-        {
-
-        }
-
-        ImGui::Separator();
-
-        if (ImGui::IDGuard(HG::ID::GameObject::Menu::CreateEmpty),
-            ImGui::Selectable(HG::Names::GameObject::Menu::CreateEmpty))
-        {
-
-        }
-
-        {
-            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::Menu3DObject);
-            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::Menu3DObject))
-            {
-                if (ImGui::IDGuard(HG::ID::GameObject::Menu::Cube),
-                        ImGui::Selectable(HG::Names::GameObject::Menu::Cube))
-                {
-
-                }
-
-                ImGui::EndMenu();
-            }
-        }
-
-        {
-            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::Menu2DObject);
-            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::Menu2DObject))
-            {
-                if (ImGui::IDGuard(HG::ID::GameObject::Menu::Sprite),
-                        ImGui::Selectable(HG::Names::GameObject::Menu::Sprite))
-                {
-
-                }
-
-                ImGui::EndMenu();
-            }
-        }
-
-        {
-            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuLight);
-            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuLight))
-            {
-                if (ImGui::IDGuard(HG::ID::GameObject::Menu::PointLight),
-                        ImGui::Selectable(HG::Names::GameObject::Menu::PointLight))
-                {
-
-                }
-
-                ImGui::EndMenu();
-            }
-        }
-
-        {
-            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuAudio);
-            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuAudio))
-            {
-
-                ImGui::EndMenu();
-            }
-        }
-
-        {
-            ImGui::IDGuard idGuard(HG::ID::GameObject::Menu::MenuUI);
-            if (ImGui::BeginMenu(HG::Names::GameObject::Menu::MenuUI))
-            {
-
-                ImGui::EndMenu();
-            }
-        }
-
-        if (ImGui::IDGuard(HG::ID::GameObject::Menu::Camera),
-            ImGui::Selectable(HG::Names::GameObject::Menu::Camera))
-        {
-
-        }
-
-        ImGui::EndPopup();
     }
 }
 
@@ -183,4 +89,39 @@ void HG::Editor::Widgets::GameObjects::displayGameObject(HG::Core::GameObject *g
 
         ImGui::TreePop();
     }
+}
+
+void HG::Editor::Widgets::GameObjects::setupContextMenu()
+{
+    m_contextMenu.addItem(HG::Names::GameObject::Menu::Copy,  HG::ID::GameObject::Menu::Copy);
+    m_contextMenu.addItem(HG::Names::GameObject::Menu::Paste, HG::ID::GameObject::Menu::Paste);
+
+    m_contextMenu.addSeparator();
+
+    m_contextMenu.addItem(HG::Names::GameObject::Menu::CreateEmpty, HG::ID::GameObject::Menu::CreateEmpty);
+
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::GameObject::Menu::Menu3DObject, HG::ID::GameObject::Menu::Menu3DObject);
+        menu->addItem(HG::Names::GameObject::Menu::Cube, HG::ID::GameObject::Menu::Cube);
+    }
+
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::GameObject::Menu::Menu2DObject, HG::ID::GameObject::Menu::Menu2DObject);
+        menu->addItem(HG::Names::GameObject::Menu::Sprite, HG::ID::GameObject::Menu::Sprite);
+    }
+
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::GameObject::Menu::MenuLight, HG::ID::GameObject::Menu::MenuLight);
+        menu->addItem(HG::Names::GameObject::Menu::PointLight, HG::ID::GameObject::Menu::PointLight);
+    }
+
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::GameObject::Menu::MenuAudio, HG::ID::GameObject::Menu::MenuAudio);
+    }
+
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::GameObject::Menu::MenuUI, HG::ID::GameObject::Menu::MenuUI);
+    }
+
+    m_contextMenu.addItem(HG::Names::GameObject::Menu::Camera, HG::ID::GameObject::Menu::Camera);
 }

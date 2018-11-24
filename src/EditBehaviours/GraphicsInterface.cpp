@@ -151,7 +151,15 @@ void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
     m_openPathWidget->setOkCallback(
         [project](const std::filesystem::path& data)
         {
-            project->load(data);
+            try
+            {
+                project->load(data);
+            }
+            catch (const std::invalid_argument& argument)
+            {
+                // todo: Open error modal here
+                ErrorF() << "Can't open project: " << argument.what();
+            }
         }
     );
 

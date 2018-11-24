@@ -2,6 +2,7 @@
 
 // Editor
 #include <Widgets/AbstractWidget.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 namespace HG::Core
 {
@@ -40,12 +41,14 @@ namespace HG::Editor::Widgets
 
     private:
 
-        void drawGameObjects();
+        void setupContextMenu();
 
-        void drawMenu();
+        void drawGameObjects();
 
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         HG::Core::GameObject* m_previousSelected;
+
+        ImGui::Menu m_contextMenu;
     };
 }

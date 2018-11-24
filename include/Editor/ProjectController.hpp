@@ -1,6 +1,10 @@
 #pragma once
 
+// C++ STL
 #include <filesystem>
+
+// Json
+#include <nlohmann/json.hpp>
 
 namespace HG::AssetSystem
 {
@@ -17,6 +21,12 @@ namespace HG::Editor
     class ProjectController
     {
     public:
+
+        struct Metadata
+        {
+            std::string assetsDirectory;
+            std::string activeScene;
+        };
 
         /**
          * @brief Constructor.
@@ -50,9 +60,13 @@ namespace HG::Editor
 
     private:
 
+        void parseMetadata(nlohmann::json json);
+
         HG::Editor::Application* m_parentApplication;
 
         HG::AssetSystem::AssetsManager* m_assetsManager;
+
+        Metadata m_metadata;
     };
 }
 

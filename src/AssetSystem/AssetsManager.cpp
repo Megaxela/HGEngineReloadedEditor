@@ -4,6 +4,9 @@
 #include <AssetSystem/Assets/RootAsset.hpp>
 #include <Fabrics/AssetsFabric.hpp>
 
+// HG::Core
+#include <HG/Core/ThreadPool.hpp>
+
 // ALogger
 #include <CurrentLogger.hpp>
 #include <AssetSystem/Assets/DirectoryAsset.hpp>
@@ -59,6 +62,7 @@ void HG::AssetSystem::AssetsManager::updateAssets()
     if (m_rootAsset == nullptr)
     {
         reloadAssets();
+        postAssetsForLoading();
         return;
     }
 }
@@ -90,4 +94,31 @@ void HG::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path
 HG::Editor::AssetSystem::Assets::AssetPtr HG::AssetSystem::AssetsManager::rootAsset() const
 {
     return m_rootAsset;
+}
+
+void HG::AssetSystem::AssetsManager::postAssetsForLoading()
+{
+    postAssetForLoading(m_rootAsset);
+}
+
+void HG::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset)
+{
+    if (asset == nullptr ||
+        m_parentApplication == nullptr)
+    {
+        throw std::runtime_error("Asset or parent application is null");
+    }
+
+    m_parentApplication->threadPool()->push(
+        [asset]()
+        {
+            asset->load();
+        },
+        HG::Core::ThreadPool::Type::UserThread
+    );
+
+    for (auto& child : asset->children())
+    {
+        postAssetForLoading(child);
+    }
 }

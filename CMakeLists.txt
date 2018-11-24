@@ -48,6 +48,7 @@ target_link_libraries(HGEngineReloadedImGui
 
     # Libraries
     FilesystemWatcher
+    rectpack2D
 
     # LLVM
     LLVM

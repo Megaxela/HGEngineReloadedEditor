@@ -167,3 +167,151 @@ ImGui::DisabledGuard::~DisabledGuard()
     ImGui::PopItemFlag();
     ImGui::PopStyleVar();
 }
+
+
+
+ImGui::Item::Item(const char *name, const char *id) :
+    m_callback(),
+    m_name(name),
+    m_id(id)
+{
+
+}
+
+ImGui::Item::~Item()
+{
+
+}
+
+void ImGui::Item::setCallback(ImGui::Item::Callback cb)
+{
+    m_callback = std::move(cb);
+}
+
+ImGui::Item::Callback ImGui::Item::callback() const
+{
+    return m_callback;
+}
+
+const char *ImGui::Item::name() const
+{
+    return m_name;
+}
+
+const char *ImGui::Item::id() const
+{
+    return m_id;
+}
+
+ImGui::Menu::Menu() :
+    Item(nullptr, nullptr),
+    m_entries()
+{
+
+}
+
+ImGui::Menu::Menu(const char *name, const char *id) :
+    Item(name, id),
+    m_entries()
+{
+
+}
+
+ImGui::Menu::~Menu()
+{
+    for (auto& entry : m_entries)
+    {
+        delete entry.item;
+    }
+}
+
+ImGui::Item *ImGui::Menu::addItem(const char *name, const char *id)
+{
+    auto item = new Item(name, id);
+
+    m_entries.emplace_back(Entry::Type::Item, item);
+
+    return item;
+}
+
+ImGui::Menu *ImGui::Menu::addMenu(const char *name, const char *id)
+{
+    auto menu = new Menu(name, id);
+
+    m_entries.emplace_back(Entry::Type::Menu, menu);
+
+    return menu;
+}
+
+void ImGui::Menu::addSeparator()
+{
+    m_entries.emplace_back(Entry::Type::Separator, nullptr);
+}
+
+const std::vector<ImGui::Menu::Entry> ImGui::Menu::entries() const
+{
+    return m_entries;
+}
+
+ImGui::ContextMenuRenderer::ContextMenuRenderer()
+{
+
+}
+
+void ImGui::ContextMenuRenderer::render(const ImGui::Menu &menu)
+{
+    if (ImGui::BeginPopupContextWindow(menu.id()))
+    {
+        renderMenu(menu);
+
+        ImGui::EndPopup();
+    }
+}
+
+void ImGui::ContextMenuRenderer::renderMenu(const ImGui::Menu &menu)
+{
+    for (const auto& entry : menu.entries())
+    {
+        switch (entry.type)
+        {
+        case Menu::Entry::Type::Item:
+        {
+            renderItem(*entry.item);
+            break;
+        }
+        case Menu::Entry::Type::Menu:
+        {
+            ImGui::IDGuard idGuard(entry.item->id());
+            if (ImGui::BeginMenu(entry.item->name()))
+            {
+                renderMenu(reinterpret_cast<const Menu &>(*entry.item));
+
+                ImGui::EndMenu();
+            }
+            break;
+        }
+        case Menu::Entry::Type::Separator:
+        {
+            renderSeparator();
+            break;
+        }
+        }
+    }
+}
+
+void ImGui::ContextMenuRenderer::renderItem(const ImGui::Item &item)
+{
+    if (ImGui::IDGuard(item.id()),
+        ImGui::Selectable(item.name()))
+    {
+        if (!item.callback())
+            return;
+
+        item.callback()();
+    }
+}
+
+void ImGui::ContextMenuRenderer::renderSeparator()
+{
+    ImGui::Separator();
+}

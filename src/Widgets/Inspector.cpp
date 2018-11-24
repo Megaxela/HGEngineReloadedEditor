@@ -55,7 +55,8 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
     // Displaying gameobject header
     bool enabledCache = gameObject->isEnabled();
-    if (ImGui::IDGuard(HG::ID::Inspector::EnabledCheckbox), ImGui::Checkbox(nullptr, &enabledCache))
+    if (ImGui::IDGuard(HG::ID::Inspector::EnabledCheckbox),
+        ImGui::Checkbox(HG::Names::Inspector::EnabledCheckbox, &enabledCache))
     {
         gameObject->setEnabled(enabledCache);
     }
@@ -106,7 +107,7 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
                     continue;
                 }
 
-                ImGui::IDGuard idGuard(static_cast<int>(id++));
+                ImGui::IDGuard idGuard((void*) &property);
 
                 processor->perform(property.name(), property);
             }

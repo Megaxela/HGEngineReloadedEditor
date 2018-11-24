@@ -23,7 +23,7 @@ namespace HG
 {
     // Names/Menu
     STR_NAME_ID(Inspector,        Window,          "Inspector");
-    STR_NAME_ID(Inspector,        EnabledCheckbox, "Enabled");
+    STR_NAME_ID(Inspector,        EnabledCheckbox, "");
 
     STR_NAME_ID(GameObject,       Window,       "GameObject");
     STR_ID     (GameObject,       ContextMenu,  "GameObject");

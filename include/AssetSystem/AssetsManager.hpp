@@ -76,6 +76,10 @@ namespace HG::AssetSystem
 
     private:
 
+        void postAssetsForLoading();
+
+        void postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset);
+
         void reloadAssets();
 
         void reloadDirectory(const std::filesystem::path& path, HG::Editor::AssetSystem::Assets::AssetPtr target);
