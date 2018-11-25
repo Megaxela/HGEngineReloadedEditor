@@ -6,6 +6,7 @@
 
 // GLM
 #include <glm/vec2.hpp>
+#include <HG/Rendering/Base/BlitData.hpp>
 
 namespace HG::Rendering::Base
 {
@@ -26,7 +27,9 @@ namespace HG::Editor
     {
     public:
 
-        using Handler = std::size_t;
+        using Handle = std::size_t;
+
+        static constexpr Handle InvalidHandle = static_cast<const Handle>(-1);
 
         struct TLBR
         {
@@ -44,7 +47,7 @@ namespace HG::Editor
          * @brief Method for getting parent application.
          * @return Pointer to parent application.
          */
-        HG::Editor::Application* parentApplication() const;
+        HG::Editor::Application* application() const;
 
         /**
          * @brief Method for getting pointer to texture
@@ -62,7 +65,7 @@ namespace HG::Editor
          * will be resized). If size is {0, 0} size
          * will be taken from texture.
          */
-        Handler addThumbnail(HG::Rendering::Base::Texture* texture, glm::ivec2 size={0, 0});
+        Handle addThumbnail(HG::Rendering::Base::Texture* texture, glm::ivec2 size={0, 0});
 
         /**
          * @brief Method for updating thumbnail on existing handler.
@@ -74,7 +77,7 @@ namespace HG::Editor
          * will be resized). If size is {0, 0} size
          * will be taken from texture.
          */
-        void updateThumbnail(Handler handler, HG::Rendering::Base::Texture* texture, glm::ivec2 size={0, 0});
+        void updateThumbnail(Handle handler, HG::Rendering::Base::Texture* texture, glm::ivec2 size={0, 0});
 
         /**
          * @brief Method for removing thumbnail.
@@ -82,14 +85,14 @@ namespace HG::Editor
          * regardless whether `invalidateCache` was called.
          * @param handler Handler.
          */
-        void removeThumbnail(Handler handler);
+        void removeThumbnail(Handle handler);
 
         /**
          * @brief Method for checking is thumbnail loaded
          * to cache.
          * @param handler Thumbnail handler.
          */
-        bool isAvailable(Handler handler) const;
+        bool isAvailable(Handle handler) const;
 
         /**
          * @brief Method for getting thumbnail TLBR
@@ -98,7 +101,7 @@ namespace HG::Editor
          * @param handler
          * @return
          */
-        TLBR thumbnailTLBR(Handler handler) const;
+        TLBR thumbnailTLBR(Handle handler) const;
 
         /**
          * @brief Method for notifying that cache has to be
@@ -106,14 +109,32 @@ namespace HG::Editor
          */
         void invalidateCache();
 
+        /**
+         * @brief Method, that performs convertation
+         * from pixel values in TLBR to UV values.
+         * If cache does not have set up internal texture -
+         * glm::vec(0, 0) will be returned.
+         * @param value TL/BR value.
+         * @return Converted to UV.
+         */
+        glm::vec2 pixelsToUV(glm::ivec2 value);
+
     private:
 
+        using HandlerTLBRContainer = std::unordered_map<HG::Editor::ThumbnailsCache::Handle, HG::Editor::ThumbnailsCache::TLBR>;
+
         /**
-         * @brief Method, that performs loading current thumbnails
-         * to GPU.
+         * @brief Method, that performs preparing current thumbnails
+         * for loading to GPU.
          */
-        void loadCurrentThumbnails(HG::Rendering::Base::RenderTarget* texture,
-                                   const std::unordered_map<Handler, TLBR>& newCurrent);
+        void prepareCurrentThumbnails(HG::Rendering::Base::BlitData &blitData,
+                                      const HG::Editor::ThumbnailsCache::HandlerTLBRContainer &newCurrent);
+        /**
+         * @brief Method, that performs preparing new thumbnails
+         * for loading to GPU.
+         */
+        void prepareNewThumbnails(HG::Rendering::Base::BlitData &blitData,
+                                  const HG::Editor::ThumbnailsCache::HandlerTLBRContainer &newCurrent);
 
         struct NewThumbnail
         {
@@ -135,9 +156,9 @@ namespace HG::Editor
         HG::Editor::Application* m_parentApplication;
 
         HG::Rendering::Base::Texture* m_texture;
-        std::unordered_map<Handler, TLBR> m_currentThumbnails;
-        std::unordered_map<Handler, NewThumbnail> m_newOrUpdateThumbnails;
-        Handler m_handlerCounter;
+        HandlerTLBRContainer m_currentThumbnails;
+        std::unordered_map<Handle, NewThumbnail> m_newOrUpdateThumbnails;
+        Handle m_handlerCounter;
     };
 }
 

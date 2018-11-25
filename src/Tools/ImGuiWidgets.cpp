@@ -27,12 +27,18 @@ ImVec2 operator-(const ImVec2& l, const ImVec2& r)
     return result;
 }
 
+ImVec2 ImGui::fromGLM(const glm::vec2 &vec)
+{
+    return {vec.x, vec.y};
+}
 
 bool ImGui::IconSelectable(const char *label,
                            bool selected,
                            int flags,
                            const ImVec2& size_arg,
-                           HG::Rendering::Base::Texture *icon)
+                           HG::Rendering::Base::Texture *icon,
+                           const ImVec2& uv_tl,
+                           const ImVec2& uv_br)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems)
@@ -122,7 +128,7 @@ bool ImGui::IconSelectable(const char *label,
 
     if (icon != nullptr)
     {
-        window->DrawList->AddImage(icon, pos, pos + ImVec2(size.y, size.y));
+        window->DrawList->AddImage(icon, pos, pos + ImVec2(size.y, size.y), uv_tl, uv_br);
     }
 
     // Automatically close popups

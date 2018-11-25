@@ -12,6 +12,7 @@
 #include <Widgets/Logging.hpp>
 
 #include <Widgets/OpenPath.hpp>
+#include <Widgets/InformationModal.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -42,11 +43,22 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_loggingWidget(new HG::Editor::Widgets::Logging()),
     m_assetsWidget(new HG::Editor::Widgets::Assets(&m_commonSettings)),
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
-    m_renderOverride(new HG::Rendering::Base::RenderOverride)
+    m_informationModalWidget(new HG::Editor::Widgets::InformationModal()),
+    m_renderOverride(new HG::Rendering::Base::RenderOverride),
+    m_dockWidgets(),
+    m_commonWidgets()
 {
     setupLogging();
 
     setupRenderOverride();
+
+    m_dockWidgets.push_back(m_gameObjectsWidget);
+    m_dockWidgets.push_back(m_inspectorWidget);
+    m_dockWidgets.push_back(m_sceneWidget);
+    m_dockWidgets.push_back(m_loggingWidget);
+    m_dockWidgets.push_back(m_assetsWidget);
+    m_commonWidgets.push_back(m_openPathWidget);
+    m_commonWidgets.push_back(m_informationModalWidget);
 }
 
 HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
@@ -58,9 +70,15 @@ HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
     delete m_renderOverride->mainRenderTarget;
     delete m_renderOverride;
 
-    delete m_gameObjectsWidget;
-    delete m_inspectorWidget;
-    delete m_sceneWidget;
+    for (auto& widget : m_dockWidgets)
+    {
+        delete widget;
+    }
+
+    for (auto& widget : m_commonWidgets)
+    {
+        delete widget;
+    }
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
@@ -69,7 +87,15 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     scene()->application()->renderer()->pipeline()->setRenderOverride(m_renderOverride);
     scene()->application()->renderer()->pipeline()->clear(HG::Utils::Color::fromRGB(25, 25, 25));
 
-    m_loggingWidget->update();
+    for (auto& widget : m_dockWidgets)
+    {
+        widget->update();
+    }
+
+    for (auto& widget : m_commonWidgets)
+    {
+        widget->update();
+    }
 
     updateGameObjectsCache();
 
@@ -78,28 +104,59 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     // Drawing widgets
     drawToolBar();
 
-    m_gameObjectsWidget->draw();
-    m_inspectorWidget->draw();
-    m_sceneWidget->draw();
-    m_loggingWidget->draw();
-    m_assetsWidget->draw();
+    for (auto& widget : m_dockWidgets)
+    {
+        widget->draw();
+    }
 
     // Required because of ImGui::Begin call in prepareDockSpace
     ImGui::End();
 
-    m_openPathWidget->draw();
+    for (auto& widget : m_commonWidgets)
+    {
+        widget->draw();
+    }
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
-    m_gameObjectsWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
-    m_inspectorWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
-    m_sceneWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
-    m_loggingWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
-    m_assetsWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
+    // Setting application to widgets.
+    for (auto& widget : m_dockWidgets)
+    {
+        widget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
+    }
 
-    m_openPathWidget->setApplication(dynamic_cast<HG::Editor::Application *>(scene()->application()));
-    m_openPathWidget->initialize();
+    for (auto& widget : m_commonWidgets)
+    {
+        widget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
+    }
+
+    // Initializing widgets
+    for (auto& widget : m_dockWidgets)
+    {
+        widget->initialize();
+    }
+
+    for (auto& widget : m_commonWidgets)
+    {
+        widget->initialize();
+    }
+
+    dynamic_cast<Editor::Application*>(scene()->application())
+        ->thumbnailsCache()->invalidateCache();
+
+    // Post initalization
+    for (auto& widget : m_dockWidgets)
+    {
+        widget->postInitialization();
+    }
+
+    for (auto& widget : m_commonWidgets)
+    {
+        widget->postInitialization();
+    }
+
+//    m_informationModalWidget->info("SOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXT");
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()

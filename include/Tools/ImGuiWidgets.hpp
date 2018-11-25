@@ -1,5 +1,8 @@
 #pragma once
 
+// GLm
+#include <glm/vec2.hpp>
+
 // ImGui
 #include <imgui.h>
 
@@ -13,7 +16,20 @@ namespace HG::Rendering::Base
 
 namespace ImGui
 {
-    bool IconSelectable(const char* label, bool selected, int flags, const ImVec2& size_arg={0, 0}, HG::Rendering::Base::Texture* icon=nullptr);
+    bool IconSelectable(const char* label,
+                        bool selected,
+                        int flags,
+                        const ImVec2& size_arg={0, 0},
+                        HG::Rendering::Base::Texture* icon=nullptr,
+                        const ImVec2& uv_tl={0, 0},
+                        const ImVec2& uv_br={0, 0});
+
+    /**
+     * @brief Translates from GLM vec2 to imgui vec2.
+     * @param vec Vector object.
+     * @return ImGui vector object.
+     */
+    ImVec2 fromGLM(const glm::vec2& vec);
 
     /**
      * @brief Class, that performs pushing and popping ImGui

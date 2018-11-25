@@ -20,6 +20,7 @@
 
 namespace HG::Editor::Widgets
 {
+    class AbstractWidget;
     class GameObjects;
     class Inspector;
     class Scene;
@@ -27,6 +28,7 @@ namespace HG::Editor::Widgets
     class Logging;
 
     class OpenPath;
+    class InformationModal;
 }
 
 namespace HG::Core
@@ -112,6 +114,10 @@ namespace HG::Editor::Behaviours
         HG::Editor::Widgets::Assets* m_assetsWidget;
 
         HG::Editor::Widgets::OpenPath* m_openPathWidget;
+        HG::Editor::Widgets::InformationModal* m_informationModalWidget;
+
+        std::vector<HG::Editor::Widgets::AbstractWidget*> m_dockWidgets;
+        std::vector<HG::Editor::Widgets::AbstractWidget*> m_commonWidgets;
 
         HG::Rendering::Base::RenderOverride* m_renderOverride;
     };

@@ -6,6 +6,7 @@
 
 // Editor
 #include <Widgets/AbstractWidget.hpp>
+#include <Tools/ThumbnailsCache.hpp>
 
 namespace HG::Rendering::Base
 {
@@ -88,9 +89,15 @@ namespace HG::Editor::Widgets
 
         /**
          * @brief Method that performs icons
-         * loading.
+         * loading and prepares them for thumbnails caching.
          */
         void onInitialization() override;
+
+        /**
+         * @brief Method that deletes loaded
+         * icons, because they already in cache.
+         */
+        void onPostInitialization() override;
 
     private:
 
@@ -155,7 +162,9 @@ namespace HG::Editor::Widgets
 
         bool m_currentOpenState;
 
-        HG::Rendering::Base::Texture* m_directory;
-        HG::Rendering::Base::Texture* m_file;
+        HG::Editor::ThumbnailsCache::Handle m_directory;
+        HG::Editor::ThumbnailsCache::Handle m_file;
+
+        std::vector<HG::Rendering::Base::Texture*> m_resourcesToFree;
     };
 }

@@ -4,10 +4,12 @@
 #include <Fabrics/AssetsFabric.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AssetSystem/AssetsManager.hpp>
+#include <Tools/ThumbnailsCache.hpp>
 
 HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     HG::Core::Application(std::move(name), argc, argv),
     m_projectController(new HG::Editor::ProjectController(this)),
+    m_thumbnailsCache(new HG::Editor::ThumbnailsCache(this)),
     m_propertyEditorsFabric(new HG::Editor::Fabrics::PropertyEditorsFabric()),
     m_assetsFabric(new HG::Editor::Fabrics::AssetsFabric())
 {
@@ -34,6 +36,11 @@ HG::Editor::Fabrics::PropertyEditorsFabric *HG::Editor::Application::propertyEdi
 HG::Editor::Fabrics::AssetsFabric *HG::Editor::Application::assetsFabric() const
 {
     return m_assetsFabric;
+}
+
+HG::Editor::ThumbnailsCache *HG::Editor::Application::thumbnailsCache() const
+{
+    return m_thumbnailsCache;
 }
 
 bool HG::Editor::Application::performCycle()

@@ -46,23 +46,44 @@ HG::Editor::Widgets::OpenPath::OpenPath() :
 
 HG::Editor::Widgets::OpenPath::~OpenPath()
 {
-    delete m_file;
-    delete m_directory;
+    application()->thumbnailsCache()->removeThumbnail(m_directory);
+    application()->thumbnailsCache()->removeThumbnail(m_file);
 }
 
 void HG::Editor::Widgets::OpenPath::onInitialization()
 {
-    m_file = new HG::Rendering::Base::Texture(
+    auto textTexture = new HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/text.png")
+            .guaranteeGet()
     );
 
-    m_directory = new HG::Rendering::Base::Texture(
+    auto directoryTexture = new HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/folder.png")
+            .guaranteeGet()
     );
+
+    m_resourcesToFree.push_back(textTexture);
+    m_resourcesToFree.push_back(directoryTexture);
+
+    m_file = application()->thumbnailsCache()->addThumbnail(textTexture);
+    m_directory = application()->thumbnailsCache()->addThumbnail(directoryTexture);
+
+    // Cache invalidation will be performed in GraphicsInterface behaviour
+    // after initialization.
+}
+
+void HG::Editor::Widgets::OpenPath::onPostInitialization()
+{
+    // Resources, allocated at initalization side was used
+    // by thumbnails cache. Now they can be freed.
+    for (auto& resource : m_resourcesToFree)
+    {
+        delete resource;
+    }
 }
 
 void HG::Editor::Widgets::OpenPath::setOkCallback(HG::Editor::Widgets::OpenPath::OkCallback callback)
@@ -212,20 +233,56 @@ void HG::Editor::Widgets::OpenPath::drawItemsChild()
             continue;
         }
 
-        HG::Rendering::Base::Texture* icon = nullptr;
+        auto icon = HG::Editor::ThumbnailsCache::InvalidHandle;
 
-        if (file.status.type() == std::filesystem::file_type::directory)
+        switch (file.status.type())
         {
-            icon = m_directory;
-        }
-        else if (file.status.type() == std::filesystem::file_type::regular)
-        {
+        case std::filesystem::file_type::none:
+            break;
+        case std::filesystem::file_type::not_found:
+            break;
+        case std::filesystem::file_type::regular:
             icon = m_file;
+            break;
+        case std::filesystem::file_type::directory:
+            icon = m_directory;
+            break;
+        case std::filesystem::file_type::symlink:
+            break;
+        case std::filesystem::file_type::block:
+            break;
+        case std::filesystem::file_type::character:
+            break;
+        case std::filesystem::file_type::fifo:
+            break;
+        case std::filesystem::file_type::socket:
+            break;
+        case std::filesystem::file_type::unknown:
+            break;
+        }
+
+        HG::Rendering::Base::Texture* thumbnailsTexture = nullptr;
+        ImVec2 uvTL;
+        ImVec2 uvBR;
+
+        if (application()->thumbnailsCache()->isAvailable(icon))
+        {
+            thumbnailsTexture = application()->thumbnailsCache()->texture();
+            auto tlbr = application()->thumbnailsCache()->thumbnailTLBR(icon);
+
+            uvTL = ImGui::fromGLM(application()->thumbnailsCache()->pixelsToUV(tlbr.tl));
+            uvBR = ImGui::fromGLM(application()->thumbnailsCache()->pixelsToUV(tlbr.br));
         }
 
         auto isSelected = file.path == m_selected;
 
-        if (ImGui::IconSelectable(file.path.filename().c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick, {0, 0}, icon))
+        if (ImGui::IconSelectable(
+            file.path.filename().c_str(),
+            isSelected,
+            ImGuiSelectableFlags_AllowDoubleClick,
+            {0, 0},
+            thumbnailsTexture,
+            uvTL, uvBR))
         {
             if (validateData(file))
             {

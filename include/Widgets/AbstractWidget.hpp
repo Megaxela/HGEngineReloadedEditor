@@ -67,6 +67,13 @@ namespace HG::Editor::Widgets
          */
         void initialize();
 
+        /**
+         * @brief Method, that's called after widget initialization.
+         * On this stage, resources, allocated on initialize
+         * stage will be freed.
+         */
+        void postInitialization();
+
     protected:
 
         bool m_opened;
@@ -87,6 +94,12 @@ namespace HG::Editor::Widgets
          * By default do nothing.
          */
         virtual void onInitialization();
+
+        /**
+         * @brief Method, that's called on `postInitialization` call.
+         * By default do nothing.
+         */
+        virtual void onPostInitialization();
 
     private:
 

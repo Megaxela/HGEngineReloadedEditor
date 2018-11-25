@@ -57,3 +57,4 @@ target_link_libraries(HGEngineReloadedImGui
 
 configure_file(resources/images/folder.png images/folder.png COPYONLY )
 configure_file(resources/images/text.png images/text.png COPYONLY )
+configure_file(resources/images/error.png images/error.png COPYONLY )

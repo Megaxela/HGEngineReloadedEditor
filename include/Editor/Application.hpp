@@ -12,6 +12,7 @@ namespace HG::Editor::Fabrics
 namespace HG::Editor
 {
     class ProjectController;
+    class ThumbnailsCache;
 
     /**
      * @brief Class that describes editor application
@@ -49,11 +50,19 @@ namespace HG::Editor
          */
         HG::Editor::Fabrics::AssetsFabric* assetsFabric() const;
 
+        /**
+         * @brief Method for getting pointer to application thumbnails cache.
+         * @return Pointer to thumbnails cache.
+         */
+        HG::Editor::ThumbnailsCache* thumbnailsCache() const;
+
         bool performCycle() override;
 
     private:
 
         HG::Editor::ProjectController* m_projectController;
+
+        HG::Editor::ThumbnailsCache* m_thumbnailsCache;
 
         HG::Editor::Fabrics::PropertyEditorsFabric* m_propertyEditorsFabric;
         HG::Editor::Fabrics::AssetsFabric* m_assetsFabric;

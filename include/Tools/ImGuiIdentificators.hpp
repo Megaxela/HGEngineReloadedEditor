@@ -57,6 +57,8 @@ namespace HG
     STR_NAME_ID(OpenPath::Input,  Path,         "");
     STR_NAME_ID(OpenPath::Combo,  Extension,    "");
 
+    STR_NAME_ID(InformationModal, Window,       "Info");
+
     STR_NAME_ID(Scene,            Window,       "Scene");
 
     // DND
