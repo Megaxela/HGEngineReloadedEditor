@@ -59,6 +59,9 @@ namespace HG
 
     STR_NAME_ID(InformationModal, Window,       "Info");
 
+    STR_NAME_ID(BenchmarkView,    Window,       "Benchmark");
+    STR_NAME_ID(BenchmarkView,    Child,        "BarView");
+
     STR_NAME_ID(Scene,            Window,       "Scene");
 
     // DND

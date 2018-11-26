@@ -13,6 +13,7 @@
 
 #include <Widgets/OpenPath.hpp>
 #include <Widgets/InformationModal.hpp>
+#include <Widgets/BenchmarkView.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -42,6 +43,7 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_sceneWidget(new HG::Editor::Widgets::Scene(&m_commonSettings)),
     m_loggingWidget(new HG::Editor::Widgets::Logging()),
     m_assetsWidget(new HG::Editor::Widgets::Assets(&m_commonSettings)),
+    m_benchmarkWidget(new HG::Editor::Widgets::BenchmarkView()),
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
     m_informationModalWidget(new HG::Editor::Widgets::InformationModal()),
     m_renderOverride(new HG::Rendering::Base::RenderOverride),
@@ -57,6 +59,7 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_dockWidgets.push_back(m_sceneWidget);
     m_dockWidgets.push_back(m_loggingWidget);
     m_dockWidgets.push_back(m_assetsWidget);
+    m_dockWidgets.push_back(m_benchmarkWidget);
     m_commonWidgets.push_back(m_openPathWidget);
     m_commonWidgets.push_back(m_informationModalWidget);
 }

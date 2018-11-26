@@ -26,6 +26,7 @@ namespace HG::Editor::Widgets
     class Scene;
     class Assets;
     class Logging;
+    class BenchmarkView;
 
     class OpenPath;
     class InformationModal;
@@ -112,6 +113,7 @@ namespace HG::Editor::Behaviours
         HG::Editor::Widgets::Scene* m_sceneWidget;
         HG::Editor::Widgets::Logging* m_loggingWidget;
         HG::Editor::Widgets::Assets* m_assetsWidget;
+        HG::Editor::Widgets::BenchmarkView* m_benchmarkWidget;
 
         HG::Editor::Widgets::OpenPath* m_openPathWidget;
         HG::Editor::Widgets::InformationModal* m_informationModalWidget;

@@ -47,6 +47,7 @@ else (NOT LLVM_INCLUDE_DIRS OR NOT LLVM_LIBRARY_DIRS)
         if (CLANG_FIND_REQUIRED)
             message(FATAL_ERROR "Could NOT find Clang")
         endif (CLANG_FIND_REQUIRED)
+        message(STATUS "Could NOT find Clang")
     endif (CLANG_FOUND)
 
 endif (NOT LLVM_INCLUDE_DIRS OR NOT LLVM_LIBRARY_DIRS)

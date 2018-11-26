@@ -38,6 +38,7 @@ void HG::Editor::Widgets::Assets::onDraw()
 {
     auto flags = ImGuiWindowFlags_MenuBar;
 
+    // todo: replace with HG::ID value
     if (ImGui::Begin("Assets", &m_opened, flags))
     {
         drawToolbar();
@@ -96,6 +97,7 @@ void HG::Editor::Widgets::Assets::drawToolbar()
 {
     ImGui::BeginMenuBar();
 
+    // todo: replace with HG::ID value
     if (ImGui::BeginMenu("Sort"))
     {
         for (std::size_t i = 0; i < m_sortTypes.size(); ++i)
@@ -116,6 +118,7 @@ void HG::Editor::Widgets::Assets::drawToolbar()
 
 void HG::Editor::Widgets::Assets::drawItems()
 {
+    // todo: replace with HG::ID value
     ImGui::BeginChild(static_cast<ImGuiID>(HG::Utils::StringTools::hash(__FUNCTION__)));
 
     auto rootAsset = application()->projectController()->assetManager()->rootAsset();

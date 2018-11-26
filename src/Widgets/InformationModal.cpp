@@ -24,7 +24,7 @@ HG::Editor::Widgets::InformationModal::InformationModal() :
     m_type(Type::Info),
     m_text()
 {
-
+    setOpened(false);
 }
 
 HG::Editor::Widgets::InformationModal::~InformationModal()
