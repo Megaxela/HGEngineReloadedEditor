@@ -6,6 +6,7 @@
 
 // Editor
 #include <Widgets/AbstractWidget.hpp>
+#include <Tools/ThumbnailsCache.hpp>
 
 namespace HG::Editor::AssetSystem::Assets
 {
@@ -35,6 +36,10 @@ namespace HG::Editor::Widgets
 
     protected:
         void onDraw() override;
+
+        void onInitialization() override;
+
+        void onPostInitialization() override;
 
     private:
 
@@ -81,10 +86,17 @@ namespace HG::Editor::Widgets
          */
         void sortAssetChildren(HG::Editor::AssetSystem::Assets::AssetPtr asset);
 
+        std::vector<HG::Rendering::Base::Texture*> m_resourcesToFree;
+
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         std::vector<SortType> m_sortTypes;
 
         std::size_t m_currentSorting;
+
+        // Icons
+        HG::Editor::ThumbnailsCache::Handle m_unloadedIcon;
+        HG::Editor::ThumbnailsCache::Handle m_loadingIcon;
+        HG::Editor::ThumbnailsCache::Handle m_corruptedIcon;
     };
 }

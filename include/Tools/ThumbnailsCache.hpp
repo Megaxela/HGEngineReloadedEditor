@@ -22,6 +22,7 @@ namespace HG::Editor
      * @brief Class, that describes cache for thumbnails.
      * This class performs registration/deregistration of
      * thumbnails and icons.
+     * @todo Make this class thread safe
      */
     class ThumbnailsCache
     {

@@ -2,6 +2,15 @@
 
 // C++ STL
 #include <filesystem>
+#include <shared_mutex>
+
+// Editor
+#include <Tools/ThumbnailsCache.hpp>
+
+namespace HG::Editor::AssetSystem
+{
+    class AssetsManager;
+}
 
 namespace HG::Editor::AssetSystem::Assets
 {
@@ -23,12 +32,12 @@ namespace HG::Editor::AssetSystem::Assets
          */
         enum class State
         {
-              LoadingPending //< Asset was found in filesystem and asset type was detected.
-            , NotLoaded      //< After trying to load asset - some error was received.
-            , Loaded         //< Asset loads some information for displaying. Or/And prepared to
-                             //< be dragged onto scene.
-            , Cached         //< Asset was used recently and some specific asset data
-                             //< can be cached
+              Initial   //< Initial state.
+            , NotLoaded //< Asset was found in filesystem and asset type was detected.
+            , Loading   //< Asset is currently loading (thread started processing info)
+            , Loaded    //< Asset was successfully loaded. But specific data was not loaded.
+            , Cached    //< Asset was used recently and some specific asset data was cached.
+            , Failed    //< Asset loading failed.
         };
 
         /**
@@ -42,6 +51,18 @@ namespace HG::Editor::AssetSystem::Assets
          * @brief Virtual destructor.
          */
         virtual ~AbstractAsset();
+
+        /**
+         * @brief Method for setting parent asset manager.
+         * @param manager Pointer to asset manager.
+         */
+        void setAssetsManager(HG::Editor::AssetSystem::AssetsManager* manager);
+
+        /**
+         * @brief Method for getting parent asset manager.
+         * @return Pointer to asset manager.
+         */
+        HG::Editor::AssetSystem::AssetsManager* assetsManager() const;
 
         /**
          * @brief Virtual method for getting asset name.
@@ -93,14 +114,27 @@ namespace HG::Editor::AssetSystem::Assets
          * This method can be called async.
          * If loading will be success - asset state
          * will change to `State::Loaded`. Otherwise
-         * asset state will be changed to `State::NotLoaded`.
+         * asset state will be changed to `State::Failed`.
          * This method will clean any cached data. (because
          * this method can be called at `State::Cached` state)
          * @return Loading success.
          */
-        bool load() const;
+        bool load();
+
+        /**
+         * @brief Method, that returns asset icon.
+         * @return Asset icon handle.
+         */
+        virtual HG::Editor::ThumbnailsCache::Handle icon() const;
 
     protected:
+
+        /**
+         * @brief Method for safe setting internal
+         * asset state.
+         * @param state New asset state.
+         */
+        void setState(State state);
 
         /**
          * @brief Method, that called on loading stage.
@@ -125,10 +159,14 @@ namespace HG::Editor::AssetSystem::Assets
 
     private:
 
+        HG::Editor::AssetSystem::AssetsManager* m_assetManager;
+
         AbstractAsset* m_parent;
         std::vector<AssetPtr> m_children;
 
         State m_state;
+        mutable std::shared_mutex m_stateMutex;
+
         std::filesystem::path m_path;
         std::size_t m_type;
     };

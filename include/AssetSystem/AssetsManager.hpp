@@ -17,7 +17,7 @@ namespace HG::Editor::AssetSystem::Assets
     using AssetPtr = std::shared_ptr<AbstractAsset>;
 }
 
-namespace HG::AssetSystem
+namespace HG::Editor::AssetSystem
 {
     /**
      * @brief Class, that describes assets manager.

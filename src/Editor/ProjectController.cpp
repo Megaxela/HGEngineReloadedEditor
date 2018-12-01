@@ -10,7 +10,7 @@
 
 HG::Editor::ProjectController::ProjectController(HG::Editor::Application *parent) :
     m_parentApplication(parent),
-    m_assetsManager(new HG::AssetSystem::AssetsManager(parent))
+    m_assetsManager(new HG::Editor::AssetSystem::AssetsManager(parent))
 {
 
 }
@@ -49,7 +49,7 @@ void HG::Editor::ProjectController::load(std::filesystem::path path)
     m_assetsManager->setAssetsPath(std::move(path / m_metadata.assetsDirectory));
 }
 
-HG::AssetSystem::AssetsManager *HG::Editor::ProjectController::assetManager()
+HG::Editor::AssetSystem::AssetsManager *HG::Editor::ProjectController::assetManager()
 {
     return m_assetsManager;
 }

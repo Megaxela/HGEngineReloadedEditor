@@ -47,8 +47,8 @@ void HG::Editor::Widgets::BenchmarkView::drawToolbar()
 
     if (!application()->benchmark()->isRunning())
     {
-        // todo: replace with HG::ID value
-        if (ImGui::MenuItem("Run"))
+        if (ImGui::IDGuard(HG::ID::Benchmark::MainMenu::Run),
+            ImGui::MenuItem(HG::Names::Benchmark::MainMenu::Run))
         {
             application()->benchmark()->start();
         }
@@ -56,15 +56,17 @@ void HG::Editor::Widgets::BenchmarkView::drawToolbar()
     else
     {
         application()->benchmark()->finish();
-        // todo: replace with HG::ID value
-        if (ImGui::MenuItem("Stop"))
+
+        if (ImGui::IDGuard(HG::ID::Benchmark::MainMenu::Stop),
+            ImGui::MenuItem(HG::Names::Benchmark::MainMenu::Stop))
         {
             application()->benchmark()->finish();
         }
     }
 
-    // todo: replace with HG::ID value
-    if (ImGui::MenuItem("Clear"))
+
+    if (ImGui::IDGuard(HG::ID::Benchmark::MainMenu::Clear),
+        ImGui::MenuItem(HG::Names::Benchmark::MainMenu::Clear))
     {
         application()->benchmark()->clear();
     }
@@ -74,7 +76,6 @@ void HG::Editor::Widgets::BenchmarkView::drawToolbar()
 
 void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benchmark)
 {
-
     // Benchmark total
     auto benchStart = benchmark->startTime();
     auto benchFinish = benchmark->finishTime();
@@ -100,7 +101,7 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
         auto benchDurationMcs = std::chrono::duration_cast<std::chrono::microseconds>(benchDuration).count();
 
         ImGui::Text(
-                "Total time: %02d:%02d.%03d.%03d",
+                "Total time: %02ld:%02ld.%03ld.%03ld",
                 ((benchDurationMcs % 1000000000) / 1000000 / 60) % 60,
                  (benchDurationMcs % 1000000000) / 1000000,
                  (benchDurationMcs % 1000000   ) / 1000,

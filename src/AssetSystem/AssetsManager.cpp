@@ -11,7 +11,7 @@
 #include <CurrentLogger.hpp>
 #include <AssetSystem/Assets/DirectoryAsset.hpp>
 
-HG::AssetSystem::AssetsManager::AssetsManager(HG::Editor::Application *parent) :
+HG::Editor::AssetSystem::AssetsManager::AssetsManager(HG::Editor::Application *parent) :
     m_assetsPathChanged(false),
     m_assetsPath(),
     m_rootAsset(nullptr),
@@ -20,12 +20,12 @@ HG::AssetSystem::AssetsManager::AssetsManager(HG::Editor::Application *parent) :
 
 }
 
-HG::Editor::Application *HG::AssetSystem::AssetsManager::application() const
+HG::Editor::Application *HG::Editor::AssetSystem::AssetsManager::application() const
 {
     return m_parentApplication;
 }
 
-void HG::AssetSystem::AssetsManager::proceedEvents()
+void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
 {
     if (m_assetsPathChanged)
     {
@@ -38,7 +38,7 @@ void HG::AssetSystem::AssetsManager::proceedEvents()
     }
 }
 
-void HG::AssetSystem::AssetsManager::setAssetsPath(std::filesystem::path path)
+void HG::Editor::AssetSystem::AssetsManager::setAssetsPath(std::filesystem::path path)
 {
     if (m_assetsPath != path)
     {
@@ -47,17 +47,17 @@ void HG::AssetSystem::AssetsManager::setAssetsPath(std::filesystem::path path)
     }
 }
 
-std::filesystem::path HG::AssetSystem::AssetsManager::assetsPath() const
+std::filesystem::path HG::Editor::AssetSystem::AssetsManager::assetsPath() const
 {
     return m_assetsPath;
 }
 
-void HG::AssetSystem::AssetsManager::clearAssets()
+void HG::Editor::AssetSystem::AssetsManager::clearAssets()
 {
     m_rootAsset = nullptr;
 }
 
-void HG::AssetSystem::AssetsManager::updateAssets()
+void HG::Editor::AssetSystem::AssetsManager::updateAssets()
 {
     if (m_rootAsset == nullptr)
     {
@@ -67,20 +67,21 @@ void HG::AssetSystem::AssetsManager::updateAssets()
     }
 }
 
-void HG::AssetSystem::AssetsManager::reloadAssets()
+void HG::Editor::AssetSystem::AssetsManager::reloadAssets()
 {
     m_rootAsset = std::make_shared<HG::Editor::AssetSystem::Assets::RootAsset>(m_assetsPath);
 
     reloadDirectory(m_assetsPath, m_rootAsset);
 }
 
-void HG::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path &path, HG::Editor::AssetSystem::Assets::AssetPtr target)
+void HG::Editor::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path &path, HG::Editor::AssetSystem::Assets::AssetPtr target)
 {
     // todo: Add to watching here
 
     for (auto&& iterator : std::filesystem::directory_iterator(path))
     {
         auto newAsset = application()->assetsFabric()->create(iterator);
+        newAsset->setAssetsManager(this);
 
         if (newAsset->type() == HG::Editor::AssetSystem::Assets::DirectoryAsset::AssetId)
         {
@@ -91,17 +92,17 @@ void HG::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path
     }
 }
 
-HG::Editor::AssetSystem::Assets::AssetPtr HG::AssetSystem::AssetsManager::rootAsset() const
+HG::Editor::AssetSystem::Assets::AssetPtr HG::Editor::AssetSystem::AssetsManager::rootAsset() const
 {
     return m_rootAsset;
 }
 
-void HG::AssetSystem::AssetsManager::postAssetsForLoading()
+void HG::Editor::AssetSystem::AssetsManager::postAssetsForLoading()
 {
     postAssetForLoading(m_rootAsset);
 }
 
-void HG::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset)
+void HG::Editor::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset)
 {
     if (asset == nullptr ||
         m_parentApplication == nullptr)

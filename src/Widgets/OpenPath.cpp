@@ -84,6 +84,8 @@ void HG::Editor::Widgets::OpenPath::onPostInitialization()
     {
         delete resource;
     }
+
+    m_resourcesToFree.clear();
 }
 
 void HG::Editor::Widgets::OpenPath::setOkCallback(HG::Editor::Widgets::OpenPath::OkCallback callback)

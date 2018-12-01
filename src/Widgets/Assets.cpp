@@ -7,6 +7,17 @@
 #include <Editor/ProjectController.hpp>
 #include <AssetSystem/AssetsManager.hpp>
 #include <AssetSystem/Assets/AbstractAsset.hpp>
+#include <Tools/ImGuiIdentificators.hpp>
+#include <Tools/ImGuiWidgets.hpp>
+
+// HG::Core
+#include <HG/Core/ResourceManager.hpp>
+
+// HG::Rendering::Base
+#include <HG/Rendering/Base/Texture.hpp>
+
+// HG::Utils
+#include <HG/Utils/Loaders/STBImageLoader.hpp>
 
 // ImGui
 #include <imgui.h>
@@ -14,6 +25,7 @@
 #include <Widgets/CommonSettings.hpp>
 
 HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *settings) :
+    m_resourcesToFree(),
     m_commonSettings(settings),
     m_sortTypes({
         {"Name",
@@ -29,17 +41,63 @@ HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *setti
              return l->type() < r->type();
          }}
     }),
-    m_currentSorting(0)
+    m_currentSorting(0),
+    m_unloadedIcon (HG::Editor::ThumbnailsCache::InvalidHandle),
+    m_loadingIcon  (HG::Editor::ThumbnailsCache::InvalidHandle),
+    m_corruptedIcon(HG::Editor::ThumbnailsCache::InvalidHandle)
 {
 
+}
+
+void HG::Editor::Widgets::Assets::onInitialization()
+{
+    auto unloadedIcon = new HG::Rendering::Base::Texture(
+        application()
+            ->resourceManager()
+            ->load<HG::Utils::STBImageLoader>("images/unchecked.png")
+            .guaranteeGet()
+    );
+
+    auto loadedIcon = new HG::Rendering::Base::Texture(
+        application()
+            ->resourceManager()
+            ->load<HG::Utils::STBImageLoader>("images/checked.png")
+            .guaranteeGet()
+    );
+
+    auto corruptedIcon = new HG::Rendering::Base::Texture(
+        application()
+            ->resourceManager()
+            ->load<HG::Utils::STBImageLoader>("images/corrupted.png")
+            .guaranteeGet()
+    );
+
+    m_resourcesToFree.push_back(unloadedIcon);
+    m_resourcesToFree.push_back(loadedIcon);
+    m_resourcesToFree.push_back(corruptedIcon);
+
+    m_unloadedIcon  = application()->thumbnailsCache()->addThumbnail(unloadedIcon);
+    m_loadingIcon   = application()->thumbnailsCache()->addThumbnail(loadedIcon);
+    m_corruptedIcon = application()->thumbnailsCache()->addThumbnail(corruptedIcon);
+}
+
+void HG::Editor::Widgets::Assets::onPostInitialization()
+{
+    for (auto& resource : m_resourcesToFree)
+    {
+        delete resource;
+    }
+
+    m_resourcesToFree.clear();
 }
 
 void HG::Editor::Widgets::Assets::onDraw()
 {
     auto flags = ImGuiWindowFlags_MenuBar;
 
-    // todo: replace with HG::ID value
-    if (ImGui::Begin("Assets", &m_opened, flags))
+    ImGui::IDGuard guard(HG::ID::Assets::Window);
+
+    if (ImGui::Begin(HG::Names::Assets::Window, &m_opened, flags))
     {
         drawToolbar();
 
@@ -54,7 +112,7 @@ void HG::Editor::Widgets::Assets::drawAsset(const HG::Editor::AssetSystem::Asset
 
     if (!isRoot)
     {
-        auto flags = (asset->children().empty()                ? ImGuiTreeNodeFlags_Leaf     : 0U) |
+        auto flags = (asset->children().empty()                ? ImGuiTreeNodeFlags_Leaf     : /* 0 */ ImGuiTreeNodeFlags_Leaf) |
                      (asset == m_commonSettings->selectedAsset ? ImGuiTreeNodeFlags_Selected : 0U) |
                                                                  ImGuiTreeNodeFlags_OpenOnDoubleClick |
                                                                  ImGuiTreeNodeFlags_OpenOnArrow;
@@ -95,10 +153,11 @@ void HG::Editor::Widgets::Assets::drawAsset(const HG::Editor::AssetSystem::Asset
 
 void HG::Editor::Widgets::Assets::drawToolbar()
 {
+    ImGui::IDGuard guard(HG::ID::Assets::Sort);
+
     ImGui::BeginMenuBar();
 
-    // todo: replace with HG::ID value
-    if (ImGui::BeginMenu("Sort"))
+    if (ImGui::BeginMenu(HG::Names::Assets::Sort))
     {
         for (std::size_t i = 0; i < m_sortTypes.size(); ++i)
         {
@@ -118,8 +177,7 @@ void HG::Editor::Widgets::Assets::drawToolbar()
 
 void HG::Editor::Widgets::Assets::drawItems()
 {
-    // todo: replace with HG::ID value
-    ImGui::BeginChild(static_cast<ImGuiID>(HG::Utils::StringTools::hash(__FUNCTION__)));
+    ImGui::BeginChild(HG::ID::Assets::ItemsChild);
 
     auto rootAsset = application()->projectController()->assetManager()->rootAsset();
 

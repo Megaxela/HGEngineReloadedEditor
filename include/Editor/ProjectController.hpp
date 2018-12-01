@@ -6,7 +6,7 @@
 // Json
 #include <nlohmann/json.hpp>
 
-namespace HG::AssetSystem
+namespace HG::Editor::AssetSystem
 {
     class AssetsManager;
 }
@@ -56,7 +56,7 @@ namespace HG::Editor
          * asset manager.
          * @return Pointer to asset manager.
          */
-        HG::AssetSystem::AssetsManager* assetManager();
+        HG::Editor::AssetSystem::AssetsManager* assetManager();
 
     private:
 
@@ -64,7 +64,7 @@ namespace HG::Editor
 
         HG::Editor::Application* m_parentApplication;
 
-        HG::AssetSystem::AssetsManager* m_assetsManager;
+        HG::Editor::AssetSystem::AssetsManager* m_assetsManager;
 
         Metadata m_metadata;
     };
