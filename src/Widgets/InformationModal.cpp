@@ -69,9 +69,9 @@ void HG::Editor::Widgets::InformationModal::onDraw()
         }
     }
 
+    ImGui::SetNextWindowSize({300, 200}, ImGuiCond_FirstUseEver);
     if (ImGui::BeginPopupModal(HG::Names::InformationModal::Window,
-                               nullptr,
-                               ImGuiWindowFlags_AlwaysAutoResize))
+                               nullptr))
     {
         if (!isOpened())
         {
@@ -112,21 +112,28 @@ void HG::Editor::Widgets::InformationModal::onDraw()
         // Child region for icon
         {
             ImGui::BeginChild("IconChild", {imageSize.x + 10.0f, 0});
-
             ImGui::Image(thumbnailsTexture, imageSize, uvTL, uvBR);
 
             ImGui::EndChild();
         }
-//
-//        // Text region
-//        {
-//            ImGui::BeginChild("TextChild");
-//
-//            ImGui::Text("%s", m_text.c_str());
-//
-//            ImGui::EndChild();
-//        }
-//        ImGui::TextWrapped("%s", m_text.c_str());
+
+        ImGui::SameLine();
+
+        // Text region
+        ImGui::BeginGroup();
+        {
+            ImGui::BeginChild("TextChild", {0, -ImGui::GetFrameHeightWithSpacing()});
+
+            ImGui::TextWrapped("%s", m_text.c_str());
+
+            ImGui::EndChild();
+
+            if (ImGui::Button("Ok"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+        }
+        ImGui::EndGroup();
 
         ImGui::EndPopup();
     }

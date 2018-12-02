@@ -16,13 +16,23 @@ namespace HG::Rendering::Base
 
 namespace ImGui
 {
-    bool IconSelectable(const char* label,
-                        bool selected,
-                        int flags,
-                        const ImVec2& size_arg={0, 0},
-                        HG::Rendering::Base::Texture* icon=nullptr,
-                        const ImVec2& uv_tl={0, 0},
-                        const ImVec2& uv_br={0, 0});
+    // Widgets: Icon Selectable
+    IMGUI_API bool IconSelectable(const char* label,bool selected, int flags, const ImVec2& size_arg={0, 0}, HG::Rendering::Base::Texture* icon=nullptr, const ImVec2& uv_tl={0, 0}, const ImVec2& uv_br={0, 0});
+
+    // Widgets: Icon Trees
+    IMGUI_API bool IconTreeNode   (const char* label,  HG::Rendering::Base::Texture* icon=nullptr, const ImVec2& uv_tl={0, 0}, const ImVec2& uv_br={0, 0});
+    IMGUI_API bool IconTreeNode   (const char* str_id, HG::Rendering::Base::Texture* icon,         const ImVec2& uv_tl,        const ImVec2& uv_br, const char* fmt, ...) IM_FMTARGS(5);
+    IMGUI_API bool IconTreeNode   (const void* ptr_id, HG::Rendering::Base::Texture* icon,         const ImVec2& uv_tl,        const ImVec2& uv_br, const char* fmt, ...) IM_FMTARGS(5);
+    IMGUI_API bool IconTreeNodeV  (const char* str_id, HG::Rendering::Base::Texture* icon,         const ImVec2& uv_tl,        const ImVec2& uv_br, const char* fmt, va_list args) IM_FMTLIST(5);
+    IMGUI_API bool IconTreeNodeV  (const void* ptr_id, HG::Rendering::Base::Texture* icon,         const ImVec2& uv_tl,        const ImVec2& uv_br, const char* fmt, va_list args) IM_FMTLIST(5);
+
+    IMGUI_API bool IconTreeNodeEx (const char* label,  ImGuiTreeNodeFlags flags, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br);
+    IMGUI_API bool IconTreeNodeEx (const char* str_id, ImGuiTreeNodeFlags flags, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br, const char* fmt, ...) IM_FMTARGS(6);
+    IMGUI_API bool IconTreeNodeEx (const void* ptr_id, ImGuiTreeNodeFlags flags, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br, const char* fmt, ...) IM_FMTARGS(6);
+    IMGUI_API bool IconTreeNodeExV(const char* str_id, ImGuiTreeNodeFlags flags, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br, const char* fmt, va_list args) IM_FMTLIST(6);
+    IMGUI_API bool IconTreeNodeExV(const void* ptr_id, ImGuiTreeNodeFlags flags, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br, const char* fmt, va_list args) IM_FMTLIST(6);
+
+    IMGUI_API bool IconTreeNodeBehaviour(ImGuiID id, HG::Rendering::Base::Texture *icon, const ImVec2& uv_tl, const ImVec2& uv_br, ImGuiTreeNodeFlags flags, const char* label, const char* label_end);
 
     /**
      * @brief Translates from GLM vec2 to imgui vec2.
@@ -93,8 +103,16 @@ namespace ImGui
          */
         Callback callback() const;
 
+        /**
+         * @brief Method for getting item name.
+         * @return Pointer to cstring name.
+         */
         const char* name() const;
 
+        /**
+         * @brief Method for getting item id.
+         * @return Pointer to cstring id.
+         */
         const char* id() const;
 
     private:
@@ -181,15 +199,55 @@ namespace ImGui
         std::vector<Entry> m_entries;
     };
 
+    /**
+     * @brief Class, that performs menu rendering
+     * as main menu.
+     */
+    class MainMenuRenderer
+    {
+    public:
+
+        /**
+         * @brief Constructor.
+         */
+        MainMenuRenderer();
+
+        /**
+         * @brief Method for rendering menu.
+         * @param menu Reference to menu object.
+         */
+        void render(const Menu& menu);
+
+    private:
+
+        void renderMenu(const Menu& menu);
+
+        void renderItem(const Item& item);
+
+        void renderSeparator();
+    };
+
+    /**
+     * @brief Class, that performs menu rendering
+     * as context menu.
+     */
     class ContextMenuRenderer
     {
     public:
 
+        /**
+         * @brief Constructor.
+         */
         ContextMenuRenderer();
 
+        /**
+         * @brief Method for rendering menu.
+         * @param menu Reference to menu object.
+         */
         void render(const Menu& menu);
 
     private:
+
         void renderMenu(const Menu& menu);
 
         void renderItem(const Item& item);

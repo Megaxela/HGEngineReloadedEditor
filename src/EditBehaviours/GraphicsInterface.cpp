@@ -50,6 +50,8 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_dockWidgets(),
     m_commonWidgets()
 {
+    setupMainMenu();
+
     setupLogging();
 
     setupRenderOverride();
@@ -105,7 +107,7 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     prepareDockSpace();
 
     // Drawing widgets
-    drawToolBar();
+    ImGui::MainMenuRenderer().render(m_mainMenu);
 
     for (auto& widget : m_dockWidgets)
     {
@@ -158,8 +160,25 @@ void HG::Editor::Behaviours::GraphicsInterface::onStart()
     {
         widget->postInitialization();
     }
+}
 
-//    m_informationModalWidget->info("SOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXTSOME REAL LONG TEXT");
+void HG::Editor::Behaviours::GraphicsInterface::setupMainMenu()
+{
+    {
+        auto menu = m_mainMenu.addMenu("File", "File");
+        menu->addItem("New Project", "New Project");
+        menu->addItem("Open Project", "OpenProject")
+            ->setCallback( [this]() { actionOpenProject(); } );
+
+        menu->addItem("Close Project", "Close Project");
+        menu->addSeparator();
+        menu->addItem("Exit", "Exit");
+    }
+
+    {
+        auto menu = m_mainMenu.addMenu("Help", "Help");
+        menu->addItem("About HGEngine", "About HGEngine");
+    }
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
@@ -174,42 +193,13 @@ void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
     scene()->getGameObjects(m_commonSettings.gameobjectsCache);
 }
 
-void HG::Editor::Behaviours::GraphicsInterface::drawToolBar()
-{
-    ImGui::BeginMainMenuBar();
-    if (ImGui::BeginMenu("File"))
-    {
-        ImGui::MenuItem("New Project");
-        if (ImGui::MenuItem("Open Project"))
-        {
-            actionOpenProject();
-        }
-
-        ImGui::MenuItem("Close Project");
-
-
-        ImGui::Separator();
-
-        if (ImGui::MenuItem("Exit"));
-
-        ImGui::EndMenu();
-    }
-    if (ImGui::BeginMenu("Help"))
-    {
-        if (ImGui::MenuItem("About HGEngine"));
-
-        ImGui::EndMenu();
-    }
-    ImGui::EndMainMenuBar();
-}
-
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
 {
     auto project = dynamic_cast<HG::Editor::Application*>(scene()->application())->projectController();
 
     m_openPathWidget->settings().mode = HG::Editor::Widgets::OpenPath::Settings::Mode::Directory;
     m_openPathWidget->setOkCallback(
-        [project](const std::filesystem::path& data)
+        [project, this](const std::filesystem::path& data)
         {
             try
             {
@@ -217,7 +207,7 @@ void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
             }
             catch (const std::invalid_argument& argument)
             {
-                // todo: Open error modal here
+                m_informationModalWidget->error(std::string("Can't open project: ") + argument.what());
                 ErrorF() << "Can't open project: " << argument.what();
             }
         }

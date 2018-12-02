@@ -112,12 +112,28 @@ void HG::Editor::Widgets::Assets::drawAsset(const HG::Editor::AssetSystem::Asset
 
     if (!isRoot)
     {
-        auto flags = (asset->children().empty()                ? ImGuiTreeNodeFlags_Leaf     : /* 0 */ ImGuiTreeNodeFlags_Leaf) |
+        auto flags = (asset->children().empty()                ? ImGuiTreeNodeFlags_Leaf     : 0) |
                      (asset == m_commonSettings->selectedAsset ? ImGuiTreeNodeFlags_Selected : 0U) |
                                                                  ImGuiTreeNodeFlags_OpenOnDoubleClick |
                                                                  ImGuiTreeNodeFlags_OpenOnArrow;
 
-        expanded = ImGui::TreeNodeEx(asset.get(), flags, "%s", asset->name().c_str());
+        // Getting icon
+        HG::Rendering::Base::Texture* thumbnailsTexture = nullptr;
+        ImVec2 uvTL;
+        ImVec2 uvBR;
+
+        auto icon = m_loadingIcon;
+
+        if (application()->thumbnailsCache()->isAvailable(icon))
+        {
+            thumbnailsTexture = application()->thumbnailsCache()->texture();
+            auto tlbr = application()->thumbnailsCache()->thumbnailTLBR(icon);
+
+            uvTL = ImGui::fromGLM(application()->thumbnailsCache()->pixelsToUV(tlbr.tl));
+            uvBR = ImGui::fromGLM(application()->thumbnailsCache()->pixelsToUV(tlbr.br));
+        }
+
+        expanded = ImGui::IconTreeNodeEx(asset.get(), flags, thumbnailsTexture, uvTL, uvBR, "%s", asset->name().c_str());
 
         if (ImGui::BeginDragDropSource())
         {

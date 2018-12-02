@@ -17,6 +17,7 @@
 
 // GLM
 #include <glm/glm.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 namespace HG::Editor::Widgets
 {
@@ -71,20 +72,24 @@ namespace HG::Editor::Behaviours
          */
         void onUpdate() override;
 
+        /**
+         * @brief Method, that's called once after initialization.
+         */
         void onStart() override;
 
     private:
+
+        /**
+         * @brief Method for setting up
+         * main menu.
+         */
+        void setupMainMenu();
 
         /**
          * @brief Method for updating internal
          * gameobjects cache if it's available.
          */
         void updateGameObjectsCache();
-
-        /**
-         * @brief Method for drawing toolbar.
-         */
-        void drawToolBar();
 
         // Actions
         void actionOpenProject();
@@ -122,6 +127,8 @@ namespace HG::Editor::Behaviours
         std::vector<HG::Editor::Widgets::AbstractWidget*> m_commonWidgets;
 
         HG::Rendering::Base::RenderOverride* m_renderOverride;
+
+        ImGui::Menu m_mainMenu;
     };
 }
 
