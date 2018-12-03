@@ -72,6 +72,9 @@ namespace HG
 
     STR_NAME_ID(Scene,                Window,       "Scene");
 
+    STR_NAME_ID(TextureCacheView,     Window,       "Window");
+    STR_NAME_ID(TextureCacheView,     Toolbar,      "Toolbar");
+
     // DND
     STR_ID     (DragDrop,         GameObject,   "GameObject");
 }

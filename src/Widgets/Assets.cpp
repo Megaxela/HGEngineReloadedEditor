@@ -9,6 +9,7 @@
 #include <AssetSystem/Assets/AbstractAsset.hpp>
 #include <Tools/ImGuiIdentificators.hpp>
 #include <Tools/ImGuiWidgets.hpp>
+#include <Widgets/CommonSettings.hpp>
 
 // HG::Core
 #include <HG/Core/ResourceManager.hpp>
@@ -18,11 +19,10 @@
 
 // HG::Utils
 #include <HG/Utils/Loaders/STBImageLoader.hpp>
+#include <HG/Utils/StringTools.hpp>
 
 // ImGui
 #include <imgui.h>
-#include <HG/Utils/StringTools.hpp>
-#include <Widgets/CommonSettings.hpp>
 
 HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *settings) :
     m_resourcesToFree(),

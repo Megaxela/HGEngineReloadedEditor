@@ -14,6 +14,7 @@
 #include <Widgets/OpenPath.hpp>
 #include <Widgets/InformationModal.hpp>
 #include <Widgets/BenchmarkView.hpp>
+#include <Widgets/TextureCacheView.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -44,24 +45,20 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_loggingWidget(new HG::Editor::Widgets::Logging()),
     m_assetsWidget(new HG::Editor::Widgets::Assets(&m_commonSettings)),
     m_benchmarkWidget(new HG::Editor::Widgets::BenchmarkView()),
+    m_textureCacheViewWidget(new HG::Editor::Widgets::TextureCacheView()),
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
     m_informationModalWidget(new HG::Editor::Widgets::InformationModal()),
     m_renderOverride(new HG::Rendering::Base::RenderOverride),
     m_dockWidgets(),
     m_commonWidgets()
 {
-    setupMainMenu();
-
-    setupLogging();
-
-    setupRenderOverride();
-
     m_dockWidgets.push_back(m_gameObjectsWidget);
     m_dockWidgets.push_back(m_inspectorWidget);
     m_dockWidgets.push_back(m_sceneWidget);
     m_dockWidgets.push_back(m_loggingWidget);
     m_dockWidgets.push_back(m_assetsWidget);
     m_dockWidgets.push_back(m_benchmarkWidget);
+    m_dockWidgets.push_back(m_textureCacheViewWidget);
     m_commonWidgets.push_back(m_openPathWidget);
     m_commonWidgets.push_back(m_informationModalWidget);
 }
@@ -125,6 +122,13 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
+
+    setupMainMenu();
+
+    setupLogging();
+
+    setupRenderOverride();
+
     // Setting application to widgets.
     for (auto& widget : m_dockWidgets)
     {

@@ -24,7 +24,9 @@ namespace HG::Editor::Widgets
 
     private:
 
+        void drawToolbar();
 
+        void drawTextures();
 
     };
 }
