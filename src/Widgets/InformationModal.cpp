@@ -141,7 +141,7 @@ void HG::Editor::Widgets::InformationModal::onDraw()
 
 void HG::Editor::Widgets::InformationModal::onInitialization()
 {
-    auto errorTexture = new HG::Rendering::Base::Texture(
+    auto errorTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/error.png")

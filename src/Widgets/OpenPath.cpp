@@ -52,14 +52,14 @@ HG::Editor::Widgets::OpenPath::~OpenPath()
 
 void HG::Editor::Widgets::OpenPath::onInitialization()
 {
-    auto textTexture = new HG::Rendering::Base::Texture(
+    auto textTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/text.png")
             .guaranteeGet()
     );
 
-    auto directoryTexture = new HG::Rendering::Base::Texture(
+    auto directoryTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/folder.png")

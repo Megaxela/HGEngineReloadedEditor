@@ -51,21 +51,21 @@ HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *setti
 
 void HG::Editor::Widgets::Assets::onInitialization()
 {
-    auto unloadedIcon = new HG::Rendering::Base::Texture(
+    auto unloadedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/unchecked.png")
             .guaranteeGet()
     );
 
-    auto loadedIcon = new HG::Rendering::Base::Texture(
+    auto loadedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/checked.png")
             .guaranteeGet()
     );
 
-    auto corruptedIcon = new HG::Rendering::Base::Texture(
+    auto corruptedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>("images/corrupted.png")

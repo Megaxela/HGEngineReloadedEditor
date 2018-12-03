@@ -257,7 +257,7 @@ void HG::Editor::Behaviours::GraphicsInterface::setupLogging()
 
 void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
 {
-    auto texture = new HG::Rendering::Base::Texture(
+    auto texture = new (scene()->application()->resourceCache()) HG::Rendering::Base::Texture(
         {200, 200},
         HG::Rendering::Base::Texture::Format::RGB
     );

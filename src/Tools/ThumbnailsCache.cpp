@@ -187,7 +187,7 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
 
     Info() << "Packing finished. Loading to GPU.";
 
-    auto newTexture = new HG::Rendering::Base::Texture(
+    auto newTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         {max_side, max_side},
         HG::Rendering::Base::Texture::Format::RGBA
     );
