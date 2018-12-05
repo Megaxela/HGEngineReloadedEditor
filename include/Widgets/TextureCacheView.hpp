@@ -3,6 +3,11 @@
 // Editor
 #include <Widgets/AbstractWidget.hpp>
 
+namespace HG::Rendering::Base
+{
+    class Texture;
+}
+
 namespace HG::Editor::Widgets
 {
     /**
@@ -27,6 +32,8 @@ namespace HG::Editor::Widgets
         void drawToolbar();
 
         void drawTextures();
+
+        HG::Rendering::Base::Texture* m_selectedTexture;
 
     };
 }

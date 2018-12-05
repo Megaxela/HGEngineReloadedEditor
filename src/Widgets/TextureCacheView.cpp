@@ -52,8 +52,31 @@ void HG::Editor::Widgets::TextureCacheView::drawTextures()
             ->resourceCache()
             ->getUsedResources<HG::Rendering::Base::Texture>();
 
+    // todo: Add scrollable
+    const std::size_t buttonSideSize = 150;
+    // Getting window size
+    const auto availableSize = ImGui::GetContentRegionAvailWidth();
+    const auto itemsInRow = (int) availableSize / (int) buttonSideSize;
+
+    int rowIndex = 0;
+
+    // Displaying thumbnails
     for (auto& texture : textures)
     {
-        ImGui::Image(texture, {600, 600});
+        if (ImGui::ImageButton(texture, {buttonSideSize, buttonSideSize}))
+        {
+            m_selectedTexture = texture;
+        }
+
+        rowIndex += 1;
+
+        if (rowIndex != itemsInRow)
+        {
+            ImGui::SameLine();
+        }
+        else
+        {
+            rowIndex = 0;
+        }
     }
 }
