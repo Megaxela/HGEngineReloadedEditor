@@ -6,7 +6,7 @@
 #include <HG/Core/ResourceManager.hpp>
 
 // HG::Standard
-#include <HG/Standard/FilesystemResourceAccessor.hpp>
+#include <HG/Core/FilesystemResourceAccessor.hpp>
 
 // HG::Rendering::Base
 #include <HG/Rendering/Base/Renderer.hpp>
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     // Setting resource accessor implementation
     application.resourceManager()
-        ->setResourceAccessor(new HG::Standard::FilesystemResourceAccessor());
+        ->setResourceAccessor(new HG::Core::FilesystemResourceAccessor());
 
     // Setting system controller
     application.setSystemController(new HG::Rendering::OpenGL::GLFWSystemController(&application));

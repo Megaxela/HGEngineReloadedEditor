@@ -59,7 +59,7 @@ namespace HG::Editor::Widgets
                            std::chrono::steady_clock::time_point finish);
 
         int m_pixelsPerSecond;
-
+        float m_scale;
     };
 }
 

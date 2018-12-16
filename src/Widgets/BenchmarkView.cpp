@@ -15,7 +15,8 @@
 #include <CurrentLogger.hpp>
 
 HG::Editor::Widgets::BenchmarkView::BenchmarkView() :
-    m_pixelsPerSecond(360000)
+    m_pixelsPerSecond(360000),
+    m_scale(1.0)
 {
 
 }
@@ -109,6 +110,8 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
         );
     }
 
+    ImGui::DragFloat("Scale", &m_scale, 0.01, 0.01f, 20);
+
     ImGui::Columns(2);
 
     std::vector<bool> opened;
@@ -140,7 +143,7 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
 
     ImGui::BeginChild(HG::ID::BenchmarkView::Child, {0, 0}, true, ImGuiWindowFlags_HorizontalScrollbar);
 
-    auto pixelsPerSecond = ImGui::GetWindowContentRegionWidth() / seconds;
+    auto pixelsPerSecond = ImGui::GetWindowContentRegionWidth() / seconds * m_scale;
 
     int buttonHeight = 0;
 
@@ -167,6 +170,8 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
 
             // Calculate depth shit
 
+            auto currentStack = depthStack.size();
+
             if (!depthStack.empty())
             {
                 --depthStack.top();
@@ -176,8 +181,6 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
                     depthStack.pop();
                 }
             }
-
-            auto currentStack = depthStack.size();
 
             if (job.subjobs > 0)
             {
@@ -220,7 +223,14 @@ void HG::Editor::Widgets::BenchmarkView::drawBenchmark(HG::Core::Benchmark *benc
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue, 0.8f, 0.8f));
             ImGui::Button(job.name.c_str(), ImVec2(static_cast<float>(width), 0.0f));
 
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::BeginTooltip();
 
+                ImGui::Text("%s", job.name.c_str());
+
+                ImGui::EndTooltip();
+            }
 
             if (buttonHeight == 0)
             {
