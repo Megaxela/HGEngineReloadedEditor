@@ -15,7 +15,9 @@ HG::Editor::AssetSystem::AssetsManager::AssetsManager(HG::Editor::Application *p
     m_assetsPathChanged(false),
     m_assetsPath(),
     m_rootAsset(nullptr),
-    m_parentApplication(parent)
+    m_parentApplication(parent),
+    m_pendingLoadingAssets(0),
+    m_isLoading(false)
 {
 
 }
@@ -35,6 +37,19 @@ void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
 
         clearAssets();
         updateAssets();
+    }
+
+    // If assets loading is preformed and all assets are loaded
+    // rebuild thumbnails cache and call post load.
+    if (m_isLoading &&
+        m_pendingLoadingAssets == 0)
+    {
+        // Invalidate cache, cause assets may create
+        // their thumbnails
+        application()->thumbnailsCache()->invalidateCache();
+
+        // Performing assets `postLoad` method
+        performAssetsPostLoad(m_rootAsset);
     }
 }
 
@@ -100,6 +115,8 @@ HG::Editor::AssetSystem::Assets::AssetPtr HG::Editor::AssetSystem::AssetsManager
 void HG::Editor::AssetSystem::AssetsManager::postAssetsForLoading()
 {
     postAssetForLoading(m_rootAsset);
+
+    m_isLoading = true;
 }
 
 void HG::Editor::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset)
@@ -110,10 +127,14 @@ void HG::Editor::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::Ass
         throw std::runtime_error("Asset or parent application is null");
     }
 
+    m_pendingLoadingAssets += 1;
+
     m_parentApplication->threadPool()->push(
-        [asset]()
+        [asset, this]()
         {
             asset->load();
+
+            --m_pendingLoadingAssets;
         },
         HG::Core::ThreadPool::Type::UserThread
     );
@@ -121,5 +142,21 @@ void HG::Editor::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::Ass
     for (auto& child : asset->children())
     {
         postAssetForLoading(child);
+    }
+}
+
+void HG::Editor::AssetSystem::AssetsManager::performAssetsPostLoad(HG::Editor::AssetSystem::Assets::AssetPtr asset)
+{
+    if (asset == nullptr ||
+        m_parentApplication == nullptr)
+    {
+        throw std::runtime_error("Asset or parent application is null");
+    }
+
+    asset->postLoad();
+
+    for (auto& child : asset->children())
+    {
+        performAssetsPostLoad(child);
     }
 }

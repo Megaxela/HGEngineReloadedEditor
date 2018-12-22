@@ -122,6 +122,13 @@ namespace HG::Editor::AssetSystem::Assets
         bool load();
 
         /**
+         * @brief Method, that calls `onPostLoad`
+         * method to perform any action that can be required
+         * after asset loading and thumbnails cache invalidation.
+         */
+        void postLoad();
+
+        /**
          * @brief Method, that returns asset icon.
          * @return Asset icon handle.
          */
@@ -141,6 +148,13 @@ namespace HG::Editor::AssetSystem::Assets
          * @return Loading status.
          */
         virtual bool onLoad();
+
+        /**
+         * @brief Method, that called after all assets
+         * are loaded and thumbnails cache is invalidated.
+         * Do nothing by default.
+         */
+        virtual void onPostLoad();
 
         /**
          * @brief Method, that called every frame
