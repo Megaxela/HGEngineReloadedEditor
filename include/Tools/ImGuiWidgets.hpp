@@ -14,6 +14,11 @@ namespace HG::Rendering::Base
     class Texture;
 }
 
+namespace HG::Editor
+{
+    struct Shortcut;
+}
+
 namespace ImGui
 {
     // Widgets: Icon Selectable
@@ -83,7 +88,7 @@ namespace ImGui
         /**
          * @brief Constructor.
          */
-        Item(const char* name, const char* id);
+        Item(const char* name, const char* id, HG::Editor::Shortcut* shortcut=nullptr);
 
         /**
          * @brief Destructor.
@@ -115,12 +120,20 @@ namespace ImGui
          */
         const char* id() const;
 
+        /**
+         * @brief Method for getting item shortcut.
+         * @return Pointer to item shortcut.
+         */
+        HG::Editor::Shortcut* shortcut() const;
+
     private:
 
         Callback m_callback;
 
         const char* m_name;
         const char* m_id;
+
+        HG::Editor::Shortcut* m_shortcut;
     };
 
     /**

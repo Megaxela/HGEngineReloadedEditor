@@ -2,6 +2,7 @@
 
 // HG::Core
 #include <HG/Core/Application.hpp>
+#include "ShortcutsProcessor.hpp"
 
 namespace HG::Editor::Fabrics
 {
@@ -13,6 +14,7 @@ namespace HG::Editor
 {
     class ProjectController;
     class ThumbnailsCache;
+    class ShortcutProcessor;
 
     /**
      * @brief Class that describes editor application
@@ -56,6 +58,18 @@ namespace HG::Editor
          */
         HG::Editor::ThumbnailsCache* thumbnailsCache() const;
 
+        /**
+         * @brief Method for getting pointer to shortcuts processor
+         * object.
+         * @return Pointer to shortcuts processor.
+         */
+        HG::Editor::ShortcutsProcessor* shortcutsProcessor() const;
+
+        /**
+         * @brief Overridden method for performing single
+         * application cycle.
+         * @return Success.
+         */
         bool performCycle() override;
 
     private:
@@ -63,6 +77,7 @@ namespace HG::Editor
         HG::Editor::ProjectController* m_projectController;
 
         HG::Editor::ThumbnailsCache* m_thumbnailsCache;
+        HG::Editor::ShortcutsProcessor* m_shortcutsProcessor;
 
         HG::Editor::Fabrics::PropertyEditorsFabric* m_propertyEditorsFabric;
         HG::Editor::Fabrics::AssetsFabric* m_assetsFabric;

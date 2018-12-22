@@ -5,11 +5,13 @@
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AssetSystem/AssetsManager.hpp>
 #include <Tools/ThumbnailsCache.hpp>
+#include <Editor/ShortcutsProcessor.hpp>
 
 HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     HG::Core::Application(std::move(name), argc, argv),
     m_projectController(new HG::Editor::ProjectController(this)),
     m_thumbnailsCache(new HG::Editor::ThumbnailsCache(this)),
+    m_shortcutsProcessor(new HG::Editor::ShortcutsProcessor()),
     m_propertyEditorsFabric(new HG::Editor::Fabrics::PropertyEditorsFabric()),
     m_assetsFabric(new HG::Editor::Fabrics::AssetsFabric())
 {
@@ -43,8 +45,15 @@ HG::Editor::ThumbnailsCache *HG::Editor::Application::thumbnailsCache() const
     return m_thumbnailsCache;
 }
 
+HG::Editor::ShortcutsProcessor* HG::Editor::Application::shortcutsProcessor() const
+{
+    return m_shortcutsProcessor;
+}
+
 bool HG::Editor::Application::performCycle()
 {
+    m_shortcutsProcessor->proceed(input());
+
     m_projectController->assetManager()->proceedEvents();
 
     return HG::Core::Application::performCycle();

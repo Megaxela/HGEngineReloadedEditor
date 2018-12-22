@@ -473,10 +473,11 @@ ImGui::DisabledGuard::~DisabledGuard()
 
 
 
-ImGui::Item::Item(const char *name, const char *id) :
+ImGui::Item::Item(const char *name, const char *id, HG::Editor::Shortcut* shortcut) :
     m_callback(),
     m_name(name),
-    m_id(id)
+    m_id(id),
+    m_shortcut(shortcut)
 {
 
 }
@@ -504,6 +505,11 @@ const char *ImGui::Item::name() const
 const char *ImGui::Item::id() const
 {
     return m_id;
+}
+
+HG::Editor::Shortcut* ImGui::Item::shortcut() const
+{
+    return m_shortcut;
 }
 
 ImGui::Menu::Menu() :
