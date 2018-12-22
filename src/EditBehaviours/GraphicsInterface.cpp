@@ -168,15 +168,38 @@ void HG::Editor::Behaviours::GraphicsInterface::onStart()
 
 void HG::Editor::Behaviours::GraphicsInterface::setupMainMenu()
 {
+    auto shortcuts = editorApplication()->shortcutsProcessor();
+
     {
         auto menu = m_mainMenu.addMenu("File", "File");
-        menu->addItem("New Project", "New Project");
-        menu->addItem("Open Project", "OpenProject")
-            ->setCallback( [this]() { actionOpenProject(); } );
+        menu->addItem(
+            "New Project",
+            "New Project",
+            shortcuts->addShortcut({
+                HG::Core::Input::Keyboard::Modifiers::Ctrl
+            }, {
+                HG::Core::Input::Keyboard::Key::N
+            }));
+
+        menu->addItem(
+            "Open Project",
+            "OpenProject",
+            shortcuts->addShortcut({
+                HG::Core::Input::Keyboard::Modifiers::Ctrl
+            }, {
+                HG::Core::Input::Keyboard::Key::O
+            }))->setCallback( [this]() { actionOpenProject(); } );
 
         menu->addItem("Close Project", "Close Project");
         menu->addSeparator();
-        menu->addItem("Exit", "Exit");
+        menu->addItem(
+            "Exit",
+            "Exit",
+            shortcuts->addShortcut({
+                HG::Core::Input::Keyboard::Modifiers::Ctrl,
+            }, {
+                HG::Core::Input::Keyboard::Key::Q
+            }))->setCallback( [this]() { editorApplication()->stop(); } );
     }
 
     {
@@ -197,9 +220,14 @@ void HG::Editor::Behaviours::GraphicsInterface::updateGameObjectsCache()
     scene()->getGameObjects(m_commonSettings.gameobjectsCache);
 }
 
+HG::Editor::Application* HG::Editor::Behaviours::GraphicsInterface::editorApplication() const
+{
+    return static_cast<HG::Editor::Application*>(scene()->application());
+}
+
 void HG::Editor::Behaviours::GraphicsInterface::actionOpenProject()
 {
-    auto project = dynamic_cast<HG::Editor::Application*>(scene()->application())->projectController();
+    auto project = editorApplication()->projectController();
 
     m_openPathWidget->settings().mode = HG::Editor::Widgets::OpenPath::Settings::Mode::Directory;
     m_openPathWidget->setOkCallback(

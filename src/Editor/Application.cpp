@@ -21,6 +21,8 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
 HG::Editor::Application::~Application()
 {
     delete m_projectController;
+    delete m_thumbnailsCache;
+    delete m_shortcutsProcessor;
     delete m_propertyEditorsFabric;
     delete m_assetsFabric;
 }

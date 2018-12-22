@@ -19,6 +19,11 @@
 #include <glm/glm.hpp>
 #include <Tools/ImGuiWidgets.hpp>
 
+namespace HG::Editor
+{
+    class Application;
+}
+
 namespace HG::Editor::Widgets
 {
     class AbstractWidget;
@@ -79,6 +84,12 @@ namespace HG::Editor::Behaviours
         void onStart() override;
 
     private:
+
+        /**
+         * @brief Method for getting parent's editor application.
+         * @return Pointer to editor application.
+         */
+        HG::Editor::Application* editorApplication() const;
 
         /**
          * @brief Method for setting up

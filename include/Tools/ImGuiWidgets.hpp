@@ -186,7 +186,7 @@ namespace ImGui
          * @param id Item id.
          * @return Pointer to action for this item.
          */
-        Item* addItem(const char* name, const char* id);
+        Item* addItem(const char* name, const char* id, HG::Editor::Shortcut* shortcut=nullptr);
 
         /**
          * @brief Method, that performs adding item that

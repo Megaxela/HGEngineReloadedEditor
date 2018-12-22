@@ -10,11 +10,17 @@ namespace HG::Editor
 {
     struct Shortcut
     {
-        std::unordered_set<HG::Core::Input::Keyboard::Key> keys;
-        std::unordered_set<HG::Core::Input::Keyboard::Modifiers> modifiers;
+        using KeysSet = std::unordered_set<HG::Core::Input::Keyboard::Key>;
+        using ModifiersSet = std::unordered_set<HG::Core::Input::Keyboard::Modifiers>;
+        using Callback = std::function<void()>;
 
-        std::function<void()> callback;
+        KeysSet keys;
+        ModifiersSet modifiers;
+
+        Callback callback;
         bool fired = false;
+
+        std::string generateName() const;
     };
 
     /**
@@ -31,6 +37,11 @@ namespace HG::Editor
         ShortcutsProcessor();
 
         /**
+         * @brief Destructor.
+         */
+        ~ShortcutsProcessor();
+
+        /**
          * @brief Method for actual processing all
          * of added shortcuts.
          * @param input Pointer to input object.
@@ -42,11 +53,12 @@ namespace HG::Editor
          * processor.
          * @param shortcut Pointer to shortcut.
          */
-        void addShortcut(Shortcut* shortcut);
+        Shortcut* addShortcut(Shortcut::ModifiersSet modifiers, Shortcut::KeysSet shortcuts, Shortcut::Callback callback=nullptr);
 
         /**
          * @brief Method for removing shortcut
-         * from processor.
+         * from processor. It's also disposes
+         * shortcut.
          * @param shortcut Pointer to shortcut.
          */
         void removeShortcut(Shortcut* shortcut);

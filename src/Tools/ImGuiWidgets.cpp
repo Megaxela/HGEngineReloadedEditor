@@ -1,5 +1,6 @@
 // Editor
 #include <Tools/ImGuiWidgets.hpp>
+#include <Editor/ShortcutsProcessor.hpp>
 
 // ALogger
 #include <CurrentLogger.hpp>
@@ -534,11 +535,29 @@ ImGui::Menu::~Menu()
     }
 }
 
-ImGui::Item *ImGui::Menu::addItem(const char *name, const char *id)
+ImGui::Item *ImGui::Menu::addItem(const char *name, const char *id, HG::Editor::Shortcut* shortcut)
 {
-    auto item = new Item(name, id);
+    auto item = new Item(name, id, shortcut);
 
     m_entries.emplace_back(Entry::Type::Item, item);
+
+    if (shortcut)
+    {
+        auto previousCallback = shortcut->callback;
+
+        shortcut->callback = [item, previousCallback]()
+        {
+            if (previousCallback)
+            {
+                previousCallback();
+            }
+
+            if (item->callback())
+            {
+                item->callback()();
+            }
+        };
+    }
 
     return item;
 }
@@ -610,8 +629,15 @@ void ImGui::ContextMenuRenderer::renderMenu(const ImGui::Menu &menu)
 
 void ImGui::ContextMenuRenderer::renderItem(const ImGui::Item &item)
 {
+    std::string name;
+
+    if (item.shortcut())
+    {
+        name = item.shortcut()->generateName();
+    }
+
     if (ImGui::IDGuard(item.id()),
-        ImGui::Selectable(item.name()))
+        ImGui::MenuItem(item.name(), name.c_str()))
     {
         if (!item.callback())
             return;
@@ -672,8 +698,15 @@ void ImGui::MainMenuRenderer::renderMenu(const ImGui::Menu& menu)
 
 void ImGui::MainMenuRenderer::renderItem(const ImGui::Item& item)
 {
+    std::string name;
+
+    if (item.shortcut())
+    {
+        name = item.shortcut()->generateName();
+    }
+
     if (ImGui::IDGuard(item.id()),
-        ImGui::MenuItem(item.name()))
+        ImGui::MenuItem(item.name(), name.c_str()))
     {
         if (!item.callback())
             return;
