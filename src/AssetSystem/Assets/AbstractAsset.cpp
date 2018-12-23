@@ -112,6 +112,11 @@ bool HG::Editor::AssetSystem::Assets::AbstractAsset::load()
     return result;
 }
 
+void HG::Editor::AssetSystem::Assets::AbstractAsset::postLoad()
+{
+    onPostLoad();
+}
+
 void HG::Editor::AssetSystem::Assets::AbstractAsset::setState(HG::Editor::AssetSystem::Assets::AbstractAsset::State state)
 {
     std::unique_lock<std::shared_mutex> lock(m_stateMutex);
@@ -126,6 +131,11 @@ HG::Editor::ThumbnailsCache::Handle HG::Editor::AssetSystem::Assets::AbstractAss
 bool HG::Editor::AssetSystem::Assets::AbstractAsset::onLoad()
 {
     return false;
+}
+
+void HG::Editor::AssetSystem::Assets::AbstractAsset::onPostLoad()
+{
+
 }
 
 void HG::Editor::AssetSystem::Assets::AbstractAsset::onInspector()

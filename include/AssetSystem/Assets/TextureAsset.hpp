@@ -24,6 +24,23 @@ namespace HG::Editor::AssetSystem::Assets
          * @param path Path to asset.
          */
         explicit TextureAsset(std::filesystem::path path);
+
+        /**
+         * @brief Overridden method that will show
+         * texture thumbnail after loading.
+         * @return Thumbnail
+         */
+        ThumbnailsCache::Handle icon() const override;
+
+    protected:
+        bool onLoad() override;
+
+        void onPostLoad() override;
+
+    private:
+        HG::Rendering::Base::Texture* m_thumbnailBaseTexture;
+
+        ThumbnailsCache::Handle m_thumbnailHandle;
     };
 }
 

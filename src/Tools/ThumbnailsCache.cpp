@@ -97,6 +97,12 @@ glm::vec2 HG::Editor::ThumbnailsCache::pixelsToUV(glm::ivec2 value)
 
 void HG::Editor::ThumbnailsCache::invalidateCache()
 {
+    if (m_newOrUpdateThumbnails.empty())
+    {
+        Info() << "Cache invalidating called, but no changes apply.";
+        return;
+    }
+
     Info() << "Invalidating cache";
 
     auto beginTime = std::chrono::steady_clock::now();

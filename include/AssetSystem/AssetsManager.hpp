@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <filesystem>
+#include <atomic>
 
 namespace HG::Editor
 {
@@ -80,6 +81,8 @@ namespace HG::Editor::AssetSystem
 
         void postAssetForLoading(HG::Editor::AssetSystem::Assets::AssetPtr asset);
 
+        void performAssetsPostLoad(HG::Editor::AssetSystem::Assets::AssetPtr asset);
+
         void reloadAssets();
 
         void reloadDirectory(const std::filesystem::path& path, HG::Editor::AssetSystem::Assets::AssetPtr target);
@@ -91,6 +94,9 @@ namespace HG::Editor::AssetSystem
         std::shared_ptr<HG::Editor::AssetSystem::Assets::RootAsset> m_rootAsset;
 
         HG::Editor::Application* m_parentApplication;
+
+        std::atomic_int m_pendingLoadingAssets;
+        bool m_isLoading;
     };
 }
 
