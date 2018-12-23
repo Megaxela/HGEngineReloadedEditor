@@ -70,6 +70,8 @@ bool HG::Editor::AssetSystem::Assets::TextureAsset::onLoad()
         ->application()
         ->thumbnailsCache()
         ->addThumbnail(m_thumbnailBaseTexture, thumbnailSize);
+
+    return true;
 }
 
 void HG::Editor::AssetSystem::Assets::TextureAsset::onPostLoad()

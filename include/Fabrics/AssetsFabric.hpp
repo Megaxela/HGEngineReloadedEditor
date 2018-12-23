@@ -47,12 +47,12 @@ namespace HG::Editor::Fabrics
          * @param extensions Extension for identifying asset.
          */
         template<typename AssetType>
-        void registrate(const std::set<std::string>& extensions)
+        void registrate (std::set<std::string> extensions)
         {
-            m_data[extensions] = [](std::filesystem::path path) -> AssetPtr
+            m_data.emplace(extensions, [](std::filesystem::path path) -> AssetPtr
             {
                 return std::make_shared<AssetType>(std::move(path));
-            };
+            });
         }
 
         /**

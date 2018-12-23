@@ -17,14 +17,14 @@ add_subdirectory(libraries)
 # Internal libraries
 
 # Find LLVM
-find_package(LLVM REQUIRED CONFIG)
-message(STATUS "Found LLVM " ${LLVM_PACKAGE_VERSION})
+#find_package(LLVM REQUIRED CONFIG)
+#message(STATUS "Found LLVM " ${LLVM_PACKAGE_VERSION})
 
 # Find clang
-find_package(Clang REQUIRED)
+#find_package(Clang REQUIRED)
 
 # Finding components
-llvm_map_components_to_libnames(LLVM_COMPONENTS_MODULES core)
+#llvm_map_components_to_libnames(LLVM_COMPONENTS_MODULES core)
 
 # Adding sources
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
@@ -51,9 +51,11 @@ target_link_libraries(HGEngineReloadedImGui
     rectpack2D
 
     # LLVM
-    LLVM
-    ${CLANG_LIBS}
+#    LLVM
+#    ${CLANG_LIBS}
 )
+
+add_sanitizers(HGEngineReloadedImGui)
 
 configure_file(resources/images/folder.png images/folder.png COPYONLY )
 configure_file(resources/images/text.png images/text.png COPYONLY )

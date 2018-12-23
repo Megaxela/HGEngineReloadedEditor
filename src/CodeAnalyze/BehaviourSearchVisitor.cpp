@@ -1,6 +1,6 @@
 // Editor
 #include <CodeAnalyze/BehaviourSearchVisitor.hpp>
-
+#if 0
 class ExampleASTConsumer : public clang::ASTConsumer
 {
 public:
@@ -96,3 +96,4 @@ std::unique_ptr<clang::tooling::ToolAction> HG::CodeAnalyze::BehavioursSearchVis
 {
     return std::make_unique<ExampleActionFabric>(result);
 }
+#endif

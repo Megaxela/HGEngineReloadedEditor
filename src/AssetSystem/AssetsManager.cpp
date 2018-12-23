@@ -50,6 +50,9 @@ void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
 
         // Performing assets `postLoad` method
         performAssetsPostLoad(m_rootAsset);
+
+        // Finishing assets loading
+        m_isLoading = false;
     }
 }
 

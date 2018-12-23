@@ -16,6 +16,7 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     m_assetsFabric(new HG::Editor::Fabrics::AssetsFabric())
 {
     m_propertyEditorsFabric->registrateDefault();
+    m_assetsFabric->registrateDefault();
 }
 
 HG::Editor::Application::~Application()

@@ -6,6 +6,7 @@
 
 // ALogger
 #include <CurrentLogger.hpp>
+#include <AssetSystem/Assets/TextureAsset.hpp>
 
 HG::Editor::Fabrics::AssetsFabric::AssetsFabric() :
     m_data()
@@ -59,5 +60,7 @@ void HG::Editor::Fabrics::AssetsFabric::clear()
 
 void HG::Editor::Fabrics::AssetsFabric::registrateDefault()
 {
+
     registrate<HG::Editor::AssetSystem::Assets::TextAsset>({".txt"});
+    registrate<HG::Editor::AssetSystem::Assets::TextureAsset>({".png", ".tga", ".bmp"});
 }
