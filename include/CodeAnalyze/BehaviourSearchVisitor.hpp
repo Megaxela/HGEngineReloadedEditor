@@ -1,5 +1,4 @@
 #pragma once
-#if 0
 // C++ STL
 #include <memory>
 
@@ -54,4 +53,3 @@ namespace HG::CodeAnalyze
         clang::CXXRecordDecl* m_behaviourDecl;
     };
 }
-#endif

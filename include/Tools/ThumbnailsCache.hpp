@@ -3,6 +3,7 @@
 // C++ STL
 #include <unordered_map>
 #include <vector>
+#include <shared_mutex>
 
 // GLM
 #include <glm/vec2.hpp>
@@ -157,8 +158,14 @@ namespace HG::Editor
         HG::Editor::Application* m_parentApplication;
 
         HG::Rendering::Base::Texture* m_texture;
+        mutable std::shared_mutex m_textureMutex;
+
         HandlerTLBRContainer m_currentThumbnails;
+        mutable std::shared_mutex m_currentMutex;
+
         std::unordered_map<Handle, NewThumbnail> m_newOrUpdateThumbnails;
+        mutable std::shared_mutex m_newOrUpdateMutex;
+
         Handle m_handlerCounter;
     };
 }

@@ -34,11 +34,13 @@ HG::Editor::Application *HG::Editor::ThumbnailsCache::application() const
 
 HG::Rendering::Base::Texture *HG::Editor::ThumbnailsCache::texture() const
 {
+    std::shared_lock<std::shared_mutex> lock(m_textureMutex);
     return m_texture;
 }
 
 HG::Editor::ThumbnailsCache::Handle HG::Editor::ThumbnailsCache::addThumbnail(HG::Rendering::Base::Texture *texture, glm::ivec2 size)
 {
+    std::unique_lock<std::shared_mutex> lock(m_newOrUpdateMutex);
     m_newOrUpdateThumbnails[++m_handlerCounter] = NewThumbnail(
         texture,
         (size.x == 0 || size.y == 0) ? texture->size() : size
@@ -50,10 +52,16 @@ HG::Editor::ThumbnailsCache::Handle HG::Editor::ThumbnailsCache::addThumbnail(HG
 void HG::Editor::ThumbnailsCache::updateThumbnail(HG::Editor::ThumbnailsCache::Handle handler,
                                                   HG::Rendering::Base::Texture *texture, glm::ivec2 size)
 {
-    if (m_newOrUpdateThumbnails.count(handler) == 0 &&
-        m_currentThumbnails.count(handler))
+
+    std::unique_lock<std::shared_mutex> lock(m_newOrUpdateMutex);
+
     {
-        throw std::invalid_argument("No thumbnail with provided handler");
+        std::shared_lock<std::shared_mutex> currentLock(m_currentMutex);
+        if (m_newOrUpdateThumbnails.count(handler) == 0 &&
+            m_currentThumbnails.count(handler))
+        {
+            throw std::invalid_argument("No thumbnail with provided handler");
+        }
     }
 
     m_newOrUpdateThumbnails[handler] = NewThumbnail(
@@ -64,17 +72,22 @@ void HG::Editor::ThumbnailsCache::updateThumbnail(HG::Editor::ThumbnailsCache::H
 
 void HG::Editor::ThumbnailsCache::removeThumbnail(HG::Editor::ThumbnailsCache::Handle handler)
 {
+    std::unique_lock<std::shared_mutex> newLock(m_newOrUpdateMutex);
+    std::unique_lock<std::shared_mutex> currentLock(m_currentMutex);
+
     m_newOrUpdateThumbnails.erase(handler);
     m_currentThumbnails.erase(handler);
 }
 
 bool HG::Editor::ThumbnailsCache::isAvailable(HG::Editor::ThumbnailsCache::Handle handler) const
 {
+    std::shared_lock<std::shared_mutex> currentLock(m_currentMutex);
     return m_currentThumbnails.count(handler) > 0;
 }
 
 HG::Editor::ThumbnailsCache::TLBR HG::Editor::ThumbnailsCache::thumbnailTLBR(HG::Editor::ThumbnailsCache::Handle handler) const
 {
+    std::shared_lock<std::shared_mutex> currentLock(m_currentMutex);
     auto iterator = m_currentThumbnails.find(handler);
 
     if (iterator == m_currentThumbnails.end())
@@ -87,6 +100,7 @@ HG::Editor::ThumbnailsCache::TLBR HG::Editor::ThumbnailsCache::thumbnailTLBR(HG:
 
 glm::vec2 HG::Editor::ThumbnailsCache::pixelsToUV(glm::ivec2 value)
 {
+    std::shared_lock<std::shared_mutex> lock(m_textureMutex);
     if (m_texture == nullptr)
     {
         return glm::vec2(0, 0);
@@ -97,15 +111,19 @@ glm::vec2 HG::Editor::ThumbnailsCache::pixelsToUV(glm::ivec2 value)
 
 void HG::Editor::ThumbnailsCache::invalidateCache()
 {
+    Info() << "Invalidating cache";
+
+    auto beginTime = std::chrono::steady_clock::now();
+
+    std::unique_lock<std::shared_mutex> textureLock(m_textureMutex);
+    std::unique_lock<std::shared_mutex> currentLock(m_currentMutex);
+    std::unique_lock<std::shared_mutex> newOrUpdate(m_newOrUpdateMutex);
+
 //    if (m_newOrUpdateThumbnails.empty())
 //    {
 //        Info() << "Cache invalidating called, but no changes apply.";
 //        return;
 //    }
-
-    Info() << "Invalidating cache";
-
-    auto beginTime = std::chrono::steady_clock::now();
 
     constexpr bool allow_flip = false;
     const auto runtime_flipping_mode = rectpack2D::flipping_option::DISABLED;

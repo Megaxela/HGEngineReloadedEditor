@@ -60,7 +60,6 @@ void HG::Editor::Fabrics::AssetsFabric::clear()
 
 void HG::Editor::Fabrics::AssetsFabric::registrateDefault()
 {
-
     registrate<HG::Editor::AssetSystem::Assets::TextAsset>({".txt"});
     registrate<HG::Editor::AssetSystem::Assets::TextureAsset>({".png", ".tga", ".bmp"});
 }
