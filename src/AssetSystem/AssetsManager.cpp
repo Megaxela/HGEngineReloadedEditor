@@ -46,7 +46,10 @@ void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
     {
         // Invalidate cache, cause assets may create
         // their thumbnails
-        application()->thumbnailsCache()->invalidateCache();
+        if (application()->thumbnailsCache()->invalidationRequired())
+        {
+            application()->thumbnailsCache()->invalidateCache();
+        }
 
         // Performing assets `postLoad` method
         performAssetsPostLoad(m_rootAsset);

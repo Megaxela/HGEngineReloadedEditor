@@ -60,18 +60,6 @@ namespace HG::Editor::Widgets
          */
         void onDraw() override;
 
-        /**
-         * @brief Method that performs loading icons
-         * and prepares them for thumbnails caching.
-         */
-        void onInitialization() override;
-
-        /**
-         * @brief Method that performs icons delete
-         * because they will be loaded to thumbnails cache.
-         */
-        void onPostInitialization() override;
-
     private:
 
         enum class Type
@@ -80,12 +68,6 @@ namespace HG::Editor::Widgets
             Warning,
             Error
         };
-
-        HG::Editor::ThumbnailsCache::Handle m_infoIconHandle;
-        HG::Editor::ThumbnailsCache::Handle m_warningIconHandle;
-        HG::Editor::ThumbnailsCache::Handle m_errorIconHandle;
-
-        std::vector<HG::Rendering::Base::Texture*> m_resourcesToFree;
 
         bool m_currentOpenState;
 

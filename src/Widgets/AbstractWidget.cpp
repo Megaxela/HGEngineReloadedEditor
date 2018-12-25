@@ -52,13 +52,3 @@ void HG::Editor::Widgets::AbstractWidget::onInitialization()
 {
 
 }
-
-void HG::Editor::Widgets::AbstractWidget::postInitialization()
-{
-    onPostInitialization();
-}
-
-void HG::Editor::Widgets::AbstractWidget::onPostInitialization()
-{
-
-}

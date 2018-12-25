@@ -109,6 +109,13 @@ glm::vec2 HG::Editor::ThumbnailsCache::pixelsToUV(glm::ivec2 value)
     return glm::vec2(value) / glm::vec2(m_texture->size());
 }
 
+bool HG::Editor::ThumbnailsCache::invalidationRequired() const
+{
+    std::shared_lock<std::shared_mutex> newOrUpdate(m_newOrUpdateMutex);
+
+    return !m_newOrUpdateThumbnails.empty();
+}
+
 void HG::Editor::ThumbnailsCache::invalidateCache()
 {
     Info() << "Invalidating cache";
@@ -119,11 +126,11 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
     std::unique_lock<std::shared_mutex> currentLock(m_currentMutex);
     std::unique_lock<std::shared_mutex> newOrUpdate(m_newOrUpdateMutex);
 
-//    if (m_newOrUpdateThumbnails.empty())
-//    {
-//        Info() << "Cache invalidating called, but no changes apply.";
-//        return;
-//    }
+    if (m_newOrUpdateThumbnails.empty())
+    {
+        Info() << "Cache invalidating called, but no changes apply.";
+        return;
+    }
 
     constexpr bool allow_flip = false;
     const auto runtime_flipping_mode = rectpack2D::flipping_option::DISABLED;
@@ -227,8 +234,10 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
 
     // Saving rendertarget state
     auto currentRenderTarget = application()->renderer()->pipeline()->renderTarget();
+    auto override = application()->renderer()->pipeline()->renderOverride();
 
     // Setting new render target
+    application()->renderer()->pipeline()->setRenderOverride(nullptr);
     application()->renderer()->pipeline()->setRenderTarget(renderTarget);
 
     // Clearing new render target
@@ -239,6 +248,7 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
 
     // Restoring rendertarget state
     application()->renderer()->pipeline()->setRenderTarget(currentRenderTarget);
+    application()->renderer()->pipeline()->setRenderOverride(override);
 
     // Applying new data
     m_currentThumbnails = newCurrent;

@@ -15,6 +15,7 @@ namespace HG::Editor
     class ProjectController;
     class ThumbnailsCache;
     class ShortcutProcessor;
+    class GlobalThumbnails;
 
     /**
      * @brief Class that describes editor application
@@ -66,11 +67,20 @@ namespace HG::Editor
         HG::Editor::ShortcutsProcessor* shortcutsProcessor() const;
 
         /**
+         * @brief Method for getting pointer to object that holds
+         * global thumbnails.
+         * @return Pointer to global thumbnails controller.
+         */
+        HG::Editor::GlobalThumbnails* globalThumbnails() const;
+
+        /**
          * @brief Overridden method for performing single
          * application cycle.
          * @return Success.
          */
         bool performCycle() override;
+
+        bool init() override;
 
     private:
 
@@ -78,6 +88,7 @@ namespace HG::Editor
 
         HG::Editor::ThumbnailsCache* m_thumbnailsCache;
         HG::Editor::ShortcutsProcessor* m_shortcutsProcessor;
+        HG::Editor::GlobalThumbnails* m_globalThumbnails;
 
         HG::Editor::Fabrics::PropertyEditorsFabric* m_propertyEditorsFabric;
         HG::Editor::Fabrics::AssetsFabric* m_assetsFabric;

@@ -150,20 +150,6 @@ void HG::Editor::Behaviours::GraphicsInterface::onStart()
     {
         widget->initialize();
     }
-
-    dynamic_cast<Editor::Application*>(scene()->application())
-        ->thumbnailsCache()->invalidateCache();
-
-    // Post initalization
-    for (auto& widget : m_dockWidgets)
-    {
-        widget->postInitialization();
-    }
-
-    for (auto& widget : m_commonWidgets)
-    {
-        widget->postInitialization();
-    }
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::setupMainMenu()

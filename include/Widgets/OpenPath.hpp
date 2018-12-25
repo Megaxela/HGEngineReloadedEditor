@@ -87,18 +87,6 @@ namespace HG::Editor::Widgets
          */
         void onDraw() override;
 
-        /**
-         * @brief Method that performs icons
-         * loading and prepares them for thumbnails caching.
-         */
-        void onInitialization() override;
-
-        /**
-         * @brief Method that deletes loaded
-         * icons, because they already in cache.
-         */
-        void onPostInitialization() override;
-
     private:
 
         /**
@@ -161,10 +149,5 @@ namespace HG::Editor::Widgets
         Settings m_settings;
 
         bool m_currentOpenState;
-
-        HG::Editor::ThumbnailsCache::Handle m_directory;
-        HG::Editor::ThumbnailsCache::Handle m_file;
-
-        std::vector<HG::Rendering::Base::Texture*> m_resourcesToFree;
     };
 }

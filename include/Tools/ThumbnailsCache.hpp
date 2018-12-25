@@ -112,6 +112,13 @@ namespace HG::Editor
         void invalidateCache();
 
         /**
+         * @brief Method for checking is cache require
+         * invalidation.
+         * @return Invalidation.
+         */
+        bool invalidationRequired() const;
+
+        /**
          * @brief Method, that performs convertation
          * from pixel values in TLBR to UV values.
          * If cache does not have set up internal texture -

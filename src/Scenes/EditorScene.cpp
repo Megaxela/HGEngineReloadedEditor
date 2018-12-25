@@ -83,7 +83,7 @@ HG::Editor::EditorScene::EditorScene(HG::Core::Scene *sceneToEdit) :
 void HG::Editor::EditorScene::start()
 {
     // Creating editing camera
-    auto editingCameraGameObject = HG::Core::GameObjectBuilder()
+    auto editingCameraGameObject = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName(".EditorCamera")
         // Setting object to hidden mode
         // to hide it from user code.
@@ -125,7 +125,7 @@ void HG::Editor::EditorScene::start()
 
     material->setColor(HG::Utils::Color::fromRGB(20, 0, 0));
 
-    auto parentGO = HG::Core::GameObjectBuilder()
+    auto parentGO = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Parent1")
         .addBehaviour(
             new HG::Rendering::Base::Behaviours::Mesh(
@@ -134,18 +134,18 @@ void HG::Editor::EditorScene::start()
             )
         ).deploy();
 
-    auto parentGO2 = HG::Core::GameObjectBuilder()
+    auto parentGO2 = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Parent2")
         .addBehaviour(
             new NumberTestBehaviour()
         ).deploy();
 
-    auto child1 = HG::Core::GameObjectBuilder()
+    auto child1 = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Child1")
         .setParent(parentGO)
         .deploy();
 
-    auto child2 = HG::Core::GameObjectBuilder()
+    auto child2 = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Child2")
         .setParent(parentGO2)
         .deploy();

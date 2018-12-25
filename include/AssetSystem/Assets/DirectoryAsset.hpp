@@ -24,6 +24,8 @@ namespace HG::Editor::AssetSystem::Assets
          * @param path Path to asset.
          */
         explicit DirectoryAsset(std::filesystem::path path);
+
+        ThumbnailsCache::Handle icon() const override;
     };
 }
 

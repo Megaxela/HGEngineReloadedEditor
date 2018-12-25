@@ -10,6 +10,7 @@
 #include <Tools/ImGuiIdentificators.hpp>
 #include <Tools/ImGuiWidgets.hpp>
 #include <Widgets/CommonSettings.hpp>
+#include <Tools/GlobalThumbnails.hpp>
 
 // HG::Core
 #include <HG/Core/ResourceManager.hpp>
@@ -25,7 +26,6 @@
 #include <imgui.h>
 
 HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *settings) :
-    m_resourcesToFree(),
     m_commonSettings(settings),
     m_sortTypes({
         {"Name",
@@ -41,54 +41,9 @@ HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *setti
              return l->type() < r->type();
          }}
     }),
-    m_currentSorting(0),
-    m_unloadedIcon (HG::Editor::ThumbnailsCache::InvalidHandle),
-    m_loadingIcon  (HG::Editor::ThumbnailsCache::InvalidHandle),
-    m_corruptedIcon(HG::Editor::ThumbnailsCache::InvalidHandle)
+    m_currentSorting(0)
 {
 
-}
-
-void HG::Editor::Widgets::Assets::onInitialization()
-{
-    auto unloadedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/unchecked.png")
-            .guaranteeGet()
-    );
-
-    auto loadedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/checked.png")
-            .guaranteeGet()
-    );
-
-    auto corruptedIcon = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/corrupted.png")
-            .guaranteeGet()
-    );
-
-    m_resourcesToFree.push_back(unloadedIcon);
-    m_resourcesToFree.push_back(loadedIcon);
-    m_resourcesToFree.push_back(corruptedIcon);
-
-    m_unloadedIcon  = application()->thumbnailsCache()->addThumbnail(unloadedIcon);
-    m_loadingIcon   = application()->thumbnailsCache()->addThumbnail(loadedIcon);
-    m_corruptedIcon = application()->thumbnailsCache()->addThumbnail(corruptedIcon);
-}
-
-void HG::Editor::Widgets::Assets::onPostInitialization()
-{
-    for (auto& resource : m_resourcesToFree)
-    {
-        delete resource;
-    }
-
-    m_resourcesToFree.clear();
 }
 
 void HG::Editor::Widgets::Assets::onDraw()
@@ -122,7 +77,12 @@ void HG::Editor::Widgets::Assets::drawAsset(const HG::Editor::AssetSystem::Asset
         ImVec2 uvTL;
         ImVec2 uvBR;
 
-        auto icon = m_loadingIcon;
+        auto icon = asset->icon();
+
+        if (icon == HG::Editor::ThumbnailsCache::InvalidHandle)
+        {
+            icon = application()->globalThumbnails()->getHandle(HG::Editor::GlobalThumbnails::Thumbs::LoadingAssetIcon);
+        }
 
         if (application()->thumbnailsCache()->isAvailable(icon))
         {

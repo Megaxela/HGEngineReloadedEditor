@@ -3,6 +3,7 @@
 #include <Editor/Application.hpp>
 #include <Tools/ImGuiWidgets.hpp>
 #include <Tools/ImGuiIdentificators.hpp>
+#include <Tools/GlobalThumbnails.hpp>
 
 // C++ STL
 #include <algorithm>
@@ -46,46 +47,7 @@ HG::Editor::Widgets::OpenPath::OpenPath() :
 
 HG::Editor::Widgets::OpenPath::~OpenPath()
 {
-    application()->thumbnailsCache()->removeThumbnail(m_directory);
-    application()->thumbnailsCache()->removeThumbnail(m_file);
-}
 
-void HG::Editor::Widgets::OpenPath::onInitialization()
-{
-    auto textTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/text.png")
-            .guaranteeGet()
-    );
-
-    auto directoryTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/folder.png")
-            .guaranteeGet()
-    );
-
-    m_resourcesToFree.push_back(textTexture);
-    m_resourcesToFree.push_back(directoryTexture);
-
-    m_file = application()->thumbnailsCache()->addThumbnail(textTexture);
-    m_directory = application()->thumbnailsCache()->addThumbnail(directoryTexture);
-
-    // Cache invalidation will be performed in GraphicsInterface behaviour
-    // after initialization.
-}
-
-void HG::Editor::Widgets::OpenPath::onPostInitialization()
-{
-    // Resources, allocated at initalization side was used
-    // by thumbnails cache. Now they can be freed.
-    for (auto& resource : m_resourcesToFree)
-    {
-        delete resource;
-    }
-
-    m_resourcesToFree.clear();
 }
 
 void HG::Editor::Widgets::OpenPath::setOkCallback(HG::Editor::Widgets::OpenPath::OkCallback callback)
@@ -236,6 +198,7 @@ void HG::Editor::Widgets::OpenPath::drawItemsChild()
         }
 
         auto icon = HG::Editor::ThumbnailsCache::InvalidHandle;
+        auto* globalThumbnails = application()->globalThumbnails();
 
         switch (file.status.type())
         {
@@ -244,10 +207,12 @@ void HG::Editor::Widgets::OpenPath::drawItemsChild()
         case std::filesystem::file_type::not_found:
             break;
         case std::filesystem::file_type::regular:
-            icon = m_file;
+            icon = globalThumbnails
+                ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::FileIcon);
             break;
         case std::filesystem::file_type::directory:
-            icon = m_directory;
+            icon = globalThumbnails
+                ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::DirectoryIcon);;
             break;
         case std::filesystem::file_type::symlink:
             break;

@@ -35,11 +35,12 @@ namespace HG::Editor::Widgets
         explicit Assets(HG::Editor::Widgets::Settings::Common* settings);
 
     protected:
+
+        /**
+         * @brief Method, that performs
+         * actual widget drawing.
+         */
         void onDraw() override;
-
-        void onInitialization() override;
-
-        void onPostInitialization() override;
 
     private:
 
@@ -86,17 +87,10 @@ namespace HG::Editor::Widgets
          */
         void sortAssetChildren(HG::Editor::AssetSystem::Assets::AssetPtr asset);
 
-        std::vector<HG::Rendering::Base::Texture*> m_resourcesToFree;
-
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         std::vector<SortType> m_sortTypes;
 
         std::size_t m_currentSorting;
-
-        // Icons
-        HG::Editor::ThumbnailsCache::Handle m_unloadedIcon;
-        HG::Editor::ThumbnailsCache::Handle m_loadingIcon;
-        HG::Editor::ThumbnailsCache::Handle m_corruptedIcon;
     };
 }

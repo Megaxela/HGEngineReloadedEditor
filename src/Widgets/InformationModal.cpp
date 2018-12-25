@@ -3,6 +3,7 @@
 #include <Tools/ImGuiIdentificators.hpp>
 #include <Tools/ImGuiWidgets.hpp>
 #include <Editor/Application.hpp>
+#include <Tools/GlobalThumbnails.hpp>
 
 // HG::Core
 #include <HG/Core/ResourceManager.hpp>
@@ -16,10 +17,6 @@
 
 
 HG::Editor::Widgets::InformationModal::InformationModal() :
-    m_infoIconHandle(HG::Editor::ThumbnailsCache::InvalidHandle),
-    m_warningIconHandle(HG::Editor::ThumbnailsCache::InvalidHandle),
-    m_errorIconHandle(HG::Editor::ThumbnailsCache::InvalidHandle),
-    m_resourcesToFree(),
     m_currentOpenState(false),
     m_type(Type::Info),
     m_text()
@@ -29,9 +26,7 @@ HG::Editor::Widgets::InformationModal::InformationModal() :
 
 HG::Editor::Widgets::InformationModal::~InformationModal()
 {
-    application()->thumbnailsCache()->removeThumbnail(m_infoIconHandle);
-    application()->thumbnailsCache()->removeThumbnail(m_warningIconHandle);
-    application()->thumbnailsCache()->removeThumbnail(m_errorIconHandle);
+
 }
 
 void HG::Editor::Widgets::InformationModal::info(std::string text)
@@ -80,16 +75,21 @@ void HG::Editor::Widgets::InformationModal::onDraw()
 
         auto icon = HG::Editor::ThumbnailsCache::InvalidHandle;
 
+        auto* globalThumbnails = application()->globalThumbnails();
+
         switch (m_type)
         {
         case Type::Info:
-            icon = m_infoIconHandle;
+            icon = globalThumbnails
+                ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::InfoMark);
             break;
         case Type::Warning:
-            icon = m_warningIconHandle;
+            icon = globalThumbnails
+                ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::WarningMark);
             break;
         case Type::Error:
-            icon = m_errorIconHandle;
+            icon = globalThumbnails
+                ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::ErrorMark);
             break;
         }
 
@@ -136,34 +136,5 @@ void HG::Editor::Widgets::InformationModal::onDraw()
         ImGui::EndGroup();
 
         ImGui::EndPopup();
-    }
-}
-
-void HG::Editor::Widgets::InformationModal::onInitialization()
-{
-    auto errorTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
-        application()
-            ->resourceManager()
-            ->load<HG::Utils::STBImageLoader>("images/error.png")
-            .guaranteeGet()
-    );
-
-    m_resourcesToFree.push_back(errorTexture);
-
-    m_errorIconHandle = application()->thumbnailsCache()->addThumbnail(errorTexture);
-    m_infoIconHandle = m_errorIconHandle;
-    m_warningIconHandle = m_errorIconHandle;
-
-    // Cache invalidation will be performed in GraphicsInterface behaviour
-    // after initialization.
-}
-
-void HG::Editor::Widgets::InformationModal::onPostInitialization()
-{
-    // Resources, allocated at initalization side was used
-    // by thumbnails cache. Now they can be freed.
-    for (auto& resource : m_resourcesToFree)
-    {
-        delete resource;
     }
 }
