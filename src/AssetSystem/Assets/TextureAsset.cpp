@@ -32,14 +32,7 @@ bool HG::Editor::AssetSystem::Assets::TextureAsset::onLoad()
     auto image = assetsManager()
         ->application()
         ->resourceManager()
-        ->load<HG::Utils::STBImageLoader>(path())
-        .guaranteeGet(); // Due to async loading
-
-    // Discards it if it was not opened
-    if (image == nullptr)
-    {
-        return false;
-    }
+        ->load<HG::Utils::STBImageLoader>(path());
 
     // Creating texture for this image
     m_thumbnailBaseTexture =

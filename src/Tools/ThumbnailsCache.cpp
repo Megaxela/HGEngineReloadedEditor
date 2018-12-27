@@ -41,10 +41,7 @@ HG::Rendering::Base::Texture *HG::Editor::ThumbnailsCache::texture() const
 HG::Editor::ThumbnailsCache::Handle HG::Editor::ThumbnailsCache::addThumbnail(HG::Rendering::Base::Texture *texture, glm::ivec2 size)
 {
     std::unique_lock<std::shared_mutex> lock(m_newOrUpdateMutex);
-    m_newOrUpdateThumbnails[++m_handlerCounter] = NewThumbnail(
-        texture,
-        (size.x == 0 || size.y == 0) ? texture->size() : size
-    );
+    m_newOrUpdateThumbnails[++m_handlerCounter] = NewThumbnail(texture, size);
 
     return m_handlerCounter;
 }
@@ -64,10 +61,7 @@ void HG::Editor::ThumbnailsCache::updateThumbnail(HG::Editor::ThumbnailsCache::H
         }
     }
 
-    m_newOrUpdateThumbnails[handler] = NewThumbnail(
-        texture,
-        (size.x == 0 || size.y == 0) ? texture->size() : size
-    );
+    m_newOrUpdateThumbnails[handler] = NewThumbnail(texture, size);
 }
 
 void HG::Editor::ThumbnailsCache::removeThumbnail(HG::Editor::ThumbnailsCache::Handle handler)
@@ -139,7 +133,7 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
     using rect_type = rectpack2D::output_rect_t<spaces_type>;
 
     // Side will be multiplied by 2 on initial stage.
-    auto max_side = (m_texture != nullptr) ? (m_texture->size().x / 2) : (1024 / 2);
+    auto max_side = (m_texture != nullptr) ? (m_texture->size(true).x / 2) : (1024 / 2);
 
     bool success = true;
 
@@ -175,7 +169,14 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
     // Inserting new/update thumbnails
     for (const auto& [handler, thumbnail] : m_newOrUpdateThumbnails)
     {
-        rectangles.emplace_back(rect_type(0, 0, thumbnail.size.x, thumbnail.size.y));
+        auto size = thumbnail.size;
+
+        if (size == glm::ivec2(0, 0))
+        {
+            size = thumbnail.texture->size(true);
+        }
+
+        rectangles.emplace_back(rect_type(0, 0, size.x, size.y));
         handlers.emplace_back(handler);
     }
 

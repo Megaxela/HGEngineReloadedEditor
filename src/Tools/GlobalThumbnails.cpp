@@ -74,7 +74,6 @@ void HG::Editor::GlobalThumbnails::loadInternal(Thumbs thumb, std::filesystem::p
         application()
             ->resourceManager()
             ->load<HG::Utils::STBImageLoader>(path)
-            .guaranteeGet() // todo: Remove this call after guarantee setup implementation
     );
 
     m_textures.push_back(texture);
