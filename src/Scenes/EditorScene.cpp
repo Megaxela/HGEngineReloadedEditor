@@ -1,6 +1,7 @@
 // Editor
 #include <Scenes/EditorScene.hpp>
 #include <EditBehaviours/GraphicsInterface.hpp>
+#include <EditBehaviours/CameraMovement.hpp>
 
 // HG::Core
 #include <HG/Core/GameObjectBuilder.hpp>
@@ -87,12 +88,14 @@ void HG::Editor::EditorScene::start()
         .setName(".EditorCamera")
         // Setting object to hidden mode
         // to hide it from user code.
-        .setHidden(false)
+        .setHidden(false) // todo: Change to true after debugging
         .setGlobalPosition({0.0f, 0.0f, 2.5f})
         // Adding camera behaviour
         .addBehaviour(new HG::Rendering::Base::Camera)
         // Adding behaviours for GUI rendering
         .addBehaviour(new HG::Editor::Behaviours::GraphicsInterface)
+        // Adding behaviour for camera movement
+        .addBehaviour(new HG::Editor::Behaviours::CameraMovement)
         .deploy();
 
     // If there is scene to edit -

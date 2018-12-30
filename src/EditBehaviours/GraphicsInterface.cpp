@@ -83,6 +83,11 @@ HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
     }
 }
 
+HG::Editor::Widgets::Scene* HG::Editor::Behaviours::GraphicsInterface::sceneWidget() const
+{
+    return m_sceneWidget;
+}
+
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 {
     // Setting render override object

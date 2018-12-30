@@ -70,6 +70,13 @@ namespace HG::Editor::Behaviours
          */
         ~GraphicsInterface() override;
 
+        /**
+         * @brief Method for getting pointer to
+         * scene widget.
+         * @return Pointer to scene widget.
+         */
+        HG::Editor::Widgets::Scene* sceneWidget() const;
+
     protected:
 
         /**

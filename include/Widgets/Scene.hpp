@@ -59,15 +59,44 @@ namespace HG::Editor::Widgets
          */
         void setRenderTarget(HG::Rendering::Base::RenderTarget* target);
 
+        /**
+         * @brief Method for casting global position to scene position.
+         * @param vec Global position.
+         * @return Scene position.
+         */
+        glm::ivec2 globalPosToScenePos(const glm::ivec2& pos) const;
+
+        /**
+         * @brief Method for checking is global position in
+         * scene's widget.
+         * @param pos Global position.
+         */
+        bool isGlobalPosInScene(const glm::ivec2& pos) const;
+
     protected:
+
+        /**
+         * @brief Method, that performs drawing of render target.
+         */
         void onDraw() override;
 
     private:
 
+        /**
+         * @brief Method for updating render override system size
+         * according to widget size.
+         */
         void updateRenderOverride();
 
-        HG::Core::GameObject* checkSelectedGameObject(ImVec2 vec2);
+        /**
+         * @brief Method for getting gameobject by scene position.
+         * @param vec2 Scene position.
+         * @return Pointer to GameObject or nullptr if there was no
+         * object.
+         */
+        HG::Core::GameObject* checkSelectedGameObject(const glm::ivec2& vec2);
 
+        glm::ivec2 m_position;
         glm::ivec2 m_size;
 
         HG::Rendering::Base::RenderTarget* m_mainRenderTarget;

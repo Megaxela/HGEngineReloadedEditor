@@ -26,6 +26,7 @@
 #include <Tools/ImGuiIdentificators.hpp>
 
 HG::Editor::Widgets::Scene::Scene(HG::Editor::Widgets::Settings::Common* common) :
+    m_position({0, 0}),
     m_size({0, 0}),
     m_mainRenderTarget(nullptr),
     m_selectionOverride(new HG::Rendering::Base::RenderOverride()),
@@ -63,14 +64,19 @@ void HG::Editor::Widgets::Scene::onDraw()
         {
             ImGui::Image(
                 m_mainRenderTarget->colorTexture(0),
-                ImVec2(m_size.x, m_size.y)
+                ImVec2(m_size.x, m_size.y),
+                {0, 1},
+                {1, 0}
             );
+
+            auto pos = ImGui::GetItemRectMin();
+            m_position = {pos.x, pos.y};
 
             if (ImGui::IsItemClicked(0))
             {
-                auto pos = ImGui::GetMousePos() - ImGui::GetItemRectMin();
+                auto scenePos = globalPosToScenePos(application()->input()->mouse()->getMousePosition());
 
-                m_commonSettings->selectedGameObject = checkSelectedGameObject(pos);
+                m_commonSettings->selectedGameObject = checkSelectedGameObject(scenePos);
                 m_commonSettings->lastSelectedType = Settings::Common::LastSelectedType::GameObject;
             }
         }
@@ -80,6 +86,16 @@ void HG::Editor::Widgets::Scene::onDraw()
 
 void HG::Editor::Widgets::Scene::updateRenderOverride()
 {
+    if (m_size.x <= 0)
+    {
+        m_size.x = 1024;
+    }
+
+    if (m_size.y <= 0)
+    {
+        m_size.y = 1024;
+    }
+
     if (m_mainRenderTarget->size() != m_size)
     {
         m_mainRenderTarget->setSize(m_size);
@@ -87,7 +103,7 @@ void HG::Editor::Widgets::Scene::updateRenderOverride()
     }
 }
 
-HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(ImVec2 pos)
+HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(const glm::ivec2& pos)
 {
     // Lazy initialization
     if (m_materialOverride == nullptr)
@@ -146,7 +162,7 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(ImVec2
     application()->renderer()->pipeline()->setRenderOverride(currentOverride);
 
     // Getting data from rendertarget
-    auto color = application()->renderer()->getTexturePixel(m_mainRenderTarget->colorTexture(0), {pos.x, pos.y});
+    auto color = application()->renderer()->getTexturePixel(m_mainRenderTarget->colorTexture(0), pos);
 
     // Color to color code
     colorCode = color.red() | color.green() << 8 | color.blue() << 16;
@@ -162,4 +178,15 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(ImVec2
     }
 
     return gameObjectIterator->second;
+}
+
+glm::ivec2 HG::Editor::Widgets::Scene::globalPosToScenePos(const glm::ivec2& vec) const
+{
+    return vec - m_position;
+}
+
+bool HG::Editor::Widgets::Scene::isGlobalPosInScene(const glm::ivec2& pos) const
+{
+    return pos.x >= m_position.x && pos.x <= (m_position.x + m_size.x) &&
+           pos.y >= m_position.y && pos.y <= (m_position.y + m_size.y);
 }
