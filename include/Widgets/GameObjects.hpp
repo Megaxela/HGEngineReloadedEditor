@@ -45,6 +45,8 @@ namespace HG::Editor::Widgets
 
         void drawGameObjects();
 
+        void handleDrop();
+
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         HG::Core::GameObject* m_previousSelected;

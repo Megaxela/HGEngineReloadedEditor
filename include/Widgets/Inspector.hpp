@@ -1,7 +1,15 @@
 #pragma once
 
+// C++ STL
+#include <cstdint>
+
 // Editor
 #include <Widgets/AbstractWidget.hpp>
+
+namespace HG::Core
+{
+    class Transform;
+}
 
 namespace HG::Editor::Widgets::Settings
 {
@@ -39,6 +47,12 @@ namespace HG::Editor::Widgets
          * selected asset.
          */
         void drawAssetBody();
+
+        /**
+         * @brief Method for drawing position editors.
+         * @param gameObject Pointer to gameobject.
+         */
+        void drawTransformEdit(HG::Core::Transform* gameObject);
 
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
     };

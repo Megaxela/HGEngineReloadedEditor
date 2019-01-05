@@ -37,6 +37,7 @@ namespace HG::Editor::Widgets
 
     class OpenPath;
     class InformationModal;
+    class LineInputModal;
 }
 
 namespace HG::Core
@@ -71,11 +72,24 @@ namespace HG::Editor::Behaviours
         ~GraphicsInterface() override;
 
         /**
+         * @brief Method for getting parent's editor application.
+         * @return Pointer to editor application.
+         */
+        HG::Editor::Application* editorApplication() const;
+
+        /**
          * @brief Method for getting pointer to
          * scene widget.
          * @return Pointer to scene widget.
          */
         HG::Editor::Widgets::Scene* sceneWidget() const;
+
+        /**
+         * @brief Method for getting pointer to line input modal
+         * widget.
+         * @return Pointer to line input modal widget.
+         */
+        HG::Editor::Widgets::LineInputModal* lineInputModal() const;
 
     protected:
 
@@ -91,12 +105,6 @@ namespace HG::Editor::Behaviours
         void onStart() override;
 
     private:
-
-        /**
-         * @brief Method for getting parent's editor application.
-         * @return Pointer to editor application.
-         */
-        HG::Editor::Application* editorApplication() const;
 
         /**
          * @brief Method for setting up
@@ -142,6 +150,7 @@ namespace HG::Editor::Behaviours
 
         HG::Editor::Widgets::OpenPath* m_openPathWidget;
         HG::Editor::Widgets::InformationModal* m_informationModalWidget;
+        HG::Editor::Widgets::LineInputModal* m_lineInputModalWidget;
 
         std::vector<HG::Editor::Widgets::AbstractWidget*> m_dockWidgets;
         std::vector<HG::Editor::Widgets::AbstractWidget*> m_commonWidgets;

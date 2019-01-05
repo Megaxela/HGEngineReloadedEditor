@@ -3,10 +3,14 @@
 #include <Widgets/CommonSettings.hpp>
 #include <Tools/ImGuiIdentificators.hpp>
 #include <Tools/ImGuiWidgets.hpp>
+#include <Editor/Application.hpp>
+#include <Widgets/LineInputModal.hpp>
+#include <EditBehaviours/GraphicsInterface.hpp>
 
 // HG::Core
 #include <HG/Core/GameObject.hpp>
 #include <HG/Core/Transform.hpp>
+#include <HG/Core/Input.hpp>
 
 // ImGui
 #include <imgui.h>
@@ -26,6 +30,8 @@ void HG::Editor::Widgets::GameObjects::onDraw()
     if (ImGui::Begin(HG::Names::GameObject::Window, &m_opened))
     {
         drawGameObjects();
+
+        handleDrop();
     }
 
     ImGui::ContextMenuRenderer().render(m_contextMenu);
@@ -59,20 +65,47 @@ void HG::Editor::Widgets::GameObjects::displayGameObject(HG::Core::GameObject *g
             (ImGui::IDGuard(HG::ID::GameObject::TreeItem),
              ImGui::TreeNodeEx(gameObject, nodeFlags, "%s", gameObject->name().c_str()));
 
+    // If Drag
     if (ImGui::BeginDragDropSource())
     {
         m_commonSettings->selectedGameObject = m_previousSelected;
 
-        ImGui::SetDragDropPayload(HG::ID::DragDrop::GameObject, &gameObject, sizeof(void*));
+        ImGui::SetDragDropPayload(HG::ID::DragDrop::GameObject, &gameObject, sizeof(gameObject));
 
         ImGui::Text("GameObject: %s", gameObject->name().c_str());
 
         ImGui::EndDragDropSource();
     }
 
-    // If LMB pressed on this item
-    if (ImGui::IsItemClicked(0))
+    // If Drop
+    if (ImGui::BeginDragDropTarget())
     {
+        if (const auto* payload = ImGui::AcceptDragDropPayload(HG::ID::DragDrop::GameObject))
+        {
+            auto object = *static_cast<HG::Core::GameObject**>(payload->Data);
+
+            if (object != gameObject)
+            {
+                object->transform()->setParent(gameObject->transform());
+            }
+        }
+
+        ImGui::EndDragDropTarget();
+    }
+
+    // If LMB pressed on this item
+    if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1))
+    {
+        if (ImGui::IsMouseDoubleClicked(0))
+        {
+            graphicsInterface()->lineInputModal()->setOnSuccessCallback(
+                [gameObject](std::string name)
+                { gameObject->setName(name); }
+            );
+
+            graphicsInterface()->lineInputModal()->execute(gameObject->name(), "Enter new gameobject name");
+        }
+
         m_previousSelected = (m_previousSelected == nullptr ? gameObject : m_commonSettings->selectedGameObject);
         m_commonSettings->lastSelectedType = HG::Editor::Widgets::Settings::Common::LastSelectedType::GameObject;
         m_commonSettings->selectedGameObject = gameObject;
@@ -88,6 +121,21 @@ void HG::Editor::Widgets::GameObjects::displayGameObject(HG::Core::GameObject *g
         }
 
         ImGui::TreePop();
+    }
+}
+
+void HG::Editor::Widgets::GameObjects::handleDrop()
+{
+    if (ImGui::BeginDragDropTargetWindow())
+    {
+        if (const auto* payload = ImGui::AcceptDragDropPayload(HG::ID::DragDrop::GameObject))
+        {
+            auto object = *static_cast<HG::Core::GameObject**>(payload->Data);
+
+            object->transform()->setParent(nullptr);
+        }
+
+        ImGui::EndDragDropTarget();
     }
 }
 

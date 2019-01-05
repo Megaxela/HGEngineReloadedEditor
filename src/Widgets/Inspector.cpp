@@ -8,6 +8,7 @@
 
 // HG::Core
 #include <HG/Core/GameObject.hpp>
+#include <HG/Core/Transform.hpp>
 
 // ImGui
 #include <imgui.h>
@@ -82,7 +83,7 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
         return;
     }
 
-    std::size_t id = 0;
+    drawTransformEdit(gameObject->transform());
 
     for (const auto& behaviour : m_commonSettings->behavioursCache)
     {
@@ -112,6 +113,33 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
                 processor->perform(property.name(), property);
             }
         }
+    }
+}
+
+void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* transform)
+{
+    // Position
+    int id = 0;
+
+    auto tempVec3 = transform->globalPosition();
+    if (ImGui::IDGuard(++id),
+        ImGui::DragFloat3("Position", tempVec3.data.data, 0.05))
+    {
+        transform->setGlobalPosition(tempVec3);
+    }
+
+    tempVec3 = glm::eulerAngles(transform->localRotation());
+    if (ImGui::IDGuard(++id),
+        ImGui::DragFloat3("Rotation", tempVec3.data.data, 0.05))
+    {
+        transform->setGlobalRotation(glm::quat(tempVec3));
+    }
+
+    tempVec3 = transform->localScale();
+    if (ImGui::IDGuard(++id),
+        ImGui::DragFloat3("Scale", tempVec3.data.data, 0.05))
+    {
+        transform->setLocalScale(tempVec3);
     }
 }
 

@@ -39,6 +39,8 @@ namespace ImGui
 
     IMGUI_API bool IconTreeNodeBehaviour(ImGuiID id, HG::Rendering::Base::Texture *icon, const ImVec2& uv_tl, const ImVec2& uv_br, ImGuiTreeNodeFlags flags, const char* label, const char* label_end);
 
+    IMGUI_API bool BeginDragDropTargetWindow();
+
     /**
      * @brief Translates from GLM vec2 to imgui vec2.
      * @param vec Vector object.

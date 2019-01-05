@@ -1,8 +1,14 @@
 #pragma once
 
+
 namespace HG::Editor
 {
     class Application;
+}
+
+namespace HG::Editor::Behaviours
+{
+    class GraphicsInterface;
 }
 
 namespace HG::Editor::Widgets
@@ -28,9 +34,9 @@ namespace HG::Editor::Widgets
         /**
          * @brief Method for setting pointer to
          * parent application.
-         * @param application Pointer to parent application.
+         * @param graphicsInterface Pointer to parent application.
          */
-        void setApplication(HG::Editor::Application* application);
+        void setGraphicsInterface(HG::Editor::Behaviours::GraphicsInterface* graphicsInterface);
 
         /**
          * @brief Method for getting pointer to
@@ -38,6 +44,13 @@ namespace HG::Editor::Widgets
          * @return Pointer to parent application.
          */
         HG::Editor::Application* application() const;
+
+        /**
+         * @brief Method for getting pointer to parent
+         * user interface behaviour.
+         * @return Pointer to graphics interface.
+         */
+        HG::Editor::Behaviours::GraphicsInterface* graphicsInterface() const;
 
         /**
          * @brief Method for setting widget as
@@ -90,6 +103,6 @@ namespace HG::Editor::Widgets
 
     private:
 
-        HG::Editor::Application* m_application;
+        HG::Editor::Behaviours::GraphicsInterface* m_graphicsInterface;
     };
 }

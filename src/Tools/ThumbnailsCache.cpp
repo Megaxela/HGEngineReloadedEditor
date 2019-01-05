@@ -219,14 +219,13 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
 
     Info() << "Packing finished. Loading to GPU.";
 
-    auto newTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
+    auto* newTexture = new (application()->resourceCache()) HG::Rendering::Base::Texture(
         {max_side, max_side},
         HG::Rendering::Base::Texture::Format::RGBA
     );
 
-    auto renderTarget = new HG::Rendering::Base::RenderTarget({max_side, max_side});
+    auto* renderTarget = new (application()->resourceCache()) HG::Rendering::Base::RenderTarget({max_side, max_side});
     renderTarget->setColorTexture(newTexture);
-
 
     HG::Rendering::Base::BlitData blitData;
 
@@ -234,8 +233,8 @@ void HG::Editor::ThumbnailsCache::invalidateCache()
     prepareNewThumbnails(blitData, newCurrent);
 
     // Saving rendertarget state
-    auto currentRenderTarget = application()->renderer()->pipeline()->renderTarget();
-    auto override = application()->renderer()->pipeline()->renderOverride();
+    auto* currentRenderTarget = application()->renderer()->pipeline()->renderTarget();
+    auto* override = application()->renderer()->pipeline()->renderOverride();
 
     // Setting new render target
     application()->renderer()->pipeline()->setRenderOverride(nullptr);

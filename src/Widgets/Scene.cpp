@@ -62,6 +62,7 @@ void HG::Editor::Widgets::Scene::onDraw()
         if (m_mainRenderTarget &&
             m_mainRenderTarget->colorTexture(0))
         {
+            // todo: Remove mirror after framebuffer fix.
             ImGui::Image(
                 m_mainRenderTarget->colorTexture(0),
                 ImVec2(m_size.x, m_size.y),
@@ -162,7 +163,13 @@ HG::Core::GameObject *HG::Editor::Widgets::Scene::checkSelectedGameObject(const 
     application()->renderer()->pipeline()->setRenderOverride(currentOverride);
 
     // Getting data from rendertarget
-    auto color = application()->renderer()->getTexturePixel(m_mainRenderTarget->colorTexture(0), pos);
+
+    // It requires reverted position, cause of
+    // framebuffer is mirrored by y.
+    // todo: Remove mirror after framebuffer fix.
+    auto revertedPos = pos;
+    revertedPos.y = m_mainRenderTarget->colorTexture(0)->size(true).y - revertedPos.y;
+    auto color = application()->renderer()->getTexturePixel(m_mainRenderTarget->colorTexture(0), revertedPos);
 
     // Color to color code
     colorCode = color.red() | color.green() << 8 | color.blue() << 16;

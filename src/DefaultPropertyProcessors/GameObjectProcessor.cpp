@@ -26,7 +26,7 @@ void HG::Editor::PropertyProcessors::GameObjectProcessor::perform(const std::str
 
     if (ImGui::BeginDragDropTarget())
     {
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(HG::ID::DragDrop::GameObject))
+        if (const auto* payload = ImGui::AcceptDragDropPayload(HG::ID::DragDrop::GameObject))
         {
             auto object = *static_cast<HG::Core::GameObject**>(payload->Data);
 

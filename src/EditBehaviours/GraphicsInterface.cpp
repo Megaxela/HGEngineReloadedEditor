@@ -15,6 +15,7 @@
 #include <Widgets/InformationModal.hpp>
 #include <Widgets/BenchmarkView.hpp>
 #include <Widgets/TextureCacheView.hpp>
+#include <Widgets/LineInputModal.hpp>
 
 // HG::Core
 #include <HG/Core/Application.hpp>
@@ -48,6 +49,7 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_textureCacheViewWidget(new HG::Editor::Widgets::TextureCacheView()),
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
     m_informationModalWidget(new HG::Editor::Widgets::InformationModal()),
+    m_lineInputModalWidget(new HG::Editor::Widgets::LineInputModal()),
     m_renderOverride(new HG::Rendering::Base::RenderOverride),
     m_dockWidgets(),
     m_commonWidgets()
@@ -61,6 +63,7 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_dockWidgets.push_back(m_textureCacheViewWidget);
     m_commonWidgets.push_back(m_openPathWidget);
     m_commonWidgets.push_back(m_informationModalWidget);
+    m_commonWidgets.push_back(m_lineInputModalWidget);
 }
 
 HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
@@ -86,6 +89,11 @@ HG::Editor::Behaviours::GraphicsInterface::~GraphicsInterface()
 HG::Editor::Widgets::Scene* HG::Editor::Behaviours::GraphicsInterface::sceneWidget() const
 {
     return m_sceneWidget;
+}
+
+HG::Editor::Widgets::LineInputModal* HG::Editor::Behaviours::GraphicsInterface::lineInputModal() const
+{
+    return m_lineInputModalWidget;
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
@@ -137,12 +145,12 @@ void HG::Editor::Behaviours::GraphicsInterface::onStart()
     // Setting application to widgets.
     for (auto& widget : m_dockWidgets)
     {
-        widget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
+        widget->setGraphicsInterface(this);
     }
 
     for (auto& widget : m_commonWidgets)
     {
-        widget->setApplication(dynamic_cast<HG::Editor::Application*>(scene()->application()));
+        widget->setGraphicsInterface(this);
     }
 
     // Initializing widgets
@@ -285,7 +293,7 @@ void HG::Editor::Behaviours::GraphicsInterface::setupRenderOverride()
         HG::Rendering::Base::Texture::Format::RGB
     );
 
-    m_renderOverride->mainRenderTarget = new HG::Rendering::Base::RenderTarget({200, 200});
+    m_renderOverride->mainRenderTarget = new (scene()->application()->resourceCache()) HG::Rendering::Base::RenderTarget({200, 200});
     m_renderOverride->mainRenderTarget->setColorTexture(texture, 0);
 
     m_sceneWidget->setRenderTarget(m_renderOverride->mainRenderTarget);

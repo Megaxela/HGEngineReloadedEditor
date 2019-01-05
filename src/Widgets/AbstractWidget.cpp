@@ -1,9 +1,10 @@
 // Editor
 #include <Widgets/AbstractWidget.hpp>
+#include <EditBehaviours/GraphicsInterface.hpp>
 
 HG::Editor::Widgets::AbstractWidget::AbstractWidget() :
     m_opened(true),
-    m_application(nullptr)
+    m_graphicsInterface(nullptr)
 {
 
 }
@@ -28,14 +29,24 @@ void HG::Editor::Widgets::AbstractWidget::update()
     onUpdate();
 }
 
-void HG::Editor::Widgets::AbstractWidget::setApplication(HG::Editor::Application *application)
+void HG::Editor::Widgets::AbstractWidget::setGraphicsInterface(Behaviours::GraphicsInterface* graphicsInterface)
 {
-    m_application = application;
+    m_graphicsInterface = graphicsInterface;
 }
 
 HG::Editor::Application *HG::Editor::Widgets::AbstractWidget::application() const
 {
-    return m_application;
+    if (m_graphicsInterface == nullptr)
+    {
+        return nullptr;
+    }
+
+    return m_graphicsInterface->editorApplication();
+}
+
+HG::Editor::Behaviours::GraphicsInterface* HG::Editor::Widgets::AbstractWidget::graphicsInterface() const
+{
+    return m_graphicsInterface;
 }
 
 void HG::Editor::Widgets::AbstractWidget::onUpdate()

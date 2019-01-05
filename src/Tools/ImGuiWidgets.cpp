@@ -138,6 +138,13 @@ bool ImGui::IconSelectable(const char *label,
     return pressed;
 }
 
+bool ImGui::BeginDragDropTargetWindow()
+{
+    auto* window = ImGui::GetCurrentWindow();
+
+    return BeginDragDropTargetCustom(window->Rect(), window->MoveId);
+}
+
 bool ImGui::IconTreeNode(const char* label, HG::Rendering::Base::Texture* icon, const ImVec2& uv_tl, const ImVec2& uv_br)
 {
     ImGuiWindow* window = GetCurrentWindow();
