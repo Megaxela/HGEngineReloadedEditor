@@ -53,6 +53,8 @@ namespace HG::Rendering::Base
 
 namespace HG::Editor::Behaviours
 {
+    class TransformBehaviour;
+
     /**
      * @brief Behaviour class, that implements editor
      * graphical interface.
@@ -122,6 +124,12 @@ namespace HG::Editor::Behaviours
         void actionOpenProject();
 
         /**
+         * @brief Method for handling gameobject
+         * selection change and operating HG::Editor::Behaviours::TransformBehaviour
+         */
+        void handleGameObjectSelectionChange();
+
+        /**
          * @brief Method for setting up user logging for
          * logging widget.
          */
@@ -156,6 +164,8 @@ namespace HG::Editor::Behaviours
         std::vector<HG::Editor::Widgets::AbstractWidget*> m_commonWidgets;
 
         HG::Rendering::Base::RenderOverride* m_renderOverride;
+
+        HG::Editor::Behaviours::TransformBehaviour* m_transformBehaviour;
 
         ImGui::Menu m_mainMenu;
     };

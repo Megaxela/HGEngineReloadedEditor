@@ -1,5 +1,6 @@
 // Editor
 #include <EditBehaviours/GraphicsInterface.hpp>
+#include <EditBehaviours/TransformBehaviour.hpp>
 #include <Editor/Application.hpp>
 #include <Fabrics/PropertyEditorsFabric.hpp>
 #include <AbstractPropertyProcessor.hpp>
@@ -50,9 +51,11 @@ HG::Editor::Behaviours::GraphicsInterface::GraphicsInterface() :
     m_openPathWidget(new HG::Editor::Widgets::OpenPath()),
     m_informationModalWidget(new HG::Editor::Widgets::InformationModal()),
     m_lineInputModalWidget(new HG::Editor::Widgets::LineInputModal()),
-    m_renderOverride(new HG::Rendering::Base::RenderOverride),
     m_dockWidgets(),
-    m_commonWidgets()
+    m_commonWidgets(),
+    m_renderOverride(new HG::Rendering::Base::RenderOverride),
+    m_transformBehaviour(new HG::Editor::Behaviours::TransformBehaviour),
+    m_mainMenu()
 {
     m_dockWidgets.push_back(m_gameObjectsWidget);
     m_dockWidgets.push_back(m_inspectorWidget);
@@ -98,6 +101,8 @@ HG::Editor::Widgets::LineInputModal* HG::Editor::Behaviours::GraphicsInterface::
 
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 {
+    handleGameObjectSelectionChange();
+
     // Setting render override object
     scene()->application()->renderer()->pipeline()->setRenderOverride(m_renderOverride);
     scene()->application()->renderer()->pipeline()->clear(HG::Utils::Color::fromRGB(25, 25, 25));
@@ -135,6 +140,7 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 
 void HG::Editor::Behaviours::GraphicsInterface::onStart()
 {
+    gameObject()->addBehaviour(m_transformBehaviour);
 
     setupMainMenu();
 
@@ -325,4 +331,18 @@ void HG::Editor::Behaviours::GraphicsInterface::prepareDockSpace()
 
     // Enabling dockspace
     ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
+}
+
+void HG::Editor::Behaviours::GraphicsInterface::handleGameObjectSelectionChange()
+{
+    m_transformBehaviour->configuration()->sceneWidgetRect = HG::Utils::Rect(
+        m_sceneWidget->getTopLeftPosition().x,
+        m_sceneWidget->getTopLeftPosition().y,
+        m_renderOverride->mainRenderTarget->size().x,
+        m_renderOverride->mainRenderTarget->size().y
+    );
+
+    m_transformBehaviour->setEnabled(m_sceneWidget->isShown());
+
+    m_transformBehaviour->setSelectedGameObject(m_commonSettings.selectedGameObject);
 }

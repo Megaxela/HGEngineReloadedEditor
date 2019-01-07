@@ -12,7 +12,6 @@
 #include <HG/Rendering/Base/Renderer.hpp>
 
 // HG::Rendering::OpenGL
-#include <HG/Rendering/OpenGL/GLFWSystemController.hpp>
 #include <HG/Rendering/OpenGL/Forward/RenderingPipeline.hpp>
 #include <HG/Rendering/OpenGL/Forward/MeshRenderer.hpp>
 #include <HG/Rendering/OpenGL/Common/MeshDataProcessor.hpp>
@@ -25,6 +24,7 @@
 // ALogger
 #include <CurrentLogger.hpp>
 #include <Loggers/BasicLogger.hpp>
+#include <Editor/SystemController.hpp>
 
 int main(int argc, char** argv)
 {
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
         ->setResourceAccessor(new HG::Core::FilesystemResourceAccessor());
 
     // Setting system controller
-    application.setSystemController(new HG::Rendering::OpenGL::GLFWSystemController(&application));
+    application.setSystemController(new HG::Editor::SystemController(&application));
 
     auto pipeline = new HG::Rendering::OpenGL::Forward::RenderingPipeline(&application);
     pipeline->addRenderer(new HG::Rendering::OpenGL::Forward::MeshRenderer);

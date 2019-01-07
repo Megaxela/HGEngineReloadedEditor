@@ -60,6 +60,13 @@ namespace HG::Editor::Widgets
         void setRenderTarget(HG::Rendering::Base::RenderTarget* target);
 
         /**
+         * @brief Method for getting top left
+         * position of rendered scene framebuffer.
+         * @return Top left rendered scene position.
+         */
+        glm::ivec2 getTopLeftPosition() const;
+
+        /**
          * @brief Method for casting global position to scene position.
          * @param vec Global position.
          * @return Scene position.
@@ -72,6 +79,11 @@ namespace HG::Editor::Widgets
          * @param pos Global position.
          */
         bool isGlobalPosInScene(const glm::ivec2& pos) const;
+
+        /**
+         * @brief Method for checking is scene is shown or hidden.
+         */
+        bool isShown() const;
 
     protected:
 
@@ -105,6 +117,8 @@ namespace HG::Editor::Widgets
         HG::Editor::Materials::ColorMaterial* m_materialOverride;
 
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
+
+        bool m_shown;
 
         std::unordered_map<std::size_t, HG::Core::GameObject*> m_colorCache;
     };

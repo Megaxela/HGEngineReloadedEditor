@@ -87,6 +87,7 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
     for (const auto& behaviour : m_commonSettings->behavioursCache)
     {
+        ImGui::SetNextTreeNodeOpen(true, ImGuiCond_FirstUseEver);
         if (ImGui::IDGuard(HG::ID::GameObject::Header),
             ImGui::CollapsingHeader(SystemTools::getTypeName(*behaviour).c_str()))
         {
@@ -95,12 +96,21 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
             // Getting and iterating all properties
             behaviour->getProperties(m_commonSettings->propertiesCache);
 
+            ImGui::Columns(2);
+
             for (const auto& property : m_commonSettings->propertiesCache)
             {
                 // Displaying title
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("%s", property.name().c_str());
+
+                // Prepearing processor
                 auto processor = editorApplication
                     ->propertyEditorsFabric()
                     ->create(property.typeInfo().hash_code());
+
+                // Moving to next column
+                ImGui::NextColumn();
 
                 if (processor == nullptr)
                 {
@@ -110,37 +120,66 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
 
                 ImGui::IDGuard idGuard((void*) &property);
 
-                processor->perform(property.name(), property);
+                ImGui::PushItemWidth(-1);
+                processor->perform(std::string(), property);
+                ImGui::PopItemWidth();
+
+                ImGui::NextColumn();
             }
+
+            ImGui::Columns(1);
         }
     }
 }
 
 void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* transform)
 {
-    // Position
+    ImGui::Columns(2);
+
     int id = 0;
 
+    // Position
+    ImGui::Text("Position");
+    ImGui::NextColumn();
+
+    ImGui::PushItemWidth(-1);
     auto tempVec3 = transform->globalPosition();
     if (ImGui::IDGuard(++id),
-        ImGui::DragFloat3("Position", tempVec3.data.data, 0.05))
+        ImGui::DragFloat3("", tempVec3.data.data, 0.05))
     {
         transform->setGlobalPosition(tempVec3);
     }
+    ImGui::PopItemWidth();
 
+    ImGui::NextColumn();
+
+    ImGui::Text("Rotation");
+    ImGui::NextColumn();
+
+    ImGui::PushItemWidth(-1);
     tempVec3 = glm::eulerAngles(transform->localRotation());
     if (ImGui::IDGuard(++id),
-        ImGui::DragFloat3("Rotation", tempVec3.data.data, 0.05))
+        ImGui::DragFloat3("", tempVec3.data.data, 0.05))
     {
         transform->setGlobalRotation(glm::quat(tempVec3));
     }
+    ImGui::PopItemWidth();
 
+    ImGui::NextColumn();
+
+    ImGui::Text("Scale");
+    ImGui::NextColumn();
+
+    ImGui::PushItemWidth(-1);
     tempVec3 = transform->localScale();
     if (ImGui::IDGuard(++id),
-        ImGui::DragFloat3("Scale", tempVec3.data.data, 0.05))
+        ImGui::DragFloat3("##Scale", tempVec3.data.data, 0.05))
     {
         transform->setLocalScale(tempVec3);
     }
+    ImGui::PopItemWidth();
+
+    ImGui::Columns(1);
 }
 
 void HG::Editor::Widgets::Inspector::drawAssetBody()

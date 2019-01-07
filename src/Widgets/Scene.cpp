@@ -3,6 +3,7 @@
 #include <Tools/ImGuiWidgets.hpp>
 #include <Editor/Application.hpp>
 #include <Materials/ColorMaterial.hpp>
+#include <Guizmo/Guizmo.hpp>
 
 // HG::Core
 #include <HG/Core/Scene.hpp>
@@ -46,12 +47,25 @@ void HG::Editor::Widgets::Scene::setRenderTarget(HG::Rendering::Base::RenderTarg
     m_mainRenderTarget = target;
 }
 
+glm::ivec2 HG::Editor::Widgets::Scene::getTopLeftPosition() const
+{
+    return m_position;
+}
+
+bool HG::Editor::Widgets::Scene::isShown() const
+{
+    return m_shown;
+}
+
 void HG::Editor::Widgets::Scene::onDraw()
 {
     ImGui::IDGuard idGuard(HG::ID::Scene::Window);
 
-    if (ImGui::Begin(HG::Names::Scene::Window, &m_opened))
+    m_shown = ImGui::Begin(HG::Names::Scene::Window, &m_opened);
+
+    if (m_shown)
     {
+
         m_size = {
             ImGui::GetContentRegionAvail().x,
             ImGui::GetContentRegionAvail().y
@@ -73,7 +87,7 @@ void HG::Editor::Widgets::Scene::onDraw()
             auto pos = ImGui::GetItemRectMin();
             m_position = {pos.x, pos.y};
 
-            if (ImGui::IsItemClicked(0))
+            if (ImGui::IsItemClicked(0) && !ImGuizmo::IsOver())
             {
                 auto scenePos = globalPosToScenePos(application()->input()->mouse()->getMousePosition());
 
