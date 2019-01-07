@@ -2,6 +2,7 @@
 #include <EditBehaviours/CameraMovement.hpp>
 #include <EditBehaviours/GraphicsInterface.hpp>
 #include <Widgets/Scene.hpp>
+#include <Guizmo/Guizmo.hpp>
 
 // HG::Core
 #include <HG/Core/GameObject.hpp>
@@ -49,6 +50,8 @@ void HG::Editor::Behaviours::CameraMovement::onUpdate()
         m_first = false;
         m_lastMousePosition = input()->mouse()->getMousePosition();
     }
+
+    ImGuizmo::Enable(!isButtonPressed);
 
     if (isButtonPressed)
     {
