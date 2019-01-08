@@ -12,12 +12,12 @@ public:
             m_value(value)
         {}
 
-        T operator*(void) const
+        T operator*() const
         {
             return static_cast<T>(m_value);
         }
 
-        void operator++(void)
+        void operator++()
         {
             ++m_value;
         }

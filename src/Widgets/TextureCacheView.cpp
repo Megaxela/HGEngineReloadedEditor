@@ -14,7 +14,10 @@
 // ImGui
 #include <imgui.h>
 
-HG::Editor::Widgets::TextureCacheView::TextureCacheView()
+#include <CurrentLogger.hpp>
+
+HG::Editor::Widgets::TextureCacheView::TextureCacheView() :
+    m_selectedTexture(nullptr)
 {
 
 }
@@ -47,13 +50,15 @@ void HG::Editor::Widgets::TextureCacheView::drawToolbar()
 
 void HG::Editor::Widgets::TextureCacheView::drawTextures()
 {
+    ImGui::Columns(2);
+
     // Receiving current resources
     auto textures = application()
             ->resourceCache()
             ->getUsedResources<HG::Rendering::Base::Texture>();
 
     // todo: Add scrollable
-    const std::size_t buttonSideSize = 150;
+    const std::size_t buttonSideSize = 64;
     // Getting window size
     const auto availableSize = ImGui::GetContentRegionAvailWidth();
     const auto itemsInRow = (int) availableSize / (int) buttonSideSize;
@@ -79,4 +84,45 @@ void HG::Editor::Widgets::TextureCacheView::drawTextures()
             rowIndex = 0;
         }
     }
+
+    if (m_selectedTexture)
+    {
+        ImGui::NextColumn();
+
+        ImVec2 size;
+
+        const auto textureSize = m_selectedTexture->size(true);
+        const float ratio = textureSize.x / static_cast<float>(textureSize.y);
+        const auto maxSize = ImGui::GetContentRegionAvail();
+
+//            if (textureSize.x > maxSize)
+//            {
+//                size.x = maxSize;
+//                size.y = maxSize / ratio;
+//            }
+//            else
+//            {
+//                size.x = maxSize * ratio;
+//                size.y = maxSize;
+//            }
+
+        if (textureSize.x >= textureSize.y)
+        {
+            size.x = maxSize.x;
+            size.y = maxSize.x / ratio;
+        }
+        else
+        {
+            size.x = maxSize.y * ratio;
+            size.y = maxSize.y;
+        }
+
+
+
+        ImGui::Image(m_selectedTexture, size);
+
+        ImGui::NextColumn();
+    }
+
+    ImGui::Columns(1);
 }

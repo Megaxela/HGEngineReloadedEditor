@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(HGEngineReloadedImGui)
+project(HGEngineReloadedEditor)
 
 # Setting cmake module path
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
@@ -31,14 +31,14 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 # Setting up application
-add_executable(HGEngineReloadedImGui ${SOURCE_FILES})
+add_executable(HGEngineReloadedEditor ${SOURCE_FILES})
 
-target_include_directories(HGEngineReloadedImGui PUBLIC
+target_include_directories(HGEngineReloadedEditor PUBLIC
     include
     ${CLANG_INCLUDE_DIRS}
 )
 
-target_link_libraries(HGEngineReloadedImGui
+target_link_libraries(HGEngineReloadedEditor
     # HGEngine
     HGCore
     HGRenderingBase
@@ -55,11 +55,14 @@ target_link_libraries(HGEngineReloadedImGui
     ${CLANG_LIBS}
 )
 
-add_sanitizers(HGEngineReloadedImGui)
+add_sanitizers(HGEngineReloadedEditor)
 
-configure_file(resources/images/folder.png images/folder.png COPYONLY )
-configure_file(resources/images/text.png images/text.png COPYONLY )
-configure_file(resources/images/error.png images/error.png COPYONLY )
-configure_file(resources/images/unchecked.png images/unchecked.png COPYONLY )
-configure_file(resources/images/checked.png images/checked.png COPYONLY)
-configure_file(resources/images/corrupted.png images/corrupted.png COPYONLY)
+# Copying resources
+file(GLOB_RECURSE RESOURCES resources/*.*)
+
+foreach(RESOURCE ${RESOURCES})
+    string(REPLACE "${CMAKE_CURRENT_LIST_DIR}/resources/" "" RESOURCE_RELATIVE_PATH ${RESOURCE} )
+    configure_file("resources/${RESOURCE_RELATIVE_PATH}" ${RESOURCE_RELATIVE_PATH} COPYONLY)
+
+    message(STATUS "Copying editor resource \"${RESOURCE_RELATIVE_PATH}\"")
+endforeach()

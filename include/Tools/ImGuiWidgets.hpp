@@ -41,6 +41,10 @@ namespace ImGui
 
     IMGUI_API bool BeginDragDropTargetWindow();
 
+    // Widgets: Tool bar
+    IMGUI_API bool BeginToolBar();
+    IMGUI_API void EndToolBar();
+
     /**
      * @brief Translates from GLM vec2 to imgui vec2.
      * @param vec Vector object.

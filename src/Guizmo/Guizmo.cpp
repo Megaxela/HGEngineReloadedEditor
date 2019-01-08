@@ -785,13 +785,13 @@ namespace ImGuizmo
     static const float planeLimit = 0.2f;
 
     static const vec_t directionUnary[3] = {makeVect(1.f, 0.f, 0.f), makeVect(0.f, 1.f, 0.f), makeVect(0.f, 0.f, 1.f)};
-    static const ImU32 directionColor[3] = {0xFF0000AA, 0xFF00AA00, 0xFFAA0000};
+    static const uint32_t directionColor[3] = {0xFF0000AA, 0xFF00AA00, 0xFFAA0000};
 
     // Alpha: 100%: FF, 87%: DE, 70%: B3, 54%: 8A, 50%: 80, 38%: 61, 12%: 1F
-    static const ImU32 planeColor[3] = {0x610000AA, 0x6100AA00, 0x61AA0000};
-    static const ImU32 selectionColor = 0x8A1080FF;
-    static const ImU32 inactiveColor = 0x99999999;
-    static const ImU32 translationLineColor = 0xAAAAAAAA;
+    static const uint32_t planeColor[3] = {0x610000AA, 0x6100AA00, 0x61AA0000};
+    static const uint32_t selectionColor = 0x8A1080FF;
+    static const uint32_t inactiveColor = 0x99999999;
+    static const uint32_t translationLineColor = 0xAAAAAAAA;
     static const char* translationInfoMask[] = {"X : %5.3f", "Y : %5.3f", "Z : %5.3f",
                                                 "Y : %5.3f Z : %5.3f", "X : %5.3f Z : %5.3f", "X : %5.3f Y : %5.3f",
                                                 "X : %5.3f Y : %5.3f Z : %5.3f"};
@@ -942,9 +942,14 @@ namespace ImGuizmo
     {
         ImGuiIO& io = ImGui::GetIO();
 
-        const ImU32 flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
-                            ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings |
-                            ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        const uint32_t flags = ImGuiWindowFlags_NoTitleBar | 
+                            ImGuiWindowFlags_NoResize | 
+                            ImGuiWindowFlags_NoScrollbar |
+                            ImGuiWindowFlags_NoInputs | 
+                            ImGuiWindowFlags_NoSavedSettings |
+                            ImGuiWindowFlags_NoFocusOnAppearing | 
+                            ImGuiWindowFlags_NoBringToFrontOnFocus;
+        
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::SetNextWindowPos(ImVec2(0, 0));
 
@@ -1035,7 +1040,7 @@ namespace ImGuizmo
         ComputeCameraRay(g_context.mRayOrigin, g_context.mRayVector);
     }
 
-    static void ComputeColors(ImU32* colors, int type, OPERATION operation)
+    static void ComputeColors(uint32_t* colors, int type, OPERATION operation)
     {
         if (g_context.mbEnable)
         {
@@ -1164,7 +1169,7 @@ namespace ImGuizmo
         ImDrawList* drawList = g_context.mDrawList;
 
         // colors
-        ImU32 colors[7];
+        uint32_t colors[7];
         ComputeColors(colors, type, ROTATE);
 
         vec_t cameraToModelNormalized;
@@ -1251,7 +1256,7 @@ namespace ImGuizmo
         ImDrawList* drawList = g_context.mDrawList;
 
         // colors
-        ImU32 colors[7];
+        uint32_t colors[7];
         ComputeColors(colors, type, SCALE);
 
         // draw
@@ -1320,7 +1325,7 @@ namespace ImGuizmo
             return;
 
         // colors
-        ImU32 colors[7];
+        uint32_t colors[7];
         ComputeColors(colors, type, TRANSLATE);
 
         const ImVec2 origin = worldToPos(g_context.mModel.v.position, g_context.mViewProjection);

@@ -130,6 +130,10 @@ void HG::Editor::Widgets::Inspector::drawGameObjectBody()
             ImGui::Columns(1);
         }
     }
+
+    ImGui::Separator();
+
+    drawAddBehaviourButton();
 }
 
 void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* transform)
@@ -145,7 +149,7 @@ void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* tran
     ImGui::PushItemWidth(-1);
     auto tempVec3 = transform->globalPosition();
     if (ImGui::IDGuard(++id),
-        ImGui::DragFloat3("", tempVec3.data.data, 0.05))
+        ImGui::DragFloat3("##Position", tempVec3.data.data, 0.05))
     {
         transform->setGlobalPosition(tempVec3);
     }
@@ -159,9 +163,9 @@ void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* tran
     ImGui::PushItemWidth(-1);
     tempVec3 = glm::eulerAngles(transform->localRotation());
     if (ImGui::IDGuard(++id),
-        ImGui::DragFloat3("", tempVec3.data.data, 0.05))
+        ImGui::DragFloat3("##Rotation", tempVec3.data.data, 0.05))
     {
-        transform->setGlobalRotation(glm::quat(tempVec3));
+        transform->setLocalRotation(glm::quat(tempVec3));
     }
     ImGui::PopItemWidth();
 
@@ -180,6 +184,11 @@ void HG::Editor::Widgets::Inspector::drawTransformEdit(HG::Core::Transform* tran
     ImGui::PopItemWidth();
 
     ImGui::Columns(1);
+}
+
+void HG::Editor::Widgets::Inspector::drawAddBehaviourButton()
+{
+    ImGui::Button("Add Behaviour");
 }
 
 void HG::Editor::Widgets::Inspector::drawAssetBody()

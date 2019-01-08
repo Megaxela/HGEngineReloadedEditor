@@ -54,6 +54,11 @@ namespace HG::Editor::Widgets
          */
         void drawTransformEdit(HG::Core::Transform* gameObject);
 
+        /**
+         * @brief Method for drawing "Add Behaviour" button.
+         */
+        void drawAddBehaviourButton();
+
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
     };
 }

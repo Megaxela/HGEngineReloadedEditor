@@ -122,7 +122,14 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     prepareDockSpace();
 
     // Drawing widgets
-    ImGui::MainMenuRenderer().render(m_mainMenu);
+//    ImGui::MainMenuRenderer().render(m_mainMenu);
+
+    // Drawing toolbar
+//    if (ImGui::BeginToolBar())
+//    {
+//
+//        ImGui::EndToolBar();
+//    }
 
     for (auto& widget : m_dockWidgets)
     {
