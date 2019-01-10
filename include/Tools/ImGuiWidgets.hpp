@@ -19,6 +19,10 @@ namespace HG::Editor
     struct Shortcut;
 }
 
+enum ImGuiDockNodeFlagsEx{
+    ImGuiDockNodeFlagsEx_ToolBar = 1 << 30 // Cause last ImGuiWindowFlag in ImGui (ImGuiWindowFLags_DockNodeHost) is 1 << 29
+};
+
 namespace ImGui
 {
     // Widgets: Icon Selectable
@@ -40,6 +44,9 @@ namespace ImGui
     IMGUI_API bool IconTreeNodeBehaviour(ImGuiID id, HG::Rendering::Base::Texture *icon, const ImVec2& uv_tl, const ImVec2& uv_br, ImGuiTreeNodeFlags flags, const char* label, const char* label_end);
 
     IMGUI_API bool BeginDragDropTargetWindow();
+
+    // Widgets: Extended dock space with toolbar support
+    IMGUI_API void DockSpaceEx(ImGuiID id, const ImVec2& size = ImVec2(0, 0), ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = nullptr);
 
     // Widgets: Tool bar
     IMGUI_API bool BeginToolBar();

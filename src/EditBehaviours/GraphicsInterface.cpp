@@ -122,14 +122,19 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     prepareDockSpace();
 
     // Drawing widgets
-//    ImGui::MainMenuRenderer().render(m_mainMenu);
+//    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+    ImGui::MainMenuRenderer().render(m_mainMenu);
 
     // Drawing toolbar
-//    if (ImGui::BeginToolBar())
-//    {
-//
-//        ImGui::EndToolBar();
-//    }
+    if (ImGui::BeginToolBar())
+    {
+        ImGui::Button("Move");
+        ImGui::Button("Rotate");
+        ImGui::Button("Scale");
+
+        ImGui::EndToolBar();
+    }
+//    ImGui::PopStyleVar(1);
 
     for (auto& widget : m_dockWidgets)
     {
@@ -337,7 +342,7 @@ void HG::Editor::Behaviours::GraphicsInterface::prepareDockSpace()
     ImGui::PopStyleVar(3);
 
     // Enabling dockspace
-    ImGui::DockSpace(ImGui::GetID("EditorDockSpace"));
+    ImGui::DockSpaceEx(ImGui::GetID("EditorDockSpace"), {0, 0}, ImGuiDockNodeFlagsEx_ToolBar);
 }
 
 void HG::Editor::Behaviours::GraphicsInterface::handleGameObjectSelectionChange()

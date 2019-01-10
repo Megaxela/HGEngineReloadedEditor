@@ -441,17 +441,49 @@ bool ImGui::IconTreeNodeBehaviour(ImGuiID id,
     return is_open;
 }
 
+void ImGui::DockSpaceEx(ImGuiID id, const ImVec2& size, ImGuiDockNodeFlags flags, const ImGuiWindowClass* window_class)
+{
+    ImGuiContext& g = *GImGui;
+
+    float offset = 0;
+    if (flags & ImGuiDockNodeFlagsEx_ToolBar)
+    {
+        flags ^= ImGuiDockNodeFlagsEx_ToolBar;
+
+        offset +=
+            ImMax(
+                g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y,
+                0.0f
+            ) + (g.FontBaseSize * 1 /* 2 */) + (g.Style.FramePadding.y * 2) - g.Style.WindowBorderSize;
+    }
+
+    SetCursorPosY(GetCursorPosY() + offset);
+
+    DockSpace(id, size, flags, window_class);
+}
+
 bool ImGui::BeginToolBar()
 {
     ImGuiContext& g = *GImGui;
     ImGuiViewport* viewport = g.Viewports[0];
-//    g.NextWindowData.MenuBarOffsetMinVal =
-//        ImVec2(
-//            g.Style.DisplaySafeAreaPadding.x,
-//            ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f)
-//        );
+    ImGuiWindow* window = GetCurrentWindow();
+    g.NextWindowData.MenuBarOffsetMinVal =
+        ImVec2(
+            g.Style.DisplaySafeAreaPadding.x,
+            ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f)
+        );
 
-    SetNextWindowPos(viewport->Pos);
+//    SetNextWindowPos(viewport->Pos);
+//    SetNextWindowPos(window->DC.CursorPos);
+    SetNextWindowPos(
+        {
+            viewport->Pos.x,
+            ImMax(
+                g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y,
+                0.0f
+            ) + g.FontBaseSize + (g.Style.FramePadding.y * 2) - g.Style.WindowBorderSize
+        }
+    );
     SetNextWindowSize(
         ImVec2(
             viewport->Size.x,
