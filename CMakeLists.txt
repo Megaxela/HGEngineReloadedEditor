@@ -3,10 +3,9 @@ project(HGEngineReloadedEditor)
 
 # Setting cmake module path
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
+include(cmake/InstallSystem.cmake)
 
 set(CMAKE_CXX_STANDARD 17)
-
-set(HGRenderingOGL_USE_GLFW On)
 
 # Adding engine
 add_subdirectory(engine)
@@ -66,3 +65,8 @@ foreach(RESOURCE ${RESOURCES})
 
     message(STATUS "Copying editor resource \"${RESOURCE_RELATIVE_PATH}\"")
 endforeach()
+
+# Preparing install
+prepare_install_script(
+    MODULES ${HG_MODULES}
+)

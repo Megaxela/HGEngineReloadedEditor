@@ -122,19 +122,54 @@ void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
     prepareDockSpace();
 
     // Drawing widgets
-//    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
     ImGui::MainMenuRenderer().render(m_mainMenu);
 
     // Drawing toolbar
     if (ImGui::BeginToolBar())
     {
-        ImGui::Button("Move");
-        ImGui::Button("Rotate");
-        ImGui::Button("Scale");
+        auto* transformConfiguration = m_transformBehaviour->configuration();
+
+
+        if (ImGui::RadioButton(
+            "Move",
+            transformConfiguration->currentOperation == ImGuizmo::OPERATION::TRANSLATE))
+        {
+            transformConfiguration->currentOperation = ImGuizmo::OPERATION::TRANSLATE;
+        }
+
+        if (ImGui::RadioButton(
+            "Rotate",
+            transformConfiguration->currentOperation == ImGuizmo::OPERATION::ROTATE))
+        {
+            transformConfiguration->currentOperation = ImGuizmo::OPERATION::ROTATE;
+        }
+
+        if (ImGui::RadioButton(
+            "Scale",
+            transformConfiguration->currentOperation == ImGuizmo::OPERATION::SCALE))
+        {
+            transformConfiguration->currentOperation = ImGuizmo::OPERATION::SCALE;
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::RadioButton(
+            "Global",
+            transformConfiguration->currentMode == ImGuizmo::MODE::WORLD))
+        {
+            transformConfiguration->currentMode = ImGuizmo::MODE::WORLD;
+        }
+
+
+        if (ImGui::RadioButton(
+            "Local",
+            transformConfiguration->currentMode == ImGuizmo::MODE::LOCAL))
+        {
+            transformConfiguration->currentMode = ImGuizmo::MODE::LOCAL;
+        }
 
         ImGui::EndToolBar();
     }
-//    ImGui::PopStyleVar(1);
 
     for (auto& widget : m_dockWidgets)
     {

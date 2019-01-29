@@ -46,7 +46,7 @@ namespace ImGui
     IMGUI_API bool BeginDragDropTargetWindow();
 
     // Widgets: Extended dock space with toolbar support
-    IMGUI_API void DockSpaceEx(ImGuiID id, const ImVec2& size = ImVec2(0, 0), ImGuiDockNodeFlags flags = 0, const ImGuiWindowClass* window_class = nullptr);
+    IMGUI_API void DockSpaceEx(ImGuiID id, const ImVec2& size = ImVec2(0, 0), ImGuiDockNodeFlags flags = 0);
 
     // Widgets: Tool bar
     IMGUI_API bool BeginToolBar();

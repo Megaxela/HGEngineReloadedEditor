@@ -7,6 +7,7 @@
 #include <Tools/ThumbnailsCache.hpp>
 #include <Editor/ShortcutsProcessor.hpp>
 #include <Tools/GlobalThumbnails.hpp>
+#include <Editor/BehaviourBuildController.hpp>
 
 HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     HG::Core::Application(std::move(name), argc, argv),
@@ -19,6 +20,16 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
 {
     m_propertyEditorsFabric->registrateDefault();
     m_assetsFabric->registrateDefault();
+
+    m_projectController->create(
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample",
+        "Sample"
+    );
+    m_projectController->behaviourBuildController()->configureProject(
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample/CMakeLists.txt",
+        HG::Editor::BehaviourBuildController::ConfigurationFileType::CMakeLists,
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample/Build"
+    );
 }
 
 HG::Editor::Application::~Application()

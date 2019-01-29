@@ -24,6 +24,9 @@ namespace HG::Editor::AssetSystem::Assets
          * @param path Path to asset.
          */
         explicit BehaviourAsset(std::filesystem::path path);
+
+    protected:
+        bool onLoad() override;
     };
 }
 
