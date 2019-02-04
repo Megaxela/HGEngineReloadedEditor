@@ -44,7 +44,7 @@ namespace HG::Editor
          * @param fileType Type of configuration file.
          * @param buildDirectory Directory for build files.
          */
-        void configureProject(const std::filesystem::path& configurationFilePath,
+        bool configureProject(const std::filesystem::path& configurationFilePath,
                               ConfigurationFileType fileType,
                               const std::filesystem::path& buildDirectory);
 
@@ -52,7 +52,7 @@ namespace HG::Editor
 
         void createCMakeLists(const std::filesystem::path& path);
 
-        void configureCMakeLists(const std::filesystem::path& path,
+        bool configureCMakeLists(const std::filesystem::path& path,
                                  const std::filesystem::path& buildDirectory);
 
         HG::Editor::Application* m_parentApplication;

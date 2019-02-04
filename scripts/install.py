@@ -1,3 +1,5 @@
+#!/usr/bin/python2
+
 import argparse
 from shutil import copyfile
 import json
@@ -5,11 +7,33 @@ import os
 import re
 
 
+SPECIAL_SUBDIRECTORIES = {
+    '__root__': ''  # just root
+}
+
+
 def safe_mkdirs(path):
     try:
         os.makedirs(path)
     except:
         pass
+
+
+def clear_empty_directories_tree(path):
+
+    def find_empty_dirs(root_dir):
+        for dirpath, dirs, files in os.walk(root_dir):
+            if not dirs and not files:
+                yield dirpath
+
+    while True:
+        items = list(find_empty_dirs(path))
+
+        if len(items) == 0:
+            break
+
+        for element in items:
+            os.rmdir(element)
 
 
 def recursive_re_copy(path, regex, destination, recursive=True, preserve_paths=True):
@@ -23,14 +47,12 @@ def recursive_re_copy(path, regex, destination, recursive=True, preserve_paths=T
         dest_path = os.path.join(destination, relative_path)
 
         if preserve_paths:
-            print("Creating \"%s\"" % dest_path)
             safe_mkdirs(dest_path)
 
         for fl in files:
             if not re.search(regex, fl):
                 continue
 
-            print("Copying \"%s\"" % os.path.join(root, fl))
             copyfile(
                 os.path.join(root, fl),
                 os.path.join(dest_path, fl) if preserve_paths else os.path.join(destination, fl)
@@ -41,58 +63,78 @@ def recursive_re_copy(path, regex, destination, recursive=True, preserve_paths=T
 
 
 def perform_install(configuration):
-    """
-    Function, that performs installation.
-
-    Dependencies file format:
-    ```json
-    {
-        "engine": {
-            "include_directories": [
-                ...
-            ],
-            "library_paths": [
-                ...
-            ]
-        },
-        ...
-    }
-    ```
-
-    :param configuration:
-    :return:
-    """
 
     with open(configuration.dependencies_file) as dep_file:
         dependencies = json.load(dep_file)
 
-    install_dest_dir = os.path.join(configuration.install_dir, 'engine')
+    # Creating install directory if required
+    safe_mkdirs(configuration.install_dir)
 
-    include_dest_dir = os.path.join(install_dest_dir, 'include')
-    libraries_dest_dir = os.path.join(install_dest_dir, 'lib')
+    # Copying meta info
+    copyfile(
+        configuration.engine_meta_file,
+        os.path.join(configuration.install_dir, 'engine_meta.json')
+    )
 
-    safe_mkdirs(include_dest_dir)
-    safe_mkdirs(libraries_dest_dir)
+    for key in dependencies:
 
-    for subdirectory in dependencies:
-        content = dependencies[subdirectory]
-        for include_dir in content['include_directories']:
-            recursive_re_copy(
-                path=include_dir,
-                regex=R"\.hpp",
-                destination=include_dest_dir,
-                recursive=True,
-                preserve_paths=True
-            )
+        print('Processing \"%s\" key' % key)
 
-        for lib_dir in content['library_paths']:
-            recursive_re_copy(
-                path=lib_dir,
-                regex=R"lib[A-Za-z_]+\.(a|so)",
-                destination=libraries_dest_dir,
-                recursive=False,
-                preserve_paths=False
-            )
+        if key in SPECIAL_SUBDIRECTORIES:
+            subdirectory = SPECIAL_SUBDIRECTORIES[key]
+        else:
+            subdirectory = key
+
+        install_dest_dir = os.path.join(configuration.install_dir, subdirectory)
+
+        include_dest_dir = os.path.join(install_dest_dir, 'include')
+        libraries_dest_dir = os.path.join(install_dest_dir, 'lib')
+        binaries_dest_dir = install_dest_dir
+        files_dest_dir = install_dest_dir
+
+        safe_mkdirs(include_dest_dir)
+        safe_mkdirs(libraries_dest_dir)
+
+        content = dependencies[key]
+
+        if content.get('include_directories'):
+            for include_dir in content['include_directories']:
+                recursive_re_copy(
+                    path=include_dir,
+                    regex=R"\.hpp",
+                    destination=include_dest_dir,
+                    recursive=True,
+                    preserve_paths=True
+                )
+
+        if content.get('library_paths'):
+            for lib_dir in content['library_paths']:
+                copyfile(
+                    lib_dir,
+                    os.path.join(libraries_dest_dir, os.path.basename(lib_dir))
+                )
+
+        if content.get('binaries'):
+            for binary_dir in content['binaries']:
+                copyfile(
+                    binary_dir,
+                    os.path.join(binaries_dest_dir, os.path.basename(binary_dir))
+                )
+
+        if content.get('files'):
+            for file_dict in content['files']:
+                target_full_path = os.path.join(files_dest_dir, file_dict['target'])
+
+                safe_mkdirs(os.path.dirname(target_full_path))
+
+                copyfile(
+                    file_dict['source'],
+                    target_full_path
+                )
+
+        clear_empty_directories_tree(include_dest_dir)
+
+    print("Installation finished")
 
 
 if __name__ == "__main__":
@@ -100,7 +142,13 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--dependencies_file',
-        help='Path to json file with dependencies. This file has to be generated by `cmake`.`',
+        help='Path to json file with dependencies. This file has to be generated by `cmake`.',
+        required=True
+    )
+
+    parser.add_argument(
+        '--engine_meta_file',
+        help='Path to json with engine meta info. This file has to be generated by `cmake`.',
         required=True
     )
 

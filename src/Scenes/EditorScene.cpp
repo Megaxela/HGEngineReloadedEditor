@@ -114,9 +114,9 @@ void HG::Editor::EditorScene::start()
     }
 
     // Loading model
-    auto cubeModel = application()->resourceManager()
-        ->load<HG::Utils::AssimpLoader>("../engine/examples/RenderToTexture/Assets/Models/cube.obj")
-        .guaranteeGet();
+//    auto cubeModel = application()->resourceManager()
+//        ->load<HG::Utils::AssimpLoader>("../engine/examples/RenderToTexture/Assets/Models/cube.obj")
+//        .guaranteeGet();
 
     // Creating material
     auto material = registerResource(
@@ -130,12 +130,13 @@ void HG::Editor::EditorScene::start()
 
     auto parentGO = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Parent1")
-        .addBehaviour(
-            new HG::Rendering::Base::Behaviours::Mesh(
-                  cubeModel->children()[0]->meshes()[0],
-                  material
-            )
-        ).deploy();
+//        .addBehaviour(
+//            new HG::Rendering::Base::Behaviours::Mesh(
+//                  cubeModel->children()[0]->meshes()[0],
+//                  material
+//            )
+//        )
+        .deploy();
 
     auto parentGO2 = HG::Core::GameObjectBuilder(application()->resourceCache())
         .setName("Parent2")

@@ -16,6 +16,7 @@ namespace HG::Editor
     class ThumbnailsCache;
     class ShortcutProcessor;
     class GlobalThumbnails;
+    class EngineInfo;
 
     /**
      * @brief Class that describes editor application
@@ -34,6 +35,12 @@ namespace HG::Editor
          * @brief Destructor.
          */
         ~Application() override;
+
+        /**
+         * @brief Method for getting pointer to engine info object.
+         * @return Pointer to engine info.
+         */
+        HG::Editor::EngineInfo* engineInfo() const;
 
         /**
          * @brief Method for getting pointer to project controller.
@@ -83,6 +90,8 @@ namespace HG::Editor
         bool init() override;
 
     private:
+
+        HG::Editor::EngineInfo* m_engineInfo;
 
         HG::Editor::ProjectController* m_projectController;
 

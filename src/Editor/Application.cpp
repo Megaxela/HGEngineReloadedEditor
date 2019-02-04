@@ -6,11 +6,14 @@
 #include <AssetSystem/AssetsManager.hpp>
 #include <Tools/ThumbnailsCache.hpp>
 #include <Editor/ShortcutsProcessor.hpp>
+#include <Editor/EngineInfo.hpp>
 #include <Tools/GlobalThumbnails.hpp>
 #include <Editor/BehaviourBuildController.hpp>
+#include <CurrentLogger.hpp>
 
 HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     HG::Core::Application(std::move(name), argc, argv),
+    m_engineInfo(new HG::Editor::EngineInfo),
     m_projectController(new HG::Editor::ProjectController(this)),
     m_thumbnailsCache(new HG::Editor::ThumbnailsCache(this)),
     m_shortcutsProcessor(new HG::Editor::ShortcutsProcessor()),
@@ -25,11 +28,14 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
         "/home/ushanovalex/Development/Projects/HGEngine/Sample",
         "Sample"
     );
-    m_projectController->behaviourBuildController()->configureProject(
+    if (!m_projectController->behaviourBuildController()->configureProject(
         "/home/ushanovalex/Development/Projects/HGEngine/Sample/CMakeLists.txt",
         HG::Editor::BehaviourBuildController::ConfigurationFileType::CMakeLists,
         "/home/ushanovalex/Development/Projects/HGEngine/Sample/Build"
-    );
+    ))
+    {
+        Error() << "Can't configure project";
+    }
 }
 
 HG::Editor::Application::~Application()
@@ -40,6 +46,11 @@ HG::Editor::Application::~Application()
     delete m_shortcutsProcessor;
     delete m_propertyEditorsFabric;
     delete m_assetsFabric;
+}
+
+HG::Editor::EngineInfo* HG::Editor::Application::engineInfo() const
+{
+    return m_engineInfo;
 }
 
 HG::Editor::ProjectController *HG::Editor::Application::projectController() const
@@ -74,6 +85,16 @@ HG::Editor::GlobalThumbnails* HG::Editor::Application::globalThumbnails() const
 
 bool HG::Editor::Application::init()
 {
+    try
+    {
+        m_engineInfo->load("engine_meta.json");
+    }
+    catch (const std::exception& exception)
+    {
+        Error() << "Can't init application: " << exception.what();
+        return false;
+    }
+
     auto result = HG::Core::Application::init();
 
     if (!result)

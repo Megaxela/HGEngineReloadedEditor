@@ -4,6 +4,7 @@ project(HGEngineReloadedEditor)
 # Setting cmake module path
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 include(cmake/InstallSystem.cmake)
+include(cmake/PrepareProjects.cmake)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -48,6 +49,7 @@ target_link_libraries(HGEngineReloadedEditor
     # Libraries
     FilesystemWatcher
     rectpack2D
+    libexecstream
 
     # LLVM
     LLVM
@@ -67,6 +69,10 @@ foreach(RESOURCE ${RESOURCES})
 endforeach()
 
 # Preparing install
-prepare_install_script(
+prepare_installation(
+    MAIN_TARGET HGEngineReloadedEditor
     MODULES ${HG_MODULES}
+    DEPENDENCIES ${HG_MODULES_DEPENDENCIES}
+    RESOURCES ${RESOURCES}
+    RESOURCES_ROOT ${CMAKE_CURRENT_LIST_DIR}/resources/
 )
