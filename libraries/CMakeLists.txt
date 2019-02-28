@@ -1,3 +1,4 @@
 add_subdirectory(FilesystemWatcher)
 prepare_rectpack_project(rectpack2D)
 prepare_libexecstream_project(libexecstream)
+add_subdirectory(CMakeServerConnector)

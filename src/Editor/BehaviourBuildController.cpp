@@ -4,15 +4,23 @@
 #include <Editor/ProjectController.hpp>
 #include <Editor/EngineInfo.hpp>
 
+// HG::Utils
+#include <HG/Utils/StringTools.hpp>
+
 // C++ STL
 #include <fstream>
 #include <iostream>
 
 // libexecstream
 #include <exec-stream.h>
+#include <CurrentLogger.hpp>
 
 HG::Editor::BehaviourBuildController::BehaviourBuildController(HG::Editor::Application* parent) :
-    m_parentApplication(parent)
+    m_parentApplication(parent),
+    m_loadedFileType(),
+    m_compilationDBPath(),
+    m_buildDirectory(),
+    m_database()
 {
 
 }
@@ -24,25 +32,66 @@ void HG::Editor::BehaviourBuildController::createConfigurationFile(const std::fi
     {
     case ConfigurationFileType::CMakeLists:
         createCMakeLists(path);
-        break;
+        return;
     }
+
+    throw std::invalid_argument("Unknown configuration file type");
 }
 
 bool HG::Editor::BehaviourBuildController::configureProject(const std::filesystem::path &configurationFilePath,
                                                             HG::Editor::BehaviourBuildController::ConfigurationFileType fileType,
                                                             const std::filesystem::path &buildDirectory)
 {
+    bool configurationStatus = false;
     switch (fileType)
     {
     case ConfigurationFileType::CMakeLists:
-        return configureCMakeLists(configurationFilePath, buildDirectory);
+        configurationStatus = configureCMakeLists(configurationFilePath, buildDirectory);
+        break;
     }
 
-    return false;
+    if (!configurationStatus)
+    {
+        return false;
+    }
+
+    if (!createLibraryLoader(buildDirectory))
+    {
+        return false;
+    }
+
+    m_buildDirectory = buildDirectory;
+
+    return loadBuildInfoFrom(buildDirectory / "compile_commands.json", fileType);
 }
 
 void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesystem::path &path)
 {
+    auto pathToProject = path.parent_path();
+    auto cmakeDirectoryPath = pathToProject / "cmake";
+
+    // Copying ConfigureProject.cmake
+    std::error_code errorCode;
+    std::filesystem::create_directories(pathToProject / "cmake", errorCode);
+
+    if (errorCode)
+    {
+        throw std::invalid_argument("Can't create cmake directory: " + errorCode.message());
+    }
+
+    const std::string fileName = "ConfigureProject.cmake";
+
+    std::filesystem::copy(
+        std::filesystem::current_path() / "project_files" / fileName,
+        cmakeDirectoryPath / fileName,
+        errorCode
+    );
+
+    if (errorCode)
+    {
+        throw std::invalid_argument("Can't copy \"" + fileName + "\". Error: " + errorCode.message());
+    }
+
     std::ofstream file(path);
 
     if (!file.is_open())
@@ -51,29 +100,24 @@ void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesyste
     }
 
     const std::string& assetsDir = m_parentApplication->projectController()->metadata()->assetsDirectory;
-    const std::string& projectName = m_parentApplication->projectController()->metadata()->name;
+    std::string projectName = m_parentApplication->projectController()->metadata()->name;
+
+    // Replacing spaces with _
+    std::replace(
+        projectName.begin(),
+        projectName.end(),
+        ' ', '_'
+    );
 
     auto enginePath = std::filesystem::current_path() / "engine";
 
-    file << "cmake_minimum_required(VERSION 3.5)" << std::endl;
-    file << "project(" << projectName << ")" << std::endl;
-    file << std::endl;
-    file << "set(ASSETS_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/" << assetsDir << ")" << std::endl;
-    file << std::endl;
-    file << "file(GLOB_RECURSE SOURCES "
-            "${ASSETS_DIRECTORY}/*.cpp "
-            "${ASSETS_DIRECTORY}/*.c "
-            "${ASSETS_DIRECTORY}/*.hpp "
-            "${ASSETS_DIRECTORY}/*.h"
-            ")" << std::endl;
-
-    file << "add_library(" << projectName << " SHARED ${SOURCES})" << std::endl;
-
-    file << "target_include_directories(" << projectName
-         << " PUBLIC ${ASSETS_DIRECTORY} "
-         << (enginePath / "include") << ")" << std::endl;
-
-    file << "target_link_libraries(" << projectName << " ";
+    file << "include(cmake/ConfigureProject.cmake)" << std::endl
+         << std::endl
+         << "prepare_project(" << std::endl
+         << "    PROJECT_NAME " << projectName << std::endl
+         << "    ASSETS_DIRECTORY " << assetsDir << std::endl
+         << "    PATH_TO_ENGINE " << enginePath << std::endl
+         << "    DEPENDENCIES " << std::endl;
 
     auto modules = m_parentApplication
         ->engineInfo()
@@ -89,15 +133,13 @@ void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesyste
     }
 
     file << ")" << std::endl;
-
-    file << "set_target_properties(" << projectName << ' ' <<
-            "PROPERTIES CXX_STANDARD 17"
-            ")";
 }
 
 bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesystem::path &path,
                                                                const std::filesystem::path &buildDirectory)
 {
+    auto pathToProject = path.parent_path();
+
     // Creation of build directory
     std::error_code errorCode;
     std::filesystem::create_directories(buildDirectory, errorCode);
@@ -110,10 +152,10 @@ bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesy
     std::vector<std::string> arguments = {
         "-DCMAKE_PREFIX_PATH=/home/ushanovalex/Development/Libraries/glew-2.1.0",
         "-DCMAKE_EXPORT_COMPILE_COMMANDS=On",
-        "-DCMAKE_CXX_COMPILER=clang++-6.0",
-        "-DCMAKE_C_COMPILER=clang-6.0",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-6.0",
+        "-DCMAKE_C_COMPILER=/usr/bin/clang-6.0",
         "-B" + buildDirectory.string(),
-        "-H" + path.parent_path().string()
+        "-H" + pathToProject.string()
     };
 
     for (auto& el : arguments)
@@ -122,14 +164,14 @@ bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesy
     }
 
     exec_stream_t command(
-        "cmake", // todo: Make this path configurable
+        "/usr/local/bin/cmake", // todo: Make this path configurable
         arguments.begin(),
         arguments.end()
     );
 
     std::string line;
 
-    while (std::getline(command.out(), line))
+    while (std::getline(command.err(), line))
     {
         std::cout << line << std::endl;
     }
@@ -137,4 +179,150 @@ bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesy
     command.close();
 
     return command.exit_code() == 0;
+}
+
+HG::Editor::BehaviourBuildController::UnitBuildInfo HG::Editor::BehaviourBuildController::getBuildInfoFor(const std::filesystem::path &file) const
+{
+    auto absolutePath = std::filesystem::absolute(file);
+
+    auto searchResult = m_database.find(absolutePath);
+
+    if (searchResult == m_database.end())
+    {
+        throw std::invalid_argument("There is no compilation database at \"" + file.string() + "\"");
+    }
+
+    return searchResult->second;
+}
+
+bool HG::Editor::BehaviourBuildController::loadBuildInfoFrom(const std::filesystem::path &compilationDatabasePath,
+                                                             HG::Editor::BehaviourBuildController::ConfigurationFileType fileType)
+{
+    m_loadedFileType = fileType;
+    switch (fileType)
+    {
+    case ConfigurationFileType::CMakeLists:
+        return loadCMakeListsBuildInfoFrom(compilationDatabasePath);
+    }
+
+    throw std::invalid_argument("Unknown configuration file type");
+}
+
+bool HG::Editor::BehaviourBuildController::loadCMakeListsBuildInfoFrom(const std::filesystem::path &compilationDatabasePath)
+{
+    std::ifstream file(compilationDatabasePath);
+
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    m_database.clear();
+
+    nlohmann::json data = nlohmann::json::parse(file);
+
+    for (auto& entry : data)
+    {
+        UnitBuildInfo info;
+        std::string command;
+
+        entry.at("directory").get_to(info.directory);
+        entry.at("command").get_to(command);
+        entry.at("file").get_to(info.file);
+
+        parseCLICommand(command, info.command, info.arguments);
+
+        m_database.insert({
+            std::filesystem::absolute(info.file),
+            info
+        });
+    }
+
+    return true;
+}
+
+constexpr const char* libraryTUCode = R"(
+namespace HG::Core
+{
+    class Behaviour;
+}
+
+extern "C" HG::Core::Behaviour* createBehaviour()
+{
+    return new BEHAVIOUR_NAME();
+}
+
+extern "C" void deleteBehaviour(HG::Core::Behaviour* behaviour)
+{
+    delete behaviour;
+}
+)";
+
+bool HG::Editor::BehaviourBuildController::createLibraryLoader(const std::filesystem::path &path)
+{
+    std::ofstream file(path / "library_code.cpp");
+
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    file << libraryTUCode;
+
+    return true;
+}
+
+std::filesystem::path HG::Editor::BehaviourBuildController::buildSource(const std::filesystem::path &path)
+{
+    auto buildInfo = getBuildInfoFor(path);
+
+    std::vector<std::string> buildArguments;
+
+    for (auto& argument : buildInfo.arguments)
+    {
+        if (HG::Utils::StringTools::startsWith<std::string>(argument, "-o"))
+        {
+            continue;
+        }
+
+        buildArguments.push_back(argument);
+    }
+
+    auto pathToFile = path.string() + ".o";
+    buildArguments.push_back(pathToFile);
+
+    exec_stream_t builder(
+        buildInfo.command,
+        buildArguments.begin(),
+        buildArguments.end()
+    );
+
+    std::string line;
+    while (std::getline(builder.err(), line))
+    {
+        Error() << "Compilation error: " << line;
+    }
+
+    builder.close();
+
+    return pathToFile;
+}
+
+void HG::Editor::BehaviourBuildController::parseCLICommand(const std::string& cliCommand, std::string &command, std::vector<std::string> &arguments)
+{
+    auto splittedCommand = HG::Utils::StringTools::split(cliCommand, ' ');
+
+    if (splittedCommand.empty())
+    {
+        return;
+    }
+
+    auto iter = splittedCommand.begin();
+
+    command = *(iter++);
+
+    for (; iter != splittedCommand.end(); ++iter)
+    {
+        arguments.emplace_back(std::move(*iter));
+    }
 }

@@ -54,6 +54,9 @@ void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
         // Performing assets `postLoad` method
         performAssetsPostLoad(m_rootAsset);
 
+        // Run building if required
+
+
         // Finishing assets loading
         m_isLoading = false;
     }

@@ -25,17 +25,19 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     m_assetsFabric->registrateDefault();
 
     m_projectController->create(
-        "/home/ushanovalex/Development/Projects/HGEngine/Sample",
-        "Sample"
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample New",
+        "Sample New"
     );
     if (!m_projectController->behaviourBuildController()->configureProject(
-        "/home/ushanovalex/Development/Projects/HGEngine/Sample/CMakeLists.txt",
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample New/CMakeLists.txt",
         HG::Editor::BehaviourBuildController::ConfigurationFileType::CMakeLists,
-        "/home/ushanovalex/Development/Projects/HGEngine/Sample/Build"
+        "/home/ushanovalex/Development/Projects/HGEngine/Sample New/Build"
     ))
     {
         Error() << "Can't configure project";
     }
+
+    m_projectController->load("/home/ushanovalex/Development/Projects/HGEngine/Sample New");
 }
 
 HG::Editor::Application::~Application()

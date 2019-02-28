@@ -83,9 +83,7 @@ bool HG::CodeAnalyze::BehavioursSearchVisitor::VisitCXXRecordDecl(clang::CXXReco
             declaration->isDerivedFrom(m_behaviourDecl))
         {
             // Saving name
-            m_result->name = declaration->getQualifiedNameAsString();
-            m_result->success = true;
-            return false;
+            m_result->names.emplace_back(declaration->getQualifiedNameAsString());
         }
     }
 

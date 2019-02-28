@@ -25,8 +25,15 @@ namespace HG::Editor::AssetSystem::Assets
          */
         explicit BehaviourAsset(std::filesystem::path path);
 
+        void setName(std::string name);
+
+        std::string name() const override;
+
     protected:
         bool onLoad() override;
+
+    private:
+        std::string m_name;
     };
 }
 

@@ -19,14 +19,12 @@ namespace HG::CodeAnalyze
         struct Result
         {
             Result() :
-                    success(false),
-                    name()
+                    names()
             {
 
             }
 
-            bool success;
-            std::string name;
+            std::vector<std::string> names;
         };
 
         /**
