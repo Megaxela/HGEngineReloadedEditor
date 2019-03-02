@@ -178,3 +178,167 @@ void ConfigureResponse::deserialize(const nlohmann::json &json, BasicMessage &ms
     basicDeserialize(json, msg);
 }
 
+nlohmann::json ComputeRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void ComputeResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+}
+
+nlohmann::json CodeModelRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void CodeModelResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+
+    auto& codeModelResponse = message_cast<CodeModelResponse>(msg);
+
+    auto configurations_json = json.value("configurations", nlohmann::json::array());
+    for (const auto& configuration_json : configurations_json)
+    {
+        Configuration configuration;
+
+        configuration.name = configuration_json.value("name", std::string());
+
+        auto projects_json = json.value("projects", nlohmann::json::array());
+        for (const auto& project_json : projects_json)
+        {
+            Project project;
+
+            project.buildDirectory = project_json.value("buildDirectory", std::string());
+            project.name = project_json.value("name", std::string());
+            project.sourceDirectory = project_json.value("sourceDirectory", std::string());
+
+            auto targets_json = project_json.value("targets", nlohmann::json::array());
+            for (const auto& target_json : targets_json)
+            {
+                Target target;
+
+                target.artifacts = target_json.value("artifacts", std::vector<std::string>());
+                target.buildDirectory = target_json.value("buildDirectory", std::string());
+                target.fullName = target_json.value("fullName", std::string());
+                target.linkerLanguage = target_json.value("linkerLanguage", std::string());
+                target.name = target_json.value("name", std::string());
+                target.sourceDirectory = target_json.value("sourceDirectory", std::string());
+                target.type = target_json.value("type", std::string());
+
+                auto fileGroups_json = target_json.value("fileGroups", nlohmann::json::array());
+                for (const auto& fileGroup_json : fileGroups_json)
+                {
+                    FileGroup fileGroup;
+
+                    fileGroup.compileFlags = fileGroup_json.value("compileFlags", std::string());
+                    fileGroup.defines = fileGroup_json.value("defines", std::vector<std::string>());
+                    fileGroup.isGenerated = fileGroup_json.value("isGenerated", false);
+                    fileGroup.language = fileGroup_json.value("language", std::string());
+                    fileGroup.sources = fileGroup_json.value("sources", std::vector<std::string>());
+
+                    auto includePaths_json = fileGroup_json.value("includePath", nlohmann::json::array());
+                    for (const auto& includePath_json : includePaths_json)
+                    {
+                        IncludePath includePath;
+
+                        includePath.path = includePath_json.value("path", std::string());
+
+                        fileGroup.includePaths.emplace_back(std::move(includePath));
+                    }
+
+                    target.fileGroups.emplace_back(std::move(fileGroup));
+                }
+
+                project.targets.emplace_back(std::move(target));
+            }
+
+            configuration.projects.emplace_back(std::move(project));
+        }
+
+        codeModelResponse.configurations.emplace_back(std::move(configuration));
+    }
+}
+
+nlohmann::json CTestInfoRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void CTestInfoResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+
+    auto& ctestInfoResponse = message_cast<CTestInfoResponse>(msg);
+
+    throw std::runtime_error("No implementation");
+}
+
+nlohmann::json CMakeInputsRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void CMakeInputsResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+
+    auto& cmakeInputsResponse = message_cast<CMakeInputsResponse>(msg);
+
+    cmakeInputsResponse.cmakeRootDirectory = json.value("cmakeRootDirectory", std::string());
+    cmakeInputsResponse.sourceDirectory = json.value("sourceDirectory", std::string());
+
+    auto buildFiles_json = json.value("buildFiles", nlohmann::json::array());
+    for (const auto& buildFile_json : buildFiles_json)
+    {
+        BuildFile buildFile;
+
+        buildFile.isCMake = buildFile_json.value("isCMake", false);
+        buildFile.isTemporary = buildFile_json.value("isTemporary", false);
+        buildFile.sources = buildFile_json.value("sources", std::vector<std::string>());
+
+        cmakeInputsResponse.buildFiles.emplace_back(std::move(buildFile));
+    }
+}
+
+nlohmann::json CacheRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void CacheResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+
+    auto& cacheResponse = message_cast<CacheResponse>(msg);
+
+    auto cache_json = json.value("cache", nlohmann::json::array());
+    for (const auto& cacheValue_json : cache_json)
+    {
+        CacheValue cacheValue;
+
+        cacheValue.key = cacheValue_json.value("key", std::string());
+        cacheValue.properties = cacheValue_json.value("properties", decltype(cacheValue.properties)());
+        cacheValue.type = cacheValue_json.value("type", std::string());
+        cacheValue.value = cacheValue_json.value("value", std::string());
+
+        cacheResponse.cache.emplace_back(std::move(cacheValue));
+    }
+}
+
+nlohmann::json FileSystemWatchersRequest::serialize(const BasicMessage& msg)
+{
+    return basicSerialize(msg);
+}
+
+void FileSystemWatchersResponse::deserialize(const nlohmann::json& json, BasicMessage& msg)
+{
+    basicDeserialize(json, msg);
+
+    auto& fileSystemWatchersResponse = message_cast<FileSystemWatchersResponse>(msg);
+
+    fileSystemWatchersResponse.watchedFiles = json.value("watchedFiles", decltype(fileSystemWatchersResponse.watchedFiles)());
+    fileSystemWatchersResponse.watchedDirectories = json.value("watchedDirectories", decltype(fileSystemWatchersResponse.watchedDirectories)());
+}

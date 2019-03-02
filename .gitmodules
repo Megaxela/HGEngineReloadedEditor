@@ -1,6 +1,6 @@
 [submodule "engine"]
 	path = engine
-	url = ssh://git@185.180.231.188:5554/Megaxela/HGEngineReloaded.git
+	url = https://github.com/Megaxela/HGEngineReloaded.git
 [submodule "libraries/FilesystemWatcher"]
 	path = libraries/FilesystemWatcher
 	url = https://github.com/Megaxela/FilesystemWatcher.git

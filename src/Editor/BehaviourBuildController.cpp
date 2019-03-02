@@ -164,7 +164,7 @@ bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesy
     }
 
     exec_stream_t command(
-        "/usr/local/bin/cmake", // todo: Make this path configurable
+        "/bin/cmake", // todo: Make this path configurable
         arguments.begin(),
         arguments.end()
     );
