@@ -70,6 +70,17 @@ namespace HG::Editor
         void create(std::filesystem::path path, std::string name);
 
         /**
+         * @brief Method for closing currently opened project
+         * without saving.
+         */
+        void close();
+
+        /**
+         * @brief Method for getting path to project root directory.
+         */
+        std::filesystem::path projectPath() const;
+
+        /**
          * @brief Method for getting project controller's
          * asset manager.
          * @return Pointer to asset manager.
@@ -87,6 +98,11 @@ namespace HG::Editor
          * @brief Method for getting pointer to project's metadata.
          */
         HG::Editor::ProjectMetadata* metadata();
+
+        /**
+         * @brief Method for checking is project opened currently.
+         */
+        bool isOpened() const;
 
     private:
 

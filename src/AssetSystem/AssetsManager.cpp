@@ -83,12 +83,16 @@ void HG::Editor::AssetSystem::AssetsManager::clearAssets()
 
 void HG::Editor::AssetSystem::AssetsManager::updateAssets()
 {
+    // If there is no loaded assets
     if (m_rootAsset == nullptr)
     {
         reloadAssets();
         postAssetsForLoading();
         return;
     }
+
+    // If there is some loaded assets - update them
+    // todo: Perform incremental assets loading and selective update
 }
 
 void HG::Editor::AssetSystem::AssetsManager::reloadAssets()

@@ -24,20 +24,22 @@ HG::Editor::Application::Application(std::string name, int argc, char **argv) :
     m_propertyEditorsFabric->registrateDefault();
     m_assetsFabric->registrateDefault();
 
-    m_projectController->create(
-        "~/Development/Projects/HGEngine/Sample New",
-        "Sample New"
-    );
+    std::string projectName = "Sample New";
+
+    auto path = std::filesystem::path("/home/megaxela/Development/Projects/HGEngine") / projectName;
+
+    m_projectController->create(path, projectName);
+
     if (!m_projectController->behaviourBuildController()->configureProject(
-        "~/Development/Projects/HGEngine/Sample New/CMakeLists.txt",
+        path / "CMakeLists.txt",
         HG::Editor::BehaviourBuildController::ConfigurationFileType::CMakeLists,
-        "~/Development/Projects/HGEngine/Sample New/Build"
+        path / "Build"
     ))
     {
         Error() << "Can't configure project";
     }
 
-    m_projectController->load("~/Development/Projects/HGEngine/Sample New");
+    m_projectController->load(path);
 }
 
 HG::Editor::Application::~Application()

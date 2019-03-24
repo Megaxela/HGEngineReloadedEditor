@@ -93,6 +93,13 @@ namespace HG::Editor::Behaviours
          */
         HG::Editor::Widgets::LineInputModal* lineInputModal() const;
 
+        /**
+         * @brief Method for getting pointer to information modal
+         * widget.
+         * @return Pointer to information modal widget.
+         */
+        HG::Editor::Widgets::InformationModal* informationModal() const;
+
     protected:
 
         /**

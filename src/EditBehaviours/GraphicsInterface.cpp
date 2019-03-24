@@ -99,6 +99,11 @@ HG::Editor::Widgets::LineInputModal* HG::Editor::Behaviours::GraphicsInterface::
     return m_lineInputModalWidget;
 }
 
+HG::Editor::Widgets::InformationModal *HG::Editor::Behaviours::GraphicsInterface::informationModal() const
+{
+    return m_informationModalWidget;
+}
+
 void HG::Editor::Behaviours::GraphicsInterface::onUpdate()
 {
     handleGameObjectSelectionChange();

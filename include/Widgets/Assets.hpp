@@ -7,6 +7,7 @@
 // Editor
 #include <Widgets/AbstractWidget.hpp>
 #include <Tools/ThumbnailsCache.hpp>
+#include <Tools/ImGuiWidgets.hpp>
 
 namespace HG::Editor::AssetSystem::Assets
 {
@@ -87,10 +88,32 @@ namespace HG::Editor::Widgets
          */
         void sortAssetChildren(HG::Editor::AssetSystem::Assets::AssetPtr asset);
 
+        /**
+         * @brief Method, that performs context menu initialization.
+         */
+        void setupContextMenu();
+
+        /**
+         * @brief Method, that executes on Create->Folder.
+         */
+        void actionCreateDirectory();
+
+        /**
+         * @brief Method, that executes on Delete.
+         */
+        void actionDelete();
+
+        /**
+         * @brief Method, that executes on unimplemented methods.
+         */
+        void actionUnimplemented();
+
         HG::Editor::Widgets::Settings::Common* m_commonSettings;
 
         std::vector<SortType> m_sortTypes;
 
         std::size_t m_currentSorting;
+
+        ImGui::Menu m_contextMenu;
     };
 }

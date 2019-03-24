@@ -122,3 +122,21 @@ void HG::Editor::ProjectController::create(std::filesystem::path path, std::stri
     // Saving
     save();
 }
+
+void HG::Editor::ProjectController::close()
+{
+    m_projectPath.clear();
+    m_metadata.assetsDirectory.clear();
+    m_metadata.activeScene.clear();
+    m_metadata.name.clear();
+}
+
+bool HG::Editor::ProjectController::isOpened() const
+{
+    return !m_projectPath.empty();
+}
+
+std::filesystem::path HG::Editor::ProjectController::projectPath() const
+{
+    return m_projectPath;
+}

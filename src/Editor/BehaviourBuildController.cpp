@@ -81,9 +81,18 @@ void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesyste
 
     const std::string fileName = "ConfigureProject.cmake";
 
+    auto pathToEngineConfigure = std::filesystem::current_path() / "project_files" / fileName;
+
+    if (!std::filesystem::exists(pathToEngineConfigure))
+    {
+        throw std::invalid_argument("Can't copy \"" + pathToEngineConfigure.string() + "\". Error: File does not exists");
+    }
+
+    // todo: remove skip_existing when project version will be implemented
     std::filesystem::copy(
-        std::filesystem::current_path() / "project_files" / fileName,
+        pathToEngineConfigure,
         cmakeDirectoryPath / fileName,
+        std::filesystem::copy_options::skip_existing,
         errorCode
     );
 
@@ -96,7 +105,7 @@ void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesyste
 
     if (!file.is_open())
     {
-        throw std::invalid_argument("Can't open file for writing configuration file");
+        throw std::invalid_argument("Can't open configuration file for writing");
     }
 
     const std::string& assetsDir = m_parentApplication->projectController()->metadata()->assetsDirectory;
@@ -111,7 +120,9 @@ void HG::Editor::BehaviourBuildController::createCMakeLists(const std::filesyste
 
     auto enginePath = std::filesystem::current_path() / "engine";
 
-    file << "include(cmake/ConfigureProject.cmake)" << std::endl
+    file << "cmake_minimum_required(VERSION 3.13)" << std::endl
+         << std::endl
+         << "include(cmake/ConfigureProject.cmake)" << std::endl
          << std::endl
          << "prepare_project(" << std::endl
          << "    PROJECT_NAME " << projectName << std::endl
@@ -152,8 +163,8 @@ bool HG::Editor::BehaviourBuildController::configureCMakeLists(const std::filesy
     std::vector<std::string> arguments = {
         "-DCMAKE_PREFIX_PATH=/home/ushanovalex/Development/Libraries/glew-2.1.0",
         "-DCMAKE_EXPORT_COMPILE_COMMANDS=On",
-        "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-6.0",
-        "-DCMAKE_C_COMPILER=/usr/bin/clang-6.0",
+//        "-DCMAKE_CXX_COMPILER=/usr/bin/clang++-6.0",
+//        "-DCMAKE_C_COMPILER=/usr/bin/clang-6.0",
         "-B" + buildDirectory.string(),
         "-H" + pathToProject.string()
     };
@@ -212,9 +223,10 @@ bool HG::Editor::BehaviourBuildController::loadCMakeListsBuildInfoFrom(const std
 {
     std::ifstream file(compilationDatabasePath);
 
+    // No cpp assets found, no compilation database though
     if (!file.is_open())
     {
-        return false;
+        return true;
     }
 
     m_database.clear();

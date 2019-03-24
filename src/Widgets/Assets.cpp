@@ -11,6 +11,11 @@
 #include <Tools/ImGuiWidgets.hpp>
 #include <Widgets/CommonSettings.hpp>
 #include <Tools/GlobalThumbnails.hpp>
+#include <Widgets/LineInputModal.hpp>
+#include <EditBehaviours/GraphicsInterface.hpp>
+#include <AssetSystem/Assets/DirectoryAsset.hpp>
+#include <Tools/FilesystemTools.hpp>
+#include <Widgets/InformationModal.hpp>
 
 // HG::Core
 #include <HG/Core/ResourceManager.hpp>
@@ -43,7 +48,7 @@ HG::Editor::Widgets::Assets::Assets(HG::Editor::Widgets::Settings::Common *setti
     }),
     m_currentSorting(0)
 {
-
+    setupContextMenu();
 }
 
 void HG::Editor::Widgets::Assets::onDraw()
@@ -58,6 +63,7 @@ void HG::Editor::Widgets::Assets::onDraw()
 
         drawItems();
     }
+
     ImGui::End();
 }
 
@@ -155,6 +161,8 @@ void HG::Editor::Widgets::Assets::drawItems()
 {
     ImGui::BeginChild(HG::ID::Assets::ItemsChild);
 
+    ImGui::ContextMenuRenderer().render(m_contextMenu);
+
     auto rootAsset = application()->projectController()->assetManager()->rootAsset();
 
     if (rootAsset)
@@ -189,4 +197,88 @@ void HG::Editor::Widgets::Assets::sortAssetChildren(HG::Editor::AssetSystem::Ass
     {
         sortAssetChildren(child);
     }
+}
+
+void HG::Editor::Widgets::Assets::setupContextMenu()
+{
+    {
+        auto menu = m_contextMenu.addMenu(HG::Names::Assets::Menu::Create, HG::ID::Assets::Menu::Create);
+        menu->addItem(HG::Names::Assets::Menu::Folder, HG::ID::Assets::Menu::Folder)
+            ->setCallback([this](){ actionCreateDirectory(); });
+
+        menu->addSeparator();
+
+        menu->addItem(HG::Names::Assets::Menu::CPPBehaviour, HG::ID::Assets::Menu::CPPBehaviour)
+            ->setCallback([this](){ actionUnimplemented(); });
+        menu->addItem(HG::Names::Assets::Menu::Shader, HG::ID::Assets::Menu::Shader)
+            ->setCallback([this](){ actionUnimplemented(); });
+
+        menu->addSeparator();
+
+        menu->addItem(HG::Names::Assets::Menu::Prefab, HG::ID::Assets::Menu::Prefab)
+            ->setCallback([this](){ actionUnimplemented(); });
+
+        menu->addSeparator();
+
+        menu->addItem(HG::Names::Assets::Menu::Material, HG::ID::Assets::Menu::Material)
+            ->setCallback([this](){ actionUnimplemented(); });
+        menu->addItem(HG::Names::Assets::Menu::Cubemap, HG::ID::Assets::Menu::Cubemap)
+            ->setCallback([this](){ actionUnimplemented(); });
+    }
+
+    m_contextMenu.addItem(HG::Names::Assets::Menu::ShowInExplorer, HG::ID::Assets::Menu::ShowInExplorer)
+        ->setCallback([this](){ actionUnimplemented(); });
+    m_contextMenu.addItem(HG::Names::Assets::Menu::Open, HG::ID::Assets::Menu::Open)
+        ->setCallback([this](){ actionUnimplemented(); });
+    m_contextMenu.addItem(HG::Names::Assets::Menu::Delete, HG::ID::Assets::Menu::Delete)
+        ->setCallback([this](){ actionDelete(); });
+
+    m_contextMenu.addSeparator();
+
+    m_contextMenu.addItem(HG::Names::Assets::Menu::ReimportAll, HG::ID::Assets::Menu::ReimportAll)
+        ->setCallback([this](){ actionUnimplemented(); });
+}
+
+void HG::Editor::Widgets::Assets::actionCreateDirectory()
+{
+    if (!application()->projectController()->isOpened())
+    {
+        return;
+    }
+
+    // Deducing path
+    auto parentPath =
+            application()->projectController()->projectPath() / application()->projectController()->metadata()->assetsDirectory;
+    if (m_commonSettings->selectedAsset != nullptr)
+    {
+        if (m_commonSettings->selectedAsset->type() == HG::Editor::AssetSystem::Assets::DirectoryAsset::AssetId)
+        {
+            parentPath = m_commonSettings->selectedAsset->path();
+        }
+    }
+
+    auto folderPath = HG::Editor::FilesystemTools::findUniquePath(parentPath, "Folder");
+
+    std::error_code errorCode;
+    std::filesystem::create_directory(folderPath, errorCode);
+
+    if (errorCode)
+    {
+        Error() << "Can't create directory \"" << folderPath << "\". Error: " << errorCode.message();
+
+        graphicsInterface()->informationModal()->error("Can't create folder. Error: " + errorCode.message());
+        return;
+    }
+
+    application()->projectController()->assetManager()->updateAssets();
+}
+
+void HG::Editor::Widgets::Assets::actionUnimplemented()
+{
+    Warning() << "Action is not implemented.";
+}
+
+void HG::Editor::Widgets::Assets::actionDelete()
+{
+
 }
