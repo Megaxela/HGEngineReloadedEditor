@@ -70,6 +70,11 @@ namespace HG::Editor::AssetSystem
         void updateAssets();
 
         /**
+         * @brief Method for fully assets reloading and updating.
+         */
+        void reloadAssets();
+
+        /**
          * @brief Method for getting manager root asset.
          * @return Pointer to abstract asset.
          */
@@ -83,9 +88,9 @@ namespace HG::Editor::AssetSystem
 
         void performAssetsPostLoad(HG::Editor::AssetSystem::Assets::AssetPtr asset);
 
-        void reloadAssets();
-
         void reloadDirectory(const std::filesystem::path& path, HG::Editor::AssetSystem::Assets::AssetPtr target);
+
+        void removeDeletedAssets(HG::Editor::AssetSystem::Assets::AssetPtr rootAsset);
 
         bool m_assetsPathChanged;
 

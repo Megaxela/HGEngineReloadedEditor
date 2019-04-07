@@ -36,7 +36,7 @@ void HG::Editor::AssetSystem::AssetsManager::proceedEvents()
         Info() << "Assets path changed. Reloading assets.";
 
         clearAssets();
-        updateAssets();
+        reloadAssets();
     }
 
     // If assets loading is preformed and all assets are loaded
@@ -86,13 +86,13 @@ void HG::Editor::AssetSystem::AssetsManager::updateAssets()
     // If there is no loaded assets
     if (m_rootAsset == nullptr)
     {
-        reloadAssets();
-        postAssetsForLoading();
+        m_rootAsset = std::make_shared<HG::Editor::AssetSystem::Assets::RootAsset>(m_assetsPath);
         return;
     }
 
     // If there is some loaded assets - update them
-    // todo: Perform incremental assets loading and selective update
+    reloadDirectory(m_assetsPath, m_rootAsset);
+    postAssetForLoading(m_rootAsset);
 }
 
 void HG::Editor::AssetSystem::AssetsManager::reloadAssets()
@@ -100,23 +100,78 @@ void HG::Editor::AssetSystem::AssetsManager::reloadAssets()
     m_rootAsset = std::make_shared<HG::Editor::AssetSystem::Assets::RootAsset>(m_assetsPath);
 
     reloadDirectory(m_assetsPath, m_rootAsset);
+    postAssetForLoading(m_rootAsset);
 }
 
 void HG::Editor::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path &path, HG::Editor::AssetSystem::Assets::AssetPtr target)
 {
     // todo: Add to watching here
+    // Checking for deleted assets
+    removeDeletedAssets(target);
 
     for (auto&& iterator : std::filesystem::directory_iterator(path))
     {
-        auto newAsset = application()->assetsFabric()->create(iterator);
-        newAsset->setAssetsManager(this);
+        // Checking was asset already loaded?
+        // If it was - checking it's type and invalidating it
+        auto childAssetIterator = std::find_if(
+            target->children().begin(),
+            target->children().end(),
+            [&iterator](const HG::Editor::AssetSystem::Assets::AssetPtr& asset)
+            {
+                return asset->path() == iterator;
+            }
+        );
 
-        if (newAsset->type() == HG::Editor::AssetSystem::Assets::DirectoryAsset::AssetId)
+        HG::Editor::AssetSystem::Assets::AssetPtr asset;
+
+        // todo: Add type check with fabric
+        if (childAssetIterator != target->children().end())
         {
-            reloadDirectory(iterator, newAsset);
+            asset = (*childAssetIterator);
+
+            Debug() << "Invalidating asset \"" << asset->path() << "\".";
+            asset->invalidate();
+        }
+        else
+        {
+            asset = application()->assetsFabric()->create(iterator);
+            asset->setAssetsManager(this);
+            target->addChild(asset);
         }
 
-        target->addChild(newAsset);
+        if (asset->type() == HG::Editor::AssetSystem::Assets::DirectoryAsset::AssetId)
+        {
+            reloadDirectory(iterator, asset);
+        }
+    }
+}
+
+void HG::Editor::AssetSystem::AssetsManager::removeDeletedAssets(HG::Editor::AssetSystem::Assets::AssetPtr rootAsset)
+{
+    std::vector<HG::Editor::AssetSystem::Assets::AssetPtr> assetsToRemove;
+
+    // todo: Add type check with fabric
+    for (const auto& asset : rootAsset->children())
+    {
+        if (!std::filesystem::exists(asset->path()))
+        {
+            assetsToRemove.push_back(asset);
+            continue;
+        }
+
+        removeDeletedAssets(asset);
+    }
+
+    for (const auto& asset : assetsToRemove)
+    {
+        rootAsset->children().erase(
+            std::remove(
+                rootAsset->children().begin(),
+                rootAsset->children().end(),
+                asset
+            ),
+            rootAsset->children().end()
+        );
     }
 }
 
@@ -140,17 +195,21 @@ void HG::Editor::AssetSystem::AssetsManager::postAssetForLoading(HG::Editor::Ass
         throw std::runtime_error("Asset or parent application is null");
     }
 
-    m_pendingLoadingAssets += 1;
+    if (asset->state() == Editor::AssetSystem::Assets::AbstractAsset::State::NotLoaded ||
+        asset->state() == Editor::AssetSystem::Assets::AbstractAsset::State::Failed)
+    {
+        m_pendingLoadingAssets += 1;
 
-    m_parentApplication->threadPool()->push(
-        [asset, this]()
-        {
-            asset->load();
+        m_parentApplication->threadPool()->push(
+                [asset, this]()
+                {
+                    asset->load();
 
-            --m_pendingLoadingAssets;
-        },
-        HG::Core::ThreadPool::Type::UserThread
-    );
+                    --m_pendingLoadingAssets;
+                },
+                HG::Core::ThreadPool::Type::UserThread
+        );
+    }
 
     for (auto& child : asset->children())
     {

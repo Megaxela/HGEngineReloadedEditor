@@ -112,7 +112,8 @@ void HG::Editor::Widgets::Assets::drawAsset(const HG::Editor::AssetSystem::Asset
             ImGui::EndDragDropSource();
         }
 
-        if (ImGui::IsItemClicked(0))
+        if (ImGui::IsItemClicked(0) ||
+            ImGui::IsItemClicked(1))
         {
             m_commonSettings->selectedAsset = asset;
             m_commonSettings->lastSelectedType = HG::Editor::Widgets::Settings::Common::LastSelectedType::Asset;
@@ -236,7 +237,7 @@ void HG::Editor::Widgets::Assets::setupContextMenu()
     m_contextMenu.addSeparator();
 
     m_contextMenu.addItem(HG::Names::Assets::Menu::ReimportAll, HG::ID::Assets::Menu::ReimportAll)
-        ->setCallback([this](){ actionUnimplemented(); });
+        ->setCallback([this](){ actionReimportAll(); });
 }
 
 void HG::Editor::Widgets::Assets::actionCreateDirectory()
@@ -280,5 +281,30 @@ void HG::Editor::Widgets::Assets::actionUnimplemented()
 
 void HG::Editor::Widgets::Assets::actionDelete()
 {
+    if (!application()->projectController()->isOpened())
+    {
+        return;
+    }
 
+    if (m_commonSettings->selectedAsset == nullptr)
+    {
+        return;
+    }
+
+    // Trying to delete asset
+    std::error_code errorCode;
+    std::filesystem::remove(m_commonSettings->selectedAsset->path(), errorCode);
+
+    if (errorCode)
+    {
+        Error() << "Can't delete asset at path \"" << m_commonSettings->selectedAsset->path() << "\": " << errorCode.message();
+    }
+
+    m_commonSettings->selectedAsset = nullptr;
+    application()->projectController()->assetManager()->updateAssets();
+}
+
+void HG::Editor::Widgets::Assets::actionReimportAll()
+{
+    application()->projectController()->assetManager()->reloadAssets();
 }

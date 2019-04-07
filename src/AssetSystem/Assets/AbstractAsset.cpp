@@ -6,6 +6,7 @@
 
 // ImGui
 #include <imgui.h>
+#include <CurrentLogger.hpp>
 
 HG::Editor::AssetSystem::Assets::AbstractAsset::AbstractAsset(std::filesystem::path path, std::size_t type) :
     m_assetManager(nullptr),
@@ -14,26 +15,28 @@ HG::Editor::AssetSystem::Assets::AbstractAsset::AbstractAsset(std::filesystem::p
     m_state(State::NotLoaded),
     m_stateMutex(),
     m_path(std::move(path)),
-    m_type(type)
+    m_type(type),
+    m_lastEditTime()
 {
 
 }
 
 HG::Editor::AssetSystem::Assets::AbstractAsset::~AbstractAsset()
 {
-    if (m_parent)
-    {
-        m_parent->m_children.erase(
-            std::find_if(
-                m_parent->m_children.begin(),
-                m_parent->m_children.end(),
-                [this](const AssetPtr& asset)
-                {
-                    return asset.get() == this;
-                }
-            )
-        );
-    }
+    // todo: Remove this useless code due to shared_ptr usage
+//    if (m_parent)
+//    {
+//        m_parent->m_children.erase(
+//            std::find_if(
+//                m_parent->m_children.begin(),
+//                m_parent->m_children.end(),
+//                [this](const AssetPtr& asset)
+//                {
+//                    return asset.get() == this;
+//                }
+//            )
+//        );
+//    }
 
     m_children.clear();
 }
@@ -109,7 +112,24 @@ bool HG::Editor::AssetSystem::Assets::AbstractAsset::load()
 
     setState(result ? State::Loaded : State::Failed);
 
+    // Getting asset update time
+
+    std::error_code errorCode;
+    m_lastEditTime = std::filesystem::last_write_time(m_path, errorCode);
+
+    if (errorCode)
+    {
+        Error() << "Can't get last write time from asset by path \"" << m_path << "\": " << errorCode.message();
+    }
+
     return result;
+}
+
+void HG::Editor::AssetSystem::Assets::AbstractAsset::invalidate()
+{
+    setState(State::NotLoaded);
+
+    onInvalidate();
 }
 
 void HG::Editor::AssetSystem::Assets::AbstractAsset::postLoad()
@@ -138,6 +158,11 @@ void HG::Editor::AssetSystem::Assets::AbstractAsset::onPostLoad()
 
 }
 
+void HG::Editor::AssetSystem::Assets::AbstractAsset::onInvalidate()
+{
+
+}
+
 void HG::Editor::AssetSystem::Assets::AbstractAsset::onInspector()
 {
 
@@ -146,4 +171,9 @@ void HG::Editor::AssetSystem::Assets::AbstractAsset::onInspector()
 bool HG::Editor::AssetSystem::Assets::AbstractAsset::onTreeItemDraw(int flags)
 {
     return ImGui::TreeNodeEx(this, flags, "%s", name().c_str());
+}
+
+std::chrono::system_clock::time_point HG::Editor::AssetSystem::Assets::AbstractAsset::lastEditTime() const
+{
+    return m_lastEditTime;
 }

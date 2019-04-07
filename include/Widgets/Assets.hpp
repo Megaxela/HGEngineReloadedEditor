@@ -104,6 +104,11 @@ namespace HG::Editor::Widgets
         void actionDelete();
 
         /**
+         * @brief Method, that performs fully assets reloading.
+         */
+        void actionReimportAll();
+
+        /**
          * @brief Method, that executes on unimplemented methods.
          */
         void actionUnimplemented();

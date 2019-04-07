@@ -122,6 +122,14 @@ namespace HG::Editor::AssetSystem::Assets
         bool load();
 
         /**
+         * @brief Method, that calls `onInvalidate`
+         * method to perform actual assets data invalidation.
+         * This method will set asset to `State::NotLoaded` state.
+         * So it has to be loaded.
+         */
+        void invalidate();
+
+        /**
          * @brief Method, that calls `onPostLoad`
          * method to perform any action that can be required
          * after asset loading and thumbnails cache invalidation.
@@ -133,6 +141,15 @@ namespace HG::Editor::AssetSystem::Assets
          * @return Asset icon handle.
          */
         virtual HG::Editor::ThumbnailsCache::Handle icon() const;
+
+        /**
+         * @brief Method for getting last edit time.
+         * If this value is lower than actual file update
+         * time - then assets has old information about
+         * asset.
+         * @return Last update edit time of file.
+         */
+        std::chrono::system_clock::time_point lastEditTime() const;
 
     protected:
 
@@ -148,6 +165,12 @@ namespace HG::Editor::AssetSystem::Assets
          * @return Loading status.
          */
         virtual bool onLoad();
+
+        /**
+         * @brief Method, that called on asset invalidation.
+         * After invalidation asset has to be loaded again.
+         */
+        virtual void onInvalidate();
 
         /**
          * @brief Method, that called after all assets
@@ -183,6 +206,8 @@ namespace HG::Editor::AssetSystem::Assets
 
         std::filesystem::path m_path;
         std::size_t m_type;
+
+        std::chrono::system_clock::time_point m_lastEditTime;
     };
 }
 
