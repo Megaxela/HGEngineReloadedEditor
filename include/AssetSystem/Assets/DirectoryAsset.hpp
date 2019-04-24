@@ -26,6 +26,8 @@ namespace HG::Editor::AssetSystem::Assets
         explicit DirectoryAsset(std::filesystem::path path);
 
         ThumbnailsCache::Handle icon() const override;
+
+        bool isLoadingRequired() const override;
     };
 }
 

@@ -122,6 +122,12 @@ namespace HG::Editor::AssetSystem::Assets
         bool load();
 
         /**
+         * @brief Method, that's used for checking is
+         * loading required for asset. It returns true by default.
+         */
+        virtual bool isLoadingRequired() const;
+
+        /**
          * @brief Method, that calls `onInvalidate`
          * method to perform actual assets data invalidation.
          * This method will set asset to `State::NotLoaded` state.

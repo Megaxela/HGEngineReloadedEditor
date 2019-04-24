@@ -293,11 +293,11 @@ void HG::Editor::Widgets::Assets::actionDelete()
 
     // Trying to delete asset
     std::error_code errorCode;
-    std::filesystem::remove(m_commonSettings->selectedAsset->path(), errorCode);
+    std::filesystem::remove_all(m_commonSettings->selectedAsset->path(), errorCode);
 
     if (errorCode)
     {
-        Error() << "Can't delete asset at path \"" << m_commonSettings->selectedAsset->path() << "\": " << errorCode.message();
+        Error() << "Can't delete asset at path " << m_commonSettings->selectedAsset->path() << ": " << errorCode.message();
     }
 
     m_commonSettings->selectedAsset = nullptr;

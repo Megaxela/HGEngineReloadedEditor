@@ -93,6 +93,8 @@ void HG::Editor::AssetSystem::AssetsManager::updateAssets()
     // If there is some loaded assets - update them
     reloadDirectory(m_assetsPath, m_rootAsset);
     postAssetForLoading(m_rootAsset);
+
+    m_isLoading = true;
 }
 
 void HG::Editor::AssetSystem::AssetsManager::reloadAssets()
@@ -101,6 +103,8 @@ void HG::Editor::AssetSystem::AssetsManager::reloadAssets()
 
     reloadDirectory(m_assetsPath, m_rootAsset);
     postAssetForLoading(m_rootAsset);
+
+    m_isLoading = true;
 }
 
 void HG::Editor::AssetSystem::AssetsManager::reloadDirectory(const std::filesystem::path &path, HG::Editor::AssetSystem::Assets::AssetPtr target)

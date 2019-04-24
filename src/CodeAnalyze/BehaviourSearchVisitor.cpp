@@ -30,7 +30,8 @@ public:
 
     }
 
-    virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, StringRef file)
+protected:
+    std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &CI, llvm::StringRef InFile) override
     {
         return std::make_unique<ExampleASTConsumer>(m_result); // pass CI pointer to ASTConsumer
     }

@@ -104,8 +104,28 @@ void HG::Editor::AssetSystem::Assets::AbstractAsset::addChild(HG::Editor::AssetS
     m_children.emplace_back(std::move(child));
 }
 
+bool HG::Editor::AssetSystem::Assets::AbstractAsset::isLoadingRequired() const
+{
+    std::error_code errorCode;
+    auto currentEditTime = std::filesystem::last_write_time(m_path, errorCode);
+
+    if (errorCode)
+    {
+        Error() << "Can't get last write time for asset by path " << m_path << ": " << errorCode.message();
+        return true;
+    }
+
+    return m_lastEditTime < currentEditTime;
+}
+
 bool HG::Editor::AssetSystem::Assets::AbstractAsset::load()
 {
+    if (!isLoadingRequired())
+    {
+        setState(State::Loaded);
+        return true;
+    }
+
     setState(State::Loading);
 
     auto result = onLoad();
@@ -119,7 +139,7 @@ bool HG::Editor::AssetSystem::Assets::AbstractAsset::load()
 
     if (errorCode)
     {
-        Error() << "Can't get last write time from asset by path \"" << m_path << "\": " << errorCode.message();
+        Error() << "Can't get last write time from asset by path " << m_path << ": " << errorCode.message();
     }
 
     return result;

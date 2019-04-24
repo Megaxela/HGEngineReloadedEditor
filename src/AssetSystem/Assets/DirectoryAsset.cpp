@@ -19,3 +19,8 @@ HG::Editor::ThumbnailsCache::Handle HG::Editor::AssetSystem::Assets::DirectoryAs
         ->globalThumbnails()
         ->getHandle(HG::Editor::GlobalThumbnails::Thumbs::DirectoryIcon);
 }
+
+bool HG::Editor::AssetSystem::Assets::DirectoryAsset::isLoadingRequired() const
+{
+    return false;
+}
