@@ -1,5 +1,5 @@
 # HG Engine Editor
-It's C++17 STL based editor for [HG Engine](https://github.com/Megaxela/HGEngineReloaded) game engine.
+It's C++17 STL/ImGui based editor for [HG Engine](https://github.com/Megaxela/HGEngineReloaded) game engine.
 
 ## Status
 |Linux CMake (Travis)|Coverage|
