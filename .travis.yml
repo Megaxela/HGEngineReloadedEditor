@@ -34,6 +34,7 @@ addons:
       - libxcursor-dev
       - libglu-dev
       - libgl-dev
+      - llvm-dev
 
 compiler:
   - clang
