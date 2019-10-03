@@ -1,0 +1,103 @@
+dist: xenial
+language: cpp
+
+os:
+  - linux
+
+branches:
+  only:
+    - master
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - build-essential
+      - cmake
+      - cmake-data
+      - libgtest-dev
+      - g++-8
+      - gcc-8
+      - xorg-dev
+      - libx11-dev
+      - libxmu-dev
+      - libxi-dev
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libosmesa-dev
+      - lcov
+      - ggcov
+      - libxxf86vm-dev
+      - libxrandr-dev
+      - libxinerama-dev
+      - libxcursor-dev
+      - libglu-dev
+      - libgl-dev
+
+compiler:
+  - clang
+  - gcc
+
+git:
+  submodules: false
+
+before_install:
+  - git submodule update --init
+
+install:
+  # Setting specific compilers
+  - if [ "$CXX" = "clang++" ]; then export CXX="/usr/local/clang-7.0.0/bin/clang++" CC="/usr/local/clang-7.0.0/bin/clang"; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+
+  - | # Setting env values
+    export SOURCE_ROOT="${TRAVIS_BUILD_DIR}"
+    export BUILD_ROOT="${TRAVIS_BUILD_DIR}/cmake-build"
+    export BUILD_OPTIONS="-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=Off"
+  - | # Print some debug info
+    echo "Env variables:"
+    echo CXX=$CXX
+    echo HOME=$HOME
+    echo TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR
+    echo SOURCE_ROOT=$SOURCE_ROOT
+    echo BUILD_ROOT=$BUILD_ROOT
+    echo
+    echo Compiler version:
+    $CXX --version
+    /usr/bin/gcov-8 --version
+#   Setting up test coverage
+# todo: Test coverage is disables due to nonexistent tests
+#  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CXX" == "g++-8" ]]; then export BUILD_OPTIONS="$BUILD_OPTIONS -DHG_TEST_COVERAGE=On"; fi
+
+  - | # Prepare gtest
+# todo: Test is disabled due to nonexistent tests
+#    cd /usr/src/gtest
+#    sudo cmake CMakeLists.txt
+#    sudo cmake --build . -- -j4
+#    sudo cp *.a /usr/lib/
+#    sudo mkdir /usr/local/lib/gtest
+#    sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a
+#    sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
+#    cd -
+  - | # Getting and installing lcov 1.13
+#
+#    if [ "$CXX" = "g++-8" ]
+#    then
+#      git clone https://github.com/linux-test-project/lcov.git
+#      mkdir -p /tmp/usr
+#      make -C lcov/ PREFIX=/tmp/usr install
+#      /tmp/usr/bin/lcov --version
+#    fi
+  - | # Getting external GLEW
+    mkdir --parent dependencies
+    wget https://github.com/nigels-com/glew/archive/glew-2.1.0.tar.gz -q -O dependencies/glew.tar.gz
+    tar -xvzf dependencies/glew.tar.gz -C dependencies/
+  - | # Building external GLEW
+    make -C dependencies/glew-glew-2.1.0/auto
+    cmake -Bdependencies/glew-glew-2.1.0/build_dir -Hdependencies/glew-glew-2.1.0/build/cmake
+    cmake --build dependencies/glew-glew-2.1.0/build_dir -- -j4
+    sudo cmake --build dependencies/glew-glew-2.1.0/build_dir --target install -- -j4
+script:
+  - mkdir --parents $BUILD_ROOT
+  - cmake $BUILD_OPTIONS -B$BUILD_ROOT -H$SOURCE_ROOT
+  - cmake --build $BUILD_ROOT --target all -- -j4
