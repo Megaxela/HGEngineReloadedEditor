@@ -10,7 +10,7 @@ It's C++17 STL/ImGui based editor for [HG Engine](https://github.com/Megaxela/HG
 
 ### Supported OS
 * :heavy_check_mark: Linux
-* :heavy_check_mark: Windows
+* :x: Windows (coming soon)
 * :x: MacOS (coming soon)
 
 ## License
